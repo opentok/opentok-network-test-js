@@ -1,0 +1,25 @@
+{
+  "name": "opentok-network-connectivity",
+  "version": "1.0.0",
+  "description": "",
+  "main": "dist/index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/opentok/network-connectivity-js.git"
+  },
+  "keywords": [
+    "tokbox",
+    "opentok",
+    "network-test",
+    "connectivity"
+  ],
+  "author": "OpenTok",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/opentok/network-connectivity-js/issues"
+  },
+  "homepage": "https://github.com/opentok/network-connectivity-js#readme"
+}
