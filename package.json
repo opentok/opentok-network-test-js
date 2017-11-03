@@ -25,5 +25,10 @@
   "dependencies": {
     "@opentok/client": "^2.12.1",
     "promise": "^8.0.1"
+  },
+  "devDependencies": {
+    "tslint": "^5.8.0",
+    "tslint-config-airbnb": "^5.3.0",
+    "typescript": "^2.6.1"
   }
 }
