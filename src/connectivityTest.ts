@@ -15,7 +15,7 @@ const defaultSubsribeOptions = {
 };
 
 
-const connectToSession = ({ apiKey, sessionId, token }) =>
+const connectToSession = ({ apiKey, sessionId, token }: SessionCredentials) =>
   new Promise((resolve, reject) => {
     const session = OT.initSession(apiKey, sessionId);
     session.connect(token, (error) => {
