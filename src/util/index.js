@@ -16,7 +16,8 @@ const get = (props, obj = null) => {
 };
 
 /**
- * Returns a (nested) property from the provided object or the default value
+ * Returns a (nested) property from the provided object or
+ * the provided default value
  * @param {*} defaultValue - The value to return if the property is not found
  * @param {String} props - A comma-delimited string of keys
  * @param {Object} obj
@@ -28,15 +29,12 @@ const getOrElse = (defaultValue, props, obj = null) => get(props, obj) || defaul
  * Returns a subset of the provided object with the specified properties
  * @param {Array} props
  * @param {Object} obj
- * returns {Object}
+ * @returns {Object}
  */
-const pick = (props, obj) =>
-  obj.keys.reduce((acc, key) => {
-    return obj[key] ? acc.concat(obj[key]) : acc;
-  }, []);
+const pick = (props, obj) => Object.keys(obj).reduce((acc, key) => obj[key] ? acc.concat(obj[key]) : acc, []);
 
 module.exports = {
   get,
   getOrElse,
-  pick
-}
+  pick,
+};
