@@ -1,5 +1,5 @@
-import Promise from 'promise';
-import OT from '@opentok/client';
+import * as Promise from 'promise';
+import * as OT from '@opentok/client';
 import * as e from './errors';
 import { getOrElse } from './util';
 
@@ -42,9 +42,9 @@ const getDevices = type =>
       if (deviceList.length !== 0) {
         resolve(deviceList);
       } else if (type === 'videoInput') {
-        reject(new e.NoVideoCaptureDevicesError('No video capture devices found!'));
+        reject(new e.NoVideoCaptureDevicesError());
       } else if (type === 'audioInput') {
-        reject(new e.NoAudioCaptureDevicesError('No audio capture devices found!'));
+        reject(new e.NoAudioCaptureDevicesError());
       }
     });
   });
@@ -98,7 +98,7 @@ const checkPublishToSession = options =>
           if (error && error.code === 1601) {
             reject(new e.FailedPublishToSessionNetworkError());
           } else {
-            resolve(Object.asign({}, options, { publisher }));
+            resolve(Object.assign({}, options, { publisher }));
           }
         });
       })
@@ -131,16 +131,14 @@ const checkSubscribeToSession = options =>
   });
 
 /**
- * @param {Object} options
- * @param {String} options.apiKey
- * @param {String} options.sessionId
- * @param {String} options.token
- * @param {Function} [callback] - An optional callback function: (error, results) => void
- * @returns {Promise} <resolve: Object, reject: Error>
+ * This method checks to see if the client can connect to TokBox servers required for using OpenTok
  */
-const checkConnectivity = (credentials, onStatus, onComplete) =>
+const checkConnectivity = (
+  credentials: SessionCredentials,
+  environment: OpenTokEnvironment,
+  onStatus: StatusCallback,
+  onComplete: CompletionCallback<any>): Promise<any> =>
   new Promise((resolve, reject) => {
-
     const onSuccess = (result) => {
       onComplete && onComplete(null, result); // eslint-disable-line no-unused-expressions
       return resolve(result);
