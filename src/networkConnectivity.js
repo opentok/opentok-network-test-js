@@ -1,21 +1,25 @@
 
+import publisherTest from './publisherTest';
+import { validateCallbacks } from './validation';
+import { InvalidSessionCredentialsError } from './errors';
 
 class NetworkConnectivity {
-
   constructor(credentials) {
-     if (!credentials || credentials.apiKey || !credentials.sessionId || !credentials.token) {
-        throw new Error('An apiKey, sessionId, and token are required')
-     }
-     this.credentials = credentials;
+    if (!credentials || credentials.apiKey || !credentials.sessionId || !credentials.token) {
+      throw new InvalidSessionCredentialsError();
+    }
+    this.credentials = credentials;
   }
 
-  checkConnectivity(credentials, onStatus, onComplete) {
-   // ???
+  checkConnectivity(onStatus, onComplete) {
+    validateCallbacks(onStatus, onComplete);
+    console.log(this.credentials);
   }
 
-  testPublishing(credentials, onStatus, onComplete) {
-    // ???
+  testPublishing(onStatus, onComplete) {
+    validateCallbacks(onStatus, onComplete);
+    publisherTest(this.credentials, onStatus, onComplete);
   }
 }
 
-module.exports = NetworkConnectivity;
+export default NetworkConnectivity;
