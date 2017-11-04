@@ -1,21 +1,17 @@
+import 'opentok';
 import * as Promise from 'promise';
 import * as OT from '@opentok/client';
 import * as e from './errors';
-import { getOrElse } from './util';
+import { get, getOrElse } from './util';
 
-const defaultSubsribeOptions = {
-  getStatsInterval: 1000,
-  getStatsVideoAndAudioTestDuration: 5000,
-  getStatsAudioOnlyDuration: 10000,
-  subscribeOptions: {
-    testNetwork: true,
-    audioVolume: 0,
-  },
-  getStatsListenerInterval: 1000,
+const defaultSubsriberOptions = {
+  testNetwork: true,
+  audioVolume: 0,
 };
 
+const hasCode = (obj: OT.OTError, code: number): Boolean => get('code', obj) === code;
 
-const connectToSession = ({ apiKey, sessionId, token }: SessionCredentials) =>
+const connectToSession = ({ apiKey, sessionId, token }: SessionCredentials): Promise<OT.Session> =>
   new Promise((resolve, reject) => {
     const session = OT.initSession(apiKey, sessionId);
     session.connect(token, (error) => {
@@ -35,25 +31,25 @@ const connectToSession = ({ apiKey, sessionId, token }: SessionCredentials) =>
  * @param {String} type videoInput | audioInput
  * @returns {Promise} <resolve: Array, reject: Error>
  */
-const getDevices = type =>
+const getDevices = (deviceType: InputDeviceType): Promise<OT.Device[]> =>
   new Promise((resolve, reject) => {
     OT.getDevices((error, devices = []) => {
-      const deviceList = devices.filter(d => d.kind === type);
+      const deviceList = devices.filter(d => d.kind === deviceType);
       if (deviceList.length !== 0) {
         resolve(deviceList);
-      } else if (type === 'videoInput') {
+      } else if (deviceType === 'videoInput') {
         reject(new e.NoVideoCaptureDevicesError());
-      } else if (type === 'audioInput') {
+      } else if (deviceType === 'audioInput') {
         reject(new e.NoAudioCaptureDevicesError());
       }
     });
   });
 
 
-const getVideoDevices = () => getDevices('videoInput');
-const getAudioDevices = () => getDevices('audioInput');
+const getVideoDevices = (): Promise<OT.Device[]> => getDevices('videoInput');
+const getAudioDevices = (): Promise<OT.Device[]> => getDevices('audioInput');
 
-const checkCreateLocalPublisher = (options) => {
+const checkCreateLocalPublisher = (options: { localPublisherOptions: object } = { localPublisherOptions: {} }) => {
   const localPublisherOptions = getOrElse(null, 'localPublisherOptions', options);
   return new Promise((resolve, reject) => {
     getVideoDevices()
@@ -83,19 +79,19 @@ const checkCreateLocalPublisher = (options) => {
  * @param {Object} options
  * @param {Session} options.session - An OpenTok Session object
  */
-const checkPublishToSession = options =>
+const checkPublishToSession = (options: { session: OT.Session }): Promise<HasSessionAndPublisher> =>
   new Promise((resolve, reject) => {
     const { session } = options;
     checkCreateLocalPublisher()
-      .then((localPublisher) => {
-        const publisher = session.publish(localPublisher, (error) => {
-          if (error && error.code === 1010) {
+      .then((publisher: OT.Publisher) => {
+        session.publish(publisher, (error: OT.OTError) => {
+          if (hasCode(error, 1010)) {
             reject(new e.FailedPublishToSessionNotConnectedError());
           }
-          if (error && error.code === 1500) {
+          if (hasCode(error, 1500)) {
             reject(new e.FailedPublishToSessionPermissionOrTimeoutError());
           }
-          if (error && error.code === 1601) {
+          if (hasCode(error, 1601)) {
             reject(new e.FailedPublishToSessionNetworkError());
           } else {
             resolve(Object.assign({}, options, { publisher }));
@@ -116,19 +112,26 @@ const checkPublishToSession = options =>
  * @param {Session} options.session
  * @param {Publisher} options.publisher
  */
-const checkSubscribeToSession = options =>
+const checkSubscribeToSession = (options: { session: OT.Session, publisher: OT.Publisher }) =>
   new Promise((resolve, reject) => {
-    const subOpts = Object.assign({}, defaultSubsribeOptions);
+    const subOpts = Object.assign({}, defaultSubsriberOptions);
     const { session, publisher } = options;
     // The null in the argument is the element selector to insert the subscriber UI
-    const subscriber = session.subscribe(publisher.stream, null, subOpts, (error) => {
+    if (!publisher.stream) {
+      return reject(new e.NetworkConnectivityError('ahh'));
+    }
+
+    const subscriber = session.subscribe(publisher.stream, undefined, subOpts, (error: OT.OTError) => {
       if (error && error.code === 1600) {
         reject(new e.FailedSubscribeToStreamNetworkError());
       } else {
         resolve(Object.assign({}, options, { subscriber }));
       }
     });
+
   });
+
+
 
 /**
  * This method checks to see if the client can connect to TokBox servers required for using OpenTok
@@ -136,16 +139,18 @@ const checkSubscribeToSession = options =>
 const checkConnectivity = (
   credentials: SessionCredentials,
   environment: OpenTokEnvironment,
-  onStatus: StatusCallback,
-  onComplete: CompletionCallback<any>): Promise<any> =>
+  deviceOptions?: DeviceOptions,
+  onStatus?: StatusCallback,
+  onComplete?: CompletionCallback<any>): Promise<any> =>
   new Promise((resolve, reject) => {
-    const onSuccess = (result) => {
-      onComplete && onComplete(null, result); // eslint-disable-line no-unused-expressions
+
+    const onSuccess = (result: any) => {
+      onComplete && onComplete(null, result);
       return resolve(result);
     };
 
-    const onFailure = (error) => {
-      onComplete && onComplete(error, null); // eslint-disable-line no-unused-expressions
+    const onFailure = (error: e.NetworkConnectivityError) => {
+      onComplete && onComplete(error, null);
       return reject(error);
     };
 

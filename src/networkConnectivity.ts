@@ -6,13 +6,13 @@ import { getOrElse } from './util';
 
 class NetworkConnectivity {
 
-  credentials: SessionCredentials
-  environment: OpenTokEnvironment
+  credentials: SessionCredentials;
+  environment: OpenTokEnvironment;
 
   /**
    * Returns an instance of NetworkConnectivity
    */
-  constructor(credentials: SessionCredentials, options: { environment: OpenTokEnvironment } = null) {
+  constructor(credentials: SessionCredentials, options?: { environment: OpenTokEnvironment }) {
     if (!credentials || credentials.apiKey || !credentials.sessionId || !credentials.token) {
       throw new InvalidSessionCredentialsError();
     }
@@ -33,9 +33,12 @@ class NetworkConnectivity {
   /**
    * This method checks to see if the client can connect to TokBox servers required for using OpenTok
    */
-  checkConnectivity(deviceOptions: DeviceOptions, onStatus: StatusCallback, onComplete: CompletionCallback<any>): Promise<any> {
+  checkConnectivity(
+    deviceOptions?: DeviceOptions,
+    onStatus?: StatusCallback,
+    onComplete?: CompletionCallback<any>): Promise<any> {
     validateCallbacks(onStatus, onComplete);
-    return connectivityTest(this.credentials, Object.assign({}, { environment: this.environment }, deviceOptions), onStatus, onComplete);
+    return connectivityTest(this.credentials, this.environment, deviceOptions, onStatus, onComplete);
   }
 }
 
