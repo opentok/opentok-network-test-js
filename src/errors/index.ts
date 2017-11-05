@@ -1,14 +1,14 @@
 
 
 export class NetworkConnectivityError extends Error {
-  constructor(message) {
+  constructor(message: string) {
     super(message);
     this.name = this.constructor.name;
     this.stack = (new Error(message)).stack;
   }
 }
 
-export class InvalidSessionCredentialsError extends NetworkConnectivityError {
+export class IncompleteSessionCredentialsError extends NetworkConnectivityError {
   constructor() {
     super('NetworkConnectivity requires an apiKey, sessionId, and token.');
   }
@@ -22,6 +22,12 @@ export class InvalidOnStatusCallback extends NetworkConnectivityError {
 export class InvalidOnCompleteCallback extends NetworkConnectivityError {
   constructor() {
     super('The onComplete callback must be a function that accepts error and results parameters');
+  }
+}
+
+export class InvalidSessionCredentialsError extends NetworkConnectivityError {
+  constructor() {
+    super('NetworkConnectivity requires an apiKey, sessionId, and token.');
   }
 }
 

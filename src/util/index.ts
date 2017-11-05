@@ -12,21 +12,35 @@ const get = <T>(props: string, obj: any): T => {
 };
 
 /**
- * Returns a (nested) property from the provided object or
- * the provided default value
+ * Returns a (nested) property from the provided object or the default
+ * value if undefined
  */
 const getOrElse = <T>(defaultValue: any, props: string, obj: any): T => get(props, obj) || defaultValue;
 
 /**
- * Returns a subset of the provided object with the specified properties
+ * Returns a subset of the provided object with the specified properties. Keys whose corresponding
+ * values are undefined are not included.
  */
-const pick = <T, K extends keyof T>(props: string[], obj: T): Partial<T> => {
-  const update = (acc: T, prop: K) => obj[prop] !== undefined ? Object.assign({}, acc, obj[prop]) : acc;
-  return props.reduce(update, {});
-};
+const pick =
+  <T extends { [key: string]: any }, K extends keyof T>(
+    props: string[],
+    obj: T,
+    all: boolean = false): Partial<T> => {
+    const update = (acc: T, prop: K) =>
+      obj[prop] !== undefined || all ? Object.assign({}, acc, { [prop]: obj[prop] }) : acc;
+    return props.reduce(update, {});
+  };
+
+/**
+ * Returns a subset of the provided object with the specified properties. Keys whose corresponding
+ * values are undefined are included.
+ */
+const pickAll = <T extends { [key: string]: any }, K extends keyof T>(props: string[], obj: T): Partial<T> =>
+  pick(props, obj, true);
 
 export {
   get,
   getOrElse,
   pick,
+  pickAll,
 };

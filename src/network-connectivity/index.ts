@@ -1,10 +1,9 @@
 
 import connectivityTest from './connectivityTest';
-import { validateCallbacks } from './validation';
-import { InvalidSessionCredentialsError } from './errors';
-import { getOrElse } from './util';
+import { IncompleteSessionCredentialsError, InvalidOnStatusCallback, InvalidOnCompleteCallback } from '../errors';
+import { getOrElse } from '../util';
 
-class NetworkConnectivity {
+export default class NetworkConnectivity {
 
   credentials: SessionCredentials;
   environment: OpenTokEnvironment;
@@ -13,11 +12,28 @@ class NetworkConnectivity {
    * Returns an instance of NetworkConnectivity
    */
   constructor(credentials: SessionCredentials, options?: { environment: OpenTokEnvironment }) {
-    if (!credentials || credentials.apiKey || !credentials.sessionId || !credentials.token) {
-      throw new InvalidSessionCredentialsError();
-    }
+    this.validateCredentials(credentials);
     this.credentials = credentials;
     this.environment = getOrElse('standard', 'environment', options);
+  }
+
+  private validateCredentials (credentials: SessionCredentials) {
+    if (!credentials || credentials.apiKey || !credentials.sessionId || !credentials.token) {
+      throw new IncompleteSessionCredentialsError();
+    }
+  }
+
+  private validateCallbacks(onStatus?: StatusCallback, onComplete?: CompletionCallback<any>){
+    if (onStatus) {
+      if (typeof onStatus !== 'function' || onStatus.length !== 1) {
+        throw new InvalidOnStatusCallback();
+      }
+    }
+    if (onComplete) {
+      if (typeof onComplete !== 'function' || onComplete.length !== 2) {
+        throw new InvalidOnCompleteCallback();
+      }
+    }
   }
 
   /**
@@ -26,7 +42,7 @@ class NetworkConnectivity {
    * results indicating the recommended supported publisher settings.
    */
   testPublishing(onStatus: StatusCallback, onComplete: CompletionCallback<any>): void {
-    validateCallbacks(onStatus, onComplete);
+    this.validateCallbacks(onStatus, onComplete);
     console.log(this.credentials);
   }
 
@@ -37,9 +53,8 @@ class NetworkConnectivity {
     deviceOptions?: DeviceOptions,
     onStatus?: StatusCallback,
     onComplete?: CompletionCallback<any>): Promise<any> {
-    validateCallbacks(onStatus, onComplete);
+    this.validateCallbacks(onStatus, onComplete);
     return connectivityTest(this.credentials, this.environment, deviceOptions, onStatus, onComplete);
   }
 }
 
-export default NetworkConnectivity;
