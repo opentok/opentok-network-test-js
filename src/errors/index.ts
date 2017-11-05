@@ -1,5 +1,10 @@
+/**
+ * @module Errors
+ */
 
-
+ /**
+  * Base class for errors used throughout Network Connectivity tests.
+  */
 export class NetworkConnectivityError extends Error {
   constructor(message: string) {
     super(message);

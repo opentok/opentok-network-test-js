@@ -1,3 +1,11 @@
+/**
+ * @module NetworkConnectivity
+ */
+
+ /**
+ * Define Network Connectivy class
+ */
+
 import connectivityTest from './connectivityTest';
 import { IncompleteSessionCredentialsError, InvalidOnStatusCallback, InvalidOnCompleteCallback } from '../errors';
 import { getOrElse } from '../util';

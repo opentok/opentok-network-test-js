@@ -1,3 +1,11 @@
+/**
+ * @module Types
+ */
+
+/**
+ *
+ */
+
 type SessionCredentials = {
   apiKey: string,
   sessionId: string,

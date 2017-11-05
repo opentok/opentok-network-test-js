@@ -3,7 +3,7 @@ const webpack = require('webpack');
 const TypedocWebpackPlugin = require('typedoc-webpack-plugin');
 
 module.exports = {
-  entry: './src/network-connectivity/index.ts',
+  entry: './src/networkConnectivity/index.ts',
   devtool: 'source-map',
   module: {
     loaders: [
@@ -23,11 +23,11 @@ module.exports = {
       name: 'OpenTok Network Connectivity Test',
       readme: './README.md',
       module: 'commonjs',
-      mode: 'modules',
+      exclude: '**/{errors,util,connectivityTest}/*.ts',
       theme: 'minimal',
-      exclude: '**/{errors,util,node_modules}/*.ts',
-      includeDeclarations: false,
+      includeDeclarations: true,
       ignoreCompilerErrors: true,
+      target: 'ES6'
   }, './src')
   ]
 };

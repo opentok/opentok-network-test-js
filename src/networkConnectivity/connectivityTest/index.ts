@@ -1,7 +1,7 @@
 import * as Promise from 'promise';
 import * as OT from '@opentok/client';
-import * as e from '../errors';
-import { get, getOrElse } from '../util';
+import * as e from '../../errors';
+import { get, getOrElse } from '../../util';
 
 const defaultSubsriberOptions = {
   testNetwork: true,

@@ -1,4 +1,8 @@
 /**
+ * @module Util
+ */
+
+/**
  * Returns a (nested) property from the provided object or undefined
  */
 const get = <T>(props: string, obj: any): T => {
@@ -26,7 +30,7 @@ const pick =
     props: K[],
     obj: T,
     all: boolean = false): Partial<T> => {
-    const update = (acc: object, prop: K) =>
+    const update = (acc: object, prop: K): Partial<T> =>
       obj[prop] !== undefined || all ? Object.assign({}, acc, { [prop]: obj[prop] }) : acc;
     return props.reduce(update, {});
   };
@@ -35,7 +39,7 @@ const pick =
  * Returns a subset of the provided object with the specified properties. Keys whose corresponding
  * values are undefined are included.
  */
-const pickAll = <T extends { [key: string]: any }, K extends keyof T>(props: string[], obj: T): Partial<T> =>
+const pickAll = <T extends { [key: string]: any }, K extends keyof T>(props: K[], obj: T): Partial<T> =>
   pick(props, obj, true);
 
 export {
