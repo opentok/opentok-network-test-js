@@ -1,4 +1,3 @@
-import 'opentok';
 import * as Promise from 'promise';
 import * as OT from '@opentok/client';
 import * as e from '../errors';
@@ -14,7 +13,7 @@ const hasCode = (obj: OT.OTError, code: number): Boolean => get('code', obj) ===
 const connectToSession = ({ apiKey, sessionId, token }: SessionCredentials): Promise<OT.Session> =>
   new Promise((resolve, reject) => {
     const session = OT.initSession(apiKey, sessionId);
-    session.connect(token, (error) => {
+    session.connect(token, (error?: OT.OTError) => {
       if (error && error.code === 1004) {
         reject(new e.FailedConnectToSessionTokenError());
       } else if (error && error.code === 1005) {

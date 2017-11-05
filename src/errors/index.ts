@@ -3,6 +3,7 @@
 export class NetworkConnectivityError extends Error {
   constructor(message: string) {
     super(message);
+    Object.setPrototypeOf(this, NetworkConnectivityError.prototype);
     this.name = this.constructor.name;
     this.stack = (new Error(message)).stack;
   }

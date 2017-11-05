@@ -23,10 +23,10 @@ const getOrElse = <T>(defaultValue: any, props: string, obj: any): T => get(prop
  */
 const pick =
   <T extends { [key: string]: any }, K extends keyof T>(
-    props: string[],
+    props: K[],
     obj: T,
     all: boolean = false): Partial<T> => {
-    const update = (acc: T, prop: K) =>
+    const update = (acc: object, prop: K) =>
       obj[prop] !== undefined || all ? Object.assign({}, acc, { [prop]: obj[prop] }) : acc;
     return props.reduce(update, {});
   };

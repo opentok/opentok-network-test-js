@@ -1,4 +1,3 @@
-
 import connectivityTest from './connectivityTest';
 import { IncompleteSessionCredentialsError, InvalidOnStatusCallback, InvalidOnCompleteCallback } from '../errors';
 import { getOrElse } from '../util';
@@ -18,7 +17,7 @@ export default class NetworkConnectivity {
   }
 
   private validateCredentials (credentials: SessionCredentials) {
-    if (!credentials || credentials.apiKey || !credentials.sessionId || !credentials.token) {
+    if (!credentials || !credentials.apiKey || !credentials.sessionId || !credentials.token) {
       throw new IncompleteSessionCredentialsError();
     }
   }
