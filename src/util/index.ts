@@ -30,8 +30,8 @@ const pick =
     props: K[],
     obj: T,
     all: boolean = false): Partial<T> => {
-    const update = (acc: object, prop: K): Partial<T> =>
-      obj[prop] !== undefined || all ? Object.assign({}, acc, { [prop]: obj[prop] }) : acc;
+    const update = (acc: object, prop: string): Partial<T> =>
+      obj[prop] !== undefined || all ? { ...acc, [prop]: obj[prop] } : acc;
     return props.reduce(update, {});
   };
 
