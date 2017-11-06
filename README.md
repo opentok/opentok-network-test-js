@@ -1,4 +1,4 @@
-![logo](./tokbox-logo.png)
+![logo](./media/tokbox-logo.png)
 
 ## OpenTok Network Connectivity Test
 

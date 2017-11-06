@@ -2,10 +2,9 @@
  * @module Types
  */
 
-/**
- *
- */
-
+ /**
+  * Define global types
+  */
 type SessionCredentials = {
   apiKey: string,
   sessionId: string,

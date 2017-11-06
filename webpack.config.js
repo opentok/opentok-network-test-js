@@ -22,12 +22,13 @@ module.exports = {
     new TypedocWebpackPlugin({
       name: 'OpenTok Network Connectivity Test',
       readme: './README.md',
-      module: 'commonjs',
       exclude: '**/{errors,util,connectivityTest}/*.ts',
+      module: 'commonjs',
       theme: 'minimal',
       includeDeclarations: true,
       ignoreCompilerErrors: true,
-      target: 'ES6'
+      target: 'ES6',
+      media: './media'
   }, './src')
   ]
 };
