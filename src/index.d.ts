@@ -2,9 +2,11 @@
  * @module Types
  */
 
- /**
-  * Define global types
-  */
+/**
+ * Define global types
+ */
+
+
 type SessionCredentials = {
   apiKey: string,
   sessionId: string,
@@ -12,11 +14,12 @@ type SessionCredentials = {
 }
 type OpenTokEnvironment = 'standard' | 'enterprise'
 type StatusCallback = (status: string) => void
-type CompletionCallback < A > = (error: Error | null, results: A | null) => void
+type CompletionCallback<A> = (error: Error | null, results: A | null) => void
 
 
+type DeviceId = string;
 type InputDeviceType = 'audioInput' | 'videoInput';
 type DeviceOptions = {
-  audioDevice ? : string,
-  videoDevice ? : string
+  audioDevice?: DeviceId,
+  videoDevice?: DeviceId
 }

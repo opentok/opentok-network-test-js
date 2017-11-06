@@ -1,3 +1,14 @@
+/**
+ * @module Test/Connectivity
+ * @preferred
+ *
+ * Defines the methods required for the Connectivity Test Flow
+ */
+
+ /**
+  * Connectivity Test Flow
+  */
+
 import * as Promise from 'promise';
 import * as OT from '@opentok/client';
 import * as e from '../../errors';
