@@ -8,3 +8,9 @@
 $ npm install
 $ npm run build
 ```
+
+#### View Docs after Build:
+
+```
+$ npm run docs
+```
