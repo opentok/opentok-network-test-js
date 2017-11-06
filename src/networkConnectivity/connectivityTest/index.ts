@@ -19,10 +19,10 @@ import {
   VideoDeviceNotAvailableWarning,
 } from '../../warnings';
 
-type UnavailableDeviceWarnings = {
-  audio: null | AudioDeviceNotAvailableWarning,
-  video: null | VideoDeviceNotAvailableWarning,
-};
+interface UnavailableDeviceWarnings {
+  audio?: AudioDeviceNotAvailableWarning;
+  video?: VideoDeviceNotAvailableWarning;
+}
 
 interface CreateLocalPublisherResults {
   publisher: OT.Publisher;
@@ -31,6 +31,10 @@ interface CreateLocalPublisherResults {
 
 interface PublishToSessionResults extends CreateLocalPublisherResults {
   session: OT.Session;
+}
+
+interface SubscribeToSessionResults extends PublishToSessionResults {
+  subscriber: OT.Subscriber;
 }
 
 const defaultSubsriberOptions = {
@@ -87,12 +91,15 @@ const validateDevices = (deviceOptions?: DeviceOptions): Promise<UnavailableDevi
         const videoPreferenceAvailable = videoPreference ? availableDevices.video[videoPreference] : true;
 
         const audioWarning =
-          audioPreference && !audioPreferenceAvailable ? new AudioDeviceNotAvailableWarning(audioPreference) : null;
+          audioPreference && !audioPreferenceAvailable ?
+            { audio: new AudioDeviceNotAvailableWarning(audioPreference) }
+            : {};
         const videoWarning =
-          videoPreference && !videoPreferenceAvailable ? new VideoDeviceNotAvailableWarning(videoPreference) : null;
+          videoPreference && !videoPreferenceAvailable ?
+            { video: new VideoDeviceNotAvailableWarning(videoPreference) }
+            : {};
 
-        const warnings: UnavailableDeviceWarnings = { audio: audioWarning, video: videoWarning };
-        resolve(warnings);
+        resolve(Object.assign({}, audioWarning, videoWarning));
       }
     });
   });
@@ -112,8 +119,7 @@ const checkCreateLocalPublisher = (deviceOptions?: DeviceOptions): Promise<Creat
         const publisherOptions = !!Object.keys(sourceOptions).length ? sourceOptions : undefined;
         const publisher = OT.initPublisher(undefined, publisherOptions, (error: OT.OTError) => {
           if (!error) {
-            const warningList: NetworkConnectivityWarning[] = Object.values(warnings).filter(w => w !== null);
-            resolve({ ...{ publisher }, warnings: warningList });
+            resolve({ ...{ publisher }, warnings: Object.values(warnings) });
           } else {
             reject(new e.FailedCreateLocalPublisherError());
           }
@@ -146,31 +152,51 @@ const checkPublishToSession = (session: OT.Session, deviceOptions?: DeviceOption
       }).catch(reject);
   });
 
-// /**
-//  * @param {Object} options
-//  * @param {Session} options.session
-//  * @param {Publisher} options.publisher
-//  */
-// const checkSubscribeToSession = (options: { session: OT.Session, publisher: OT.Publisher }) =>
-//   new Promise((resolve, reject) => {
-//     const subOpts = Object.assign({}, defaultSubsriberOptions);
-//     const { session, publisher } = options;
-//     // The null in the argument is the element selector to insert the subscriber UI
-//     if (!publisher.stream) {
-//       return reject(new e.NetworkConnectivityError('ahh'));
-//     }
+/**
+ * Attempt to subscribe to our publisher
+ */
+const checkSubscribeToSession =
+  ({ session, publisher, warnings }: PublishToSessionResults): Promise<SubscribeToSessionResults> =>
+    new Promise((resolve, reject) => {
+      const subOpts = Object.assign({}, defaultSubsriberOptions);
+      // The null in the argument is the element selector to insert the subscriber UI
+      if (!publisher.stream) {
+        reject(new e.FailedSubscribeToSessionError()); // TODO: Specific error for this
+      } else {
+        const subscriber = session.subscribe(publisher.stream, undefined, subOpts, (error: OT.OTError) => {
+          if (error && error.code === 1600) {
+            reject(new e.FailedSubscribeToStreamNetworkError());
+          } else if (error) {
+            reject(new e.FailedSubscribeToSessionError());
+          } else {
+            resolve({ ...{ session }, ...{ publisher }, ...{ subscriber }, ...{ warnings } });
+          }
+        });
+      }
+    });
 
-//     const subscriber = session.subscribe(publisher.stream, undefined, subOpts, (error: OT.OTError) => {
-//       if (error && error.code === 1600) {
-//         reject(new e.FailedSubscribeToStreamNetworkError());
-//       } else {
-//         resolve(Object.assign({}, options, { subscriber }));
-//       }
-//     });
-
-//   });
-
-
+    /**
+ * Attempt to subscribe to our publisher
+ */
+const checkLoggingServer =
+(input: SubscribeToSessionResults): Promise<SubscribeToSessionResults> =>
+  new Promise((resolve, reject) => {
+    const subOpts = Object.assign({}, defaultSubsriberOptions);
+    // The null in the argument is the element selector to insert the subscriber UI
+    if (!publisher.stream) {
+      reject(new e.FailedSubscribeToSessionError()); // TODO: Specific error for this
+    } else {
+      const subscriber = session.subscribe(publisher.stream, undefined, subOpts, (error: OT.OTError) => {
+        if (error && error.code === 1600) {
+          reject(new e.FailedSubscribeToStreamNetworkError());
+        } else if (error) {
+          reject(new e.FailedSubscribeToSessionError());
+        } else {
+          resolve({ ...{ session }, ...{ publisher }, ...{ subscriber }, ...{ warnings } });
+        }
+      });
+    }
+  });
 
 /**
  * This method checks to see if the client can connect to TokBox servers required for using OpenTok
@@ -195,6 +221,7 @@ const checkConnectivity = (
     connectToSession(credentials)
       .then(session => checkPublishToSession(session, deviceOptions))
       .then(checkSubscribeToSession)
+      .then(checkLoggingServer)
       .then(onSuccess)
       .catch(onFailure);
 

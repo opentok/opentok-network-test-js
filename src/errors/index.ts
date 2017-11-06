@@ -115,7 +115,7 @@ export class FailedPublishToSessionError extends NetworkConnectivityError {
   }
 }
 
-export class FailedCheckSubscribeToSessionError extends NetworkConnectivityError {
+export class FailedSubscribeToSessionError extends NetworkConnectivityError {
   constructor() {
     super('Precall encountered an unknown error while attempting to subscribe to a session.');
   }
