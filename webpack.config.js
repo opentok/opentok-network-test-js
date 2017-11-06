@@ -6,9 +6,10 @@ module.exports = {
   entry: './src/networkConnectivity/index.ts',
   devtool: 'source-map',
   module: {
-    loaders: [
-      { test: /\.ts(x?)$/, loader: 'ts-loader' }
-    ]
+    loaders: [{
+      test: /\.ts(x?)$/,
+      loader: 'ts-loader'
+    }]
   },
   resolve: {
     extensions: ['.ts', '.js']
@@ -29,6 +30,6 @@ module.exports = {
       ignoreCompilerErrors: true,
       target: 'ES6',
       media: './media'
-  }, './src')
+    }, './src')
   ]
 };
