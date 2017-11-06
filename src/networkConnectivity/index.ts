@@ -30,7 +30,7 @@ export default class NetworkConnectivity {
     }
   }
 
-  private validateCallbacks(onStatus?: StatusCallback, onComplete?: CompletionCallback<any>){
+  private validateCallbacks(onStatus: StatusCallback | null, onComplete?: CompletionCallback<any>){
     if (onStatus) {
       if (typeof onStatus !== 'function' || onStatus.length !== 1) {
         throw new InvalidOnStatusCallback();
@@ -58,10 +58,9 @@ export default class NetworkConnectivity {
    */
   checkConnectivity(
     deviceOptions?: DeviceOptions,
-    onStatus?: StatusCallback,
     onComplete?: CompletionCallback<any>): Promise<any> {
-    this.validateCallbacks(onStatus, onComplete);
-    return connectivityTest(this.credentials, this.environment, deviceOptions, onStatus, onComplete);
+    this.validateCallbacks(null, onComplete);
+    return connectivityTest(this.credentials, this.environment, deviceOptions, onComplete);
   }
 }
 

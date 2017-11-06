@@ -5,14 +5,33 @@
  * Defines the methods required for the Connectivity Test Flow
  */
 
- /**
-  * Connectivity Test Flow
-  */
+/**
+ * Connectivity Test Flow
+ */
 
 import * as Promise from 'promise';
 import * as OT from '@opentok/client';
 import * as e from '../../errors';
 import { get, getOrElse } from '../../util';
+import {
+  NetworkConnectivityWarning,
+  AudioDeviceNotAvailableWarning,
+  VideoDeviceNotAvailableWarning,
+} from '../../warnings';
+
+type UnavailableDeviceWarnings = {
+  audio: null | AudioDeviceNotAvailableWarning,
+  video: null | VideoDeviceNotAvailableWarning,
+};
+
+interface CreateLocalPublisherResults {
+  publisher: OT.Publisher;
+  warnings: NetworkConnectivityWarning[];
+}
+
+interface PublishToSessionResults extends CreateLocalPublisherResults {
+  session: OT.Session;
+}
 
 const defaultSubsriberOptions = {
   testNetwork: true,
@@ -38,84 +57,94 @@ const connectToSession = ({ apiKey, sessionId, token }: SessionCredentials): Pro
   });
 
 /**
- * @param {String} type videoInput | audioInput
- * @returns {Promise} <resolve: Array, reject: Error>
+ * Ensure that audio and video devices are available and validate any specified
+ * device preferences are valid.
  */
-const getDevices = (deviceType: InputDeviceType): Promise<OT.Device[]> =>
+const validateDevices = (deviceOptions?: DeviceOptions): Promise<UnavailableDeviceWarnings> =>
   new Promise((resolve, reject) => {
-    OT.getDevices((error, devices = []) => {
-      const deviceList = devices.filter(d => d.kind === deviceType);
-      if (deviceList.length !== 0) {
-        resolve(deviceList);
-      } else if (deviceType === 'videoInput') {
-        reject(new e.NoVideoCaptureDevicesError());
-      } else if (deviceType === 'audioInput') {
+
+    type DeviceMap = { [deviceId: string]: OT.Device };
+    type AvailableDevices = { audio: DeviceMap, video: DeviceMap };
+
+    OT.getDevices((error: OT.OTError, devices: OT.Device[]) => {
+      const availableDevices: AvailableDevices = devices.reduce(
+        (acc: AvailableDevices, device: OT.Device) => {
+          const type = device.kind === 'audioInput' ? 'audio' : 'video';
+          return { ...acc, [type]: { ...acc[type], [device.deviceId]: device } };
+        },
+        { audio: {}, video: {} },
+      );
+
+      if (!Object.keys(availableDevices.audio).length) {
         reject(new e.NoAudioCaptureDevicesError());
+      } else if (!Object.keys(availableDevices.video).length) {
+        reject(new e.NoVideoCaptureDevicesError());
+      } else {
+
+        const audioPreference: string | null = getOrElse(null, 'audioDevice', deviceOptions);
+        const videoPreference: string | null = getOrElse(null, 'videoDevice', deviceOptions);
+        const audioPreferenceAvailable = audioPreference ? availableDevices.audio[audioPreference] : true;
+        const videoPreferenceAvailable = videoPreference ? availableDevices.video[videoPreference] : true;
+
+        const audioWarning =
+          audioPreference && !audioPreferenceAvailable ? new AudioDeviceNotAvailableWarning(audioPreference) : null;
+        const videoWarning =
+          videoPreference && !videoPreferenceAvailable ? new VideoDeviceNotAvailableWarning(videoPreference) : null;
+
+        const warnings: UnavailableDeviceWarnings = { audio: audioWarning, video: videoWarning };
+        resolve(warnings);
       }
     });
   });
 
+/**
+ * Create a local publisher object with any specified device options
+ */
+const checkCreateLocalPublisher = (deviceOptions?: DeviceOptions): Promise<CreateLocalPublisherResults> =>
+  new Promise((resolve, reject) => {
+    validateDevices(deviceOptions)
+      .then((warnings: UnavailableDeviceWarnings) => {
+        const audioDevice = get('audioDevice', deviceOptions);
+        const videoDevice = get('videoDevice', deviceOptions);
+        const audioSource = audioDevice && !warnings.audio ? { audioInput: audioDevice } : {};
+        const videoSource = videoDevice && !warnings.video ? { videoInput: videoDevice } : {};
+        const sourceOptions = { ...audioSource, ...videoSource };
+        const publisherOptions = !!Object.keys(sourceOptions).length ? sourceOptions : undefined;
+        const publisher = OT.initPublisher(undefined, publisherOptions, (error: OT.OTError) => {
+          if (!error) {
+            const warningList: NetworkConnectivityWarning[] = Object.values(warnings).filter(w => w !== null);
+            resolve({ ...{ publisher }, warnings: warningList });
+          } else {
+            reject(new e.FailedCreateLocalPublisherError());
+          }
+        });
+      });
+  });
 
-const getVideoDevices = (): Promise<OT.Device[]> => getDevices('videoInput');
-const getAudioDevices = (): Promise<OT.Device[]> => getDevices('audioInput');
-
-// const checkCreateLocalPublisher = (options: { localPublisherOptions: object } = { localPublisherOptions: {} }) => {
-//   const localPublisherOptions = getOrElse(null, 'localPublisherOptions', options);
-//   return new Promise((resolve, reject) => {
-//     getVideoDevices()
-//       .then(getAudioDevices)
-//       .then(() => {
-//         const publisher = OT.initPublisher(localPublisherOptions, (error) => {
-//           if (!error) {
-//             resolve(publisher);
-//           } else {
-//             reject(new e.FailedCreateLocalPublisherError());
-//           }
-//         });
-//       })
-//       .catch(e.UnsupportedBrowserError, () => {
-//         reject(new e.UnsupportedBrowserError());
-//       })
-//       .catch(e.NoVideoCaptureDevicesError, () => {
-//         reject(new e.NoVideoCaptureDevicesError());
-//       })
-//       .catch(e.NoAudioCaptureDevicesError, () => {
-//         reject(new e.NoAudioCaptureDevicesError());
-//       });
-//   });
-// };
-
-// /**
-//  * @param {Object} options
-//  * @param {Session} options.session - An OpenTok Session object
-//  */
-// const checkPublishToSession = (options: { session: OT.Session }): Promise<WithSessionAndPublisher> =>
-//   new Promise((resolve, reject) => {
-//     const { session } = options;
-//     checkCreateLocalPublisher()
-//       .then((publisher: OT.Publisher) => {
-//         session.publish(publisher, (error: OT.OTError) => {
-//           if (hasCode(error, 1010)) {
-//             reject(new e.FailedPublishToSessionNotConnectedError());
-//           }
-//           if (hasCode(error, 1500)) {
-//             reject(new e.FailedPublishToSessionPermissionOrTimeoutError());
-//           }
-//           if (hasCode(error, 1601)) {
-//             reject(new e.FailedPublishToSessionNetworkError());
-//           } else {
-//             resolve(Object.assign({}, options, { publisher }));
-//           }
-//         });
-//       })
-//       .catch((exception) => {
-//         if (exception instanceof e.NetworkConnectivityError) {
-//           reject(exception);
-//         } else {
-//           reject(new e.FailedCheckPublishToSessionError());
-//         }
-//       });
-//   });
+/**
+ * Attempt to publish to the session
+ */
+const checkPublishToSession = (session: OT.Session, deviceOptions?: DeviceOptions): Promise<PublishToSessionResults> =>
+  new Promise((resolve, reject) => {
+    checkCreateLocalPublisher(deviceOptions)
+      .then(({ publisher, warnings }: CreateLocalPublisherResults) => {
+        session.publish(publisher, (error: OT.OTError) => {
+          if (error && hasCode(error, 1010)) {
+            reject(new e.FailedPublishToSessionNotConnectedError());
+          }
+          if (error && hasCode(error, 1500)) {
+            reject(new e.FailedPublishToSessionPermissionOrTimeoutError());
+          }
+          if (error && hasCode(error, 1601)) {
+            reject(new e.FailedPublishToSessionNetworkError());
+          } else if (error) {
+            reject(new e.FailedPublishToSessionError());
+          } else {
+            resolve({ ...{ session }, ...{ publisher }, ...{ warnings } });
+          }
+        });
+      }).catch(reject);
+  });
 
 // /**
 //  * @param {Object} options
@@ -150,7 +179,6 @@ const checkConnectivity = (
   credentials: SessionCredentials,
   environment: OpenTokEnvironment,
   deviceOptions?: DeviceOptions,
-  onStatus?: StatusCallback,
   onComplete?: CompletionCallback<any>): Promise<any> =>
   new Promise((resolve, reject) => {
 
@@ -164,12 +192,12 @@ const checkConnectivity = (
       return reject(error);
     };
 
-    // connectToSession(credentials)
-    //   .then(checkPublishToSession)
-    //   .then(checkSubscribeToSession)
-    //   .then(onSuccess)
-    //   .catch(onFailure);
-    resolve('tim');
+    connectToSession(credentials)
+      .then(session => checkPublishToSession(session, deviceOptions))
+      .then(checkSubscribeToSession)
+      .then(onSuccess)
+      .catch(onFailure);
+
   });
 
 export default checkConnectivity;
