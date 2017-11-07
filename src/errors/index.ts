@@ -43,6 +43,12 @@ export class UnsupportedBrowserError extends NetworkConnectivityError {
   }
 }
 
+export class FailedToObtainMediaDevices extends NetworkConnectivityError {
+  constructor() {
+    super('Failed to obtain media devices from OT.getDevices()');
+  }
+}
+
 export class NoVideoCaptureDevicesError extends NetworkConnectivityError {
   constructor() {
     super('This browser has no video capture devices');

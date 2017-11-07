@@ -11,6 +11,7 @@
 
 import * as Promise from 'promise';
 import * as OT from '@opentok/client';
+import axios from 'axios';
 import * as e from '../../errors';
 import { ErrorType } from '../../errors/types';
 import { get, getOrElse } from '../../util';
@@ -18,6 +19,7 @@ import {
   NetworkConnectivityWarning,
   AudioDeviceNotAvailableWarning,
   VideoDeviceNotAvailableWarning,
+  FailedToConnectToLoggingServer,
 } from '../../warnings';
 
 interface UnavailableDeviceWarnings {
@@ -38,7 +40,8 @@ interface SubscribeToSessionResults extends PublishToSessionResults {
   subscriber: OT.Subscriber;
 }
 
-const defaultSubsriberOptions = {
+const LOGGING_URL = 'https://hlg.tokbox.com/prod/logging/ClientEvent';
+const DEFAULT_SUBSCRIBER_CONFIG = {
   testNetwork: true,
   audioVolume: 0,
 };
@@ -72,36 +75,41 @@ const validateDevices = (deviceOptions?: DeviceOptions): Promise<UnavailableDevi
     type DeviceMap = { [deviceId: string]: OT.Device };
     type AvailableDevices = { audio: DeviceMap, video: DeviceMap };
 
-    OT.getDevices((error: OT.OTError, devices: OT.Device[]) => {
-      const availableDevices: AvailableDevices = devices.reduce(
-        (acc: AvailableDevices, device: OT.Device) => {
-          const type = device.kind === 'audioInput' ? 'audio' : 'video';
-          return { ...acc, [type]: { ...acc[type], [device.deviceId]: device } };
-        },
-        { audio: {}, video: {} },
-      );
+    OT.getDevices((error: OT.OTError, devices: OT.Device[] = []) => {
 
-      if (!Object.keys(availableDevices.audio).length) {
-        reject(new e.NoAudioCaptureDevicesError());
-      } else if (!Object.keys(availableDevices.video).length) {
-        reject(new e.NoVideoCaptureDevicesError());
+      if (error) {
+        reject(new e.FailedToObtainMediaDevices());
       } else {
 
-        const audioPreference: string | null = getOrElse(null, 'audioDevice', deviceOptions);
-        const videoPreference: string | null = getOrElse(null, 'videoDevice', deviceOptions);
-        const audioPreferenceAvailable = audioPreference ? availableDevices.audio[audioPreference] : true;
-        const videoPreferenceAvailable = videoPreference ? availableDevices.video[videoPreference] : true;
+        const availableDevices: AvailableDevices = devices.reduce(
+          (acc: AvailableDevices, device: OT.Device) => {
+            const type = device.kind === 'audioInput' ? 'audio' : 'video';
+            return { ...acc, [type]: { ...acc[type], [device.deviceId]: device } };
+          },
+          { audio: {}, video: {} },
+        );
+        if (!Object.keys(availableDevices.audio).length) {
+          reject(new e.NoAudioCaptureDevicesError());
+        } else if (!Object.keys(availableDevices.video).length) {
+          reject(new e.NoVideoCaptureDevicesError());
+        } else {
 
-        const audioWarning =
-          audioPreference && !audioPreferenceAvailable ?
-            { audio: new AudioDeviceNotAvailableWarning(audioPreference) }
-            : {};
-        const videoWarning =
-          videoPreference && !videoPreferenceAvailable ?
-            { video: new VideoDeviceNotAvailableWarning(videoPreference) }
-            : {};
+          const audioPreference: string | null = getOrElse(null, 'audioDevice', deviceOptions);
+          const videoPreference: string | null = getOrElse(null, 'videoDevice', deviceOptions);
+          const audioPreferenceAvailable = audioPreference ? availableDevices.audio[audioPreference] : true;
+          const videoPreferenceAvailable = videoPreference ? availableDevices.video[videoPreference] : true;
 
-        resolve(Object.assign({}, audioWarning, videoWarning));
+          const audioWarning =
+            audioPreference && !audioPreferenceAvailable ?
+              { audio: new AudioDeviceNotAvailableWarning(audioPreference) }
+              : {};
+          const videoWarning =
+            videoPreference && !videoPreferenceAvailable ?
+              { video: new VideoDeviceNotAvailableWarning(videoPreference) }
+              : {};
+
+          resolve(Object.assign({}, audioWarning, videoWarning));
+        }
       }
     });
   });
@@ -156,7 +164,7 @@ const checkPublishToSession = (session: OT.Session, deviceOptions?: DeviceOption
 const checkSubscribeToSession =
   ({ session, publisher, warnings }: PublishToSessionResults): Promise<SubscribeToSessionResults> =>
     new Promise((resolve, reject) => {
-      const subOpts = Object.assign({}, defaultSubsriberOptions);
+      const subOpts = Object.assign({}, DEFAULT_SUBSCRIBER_CONFIG);
       // The null in the argument is the element selector to insert the subscriber UI
       if (!publisher.stream) {
         reject(new e.FailedSubscribeToSessionError()); // TODO: Specific error for this
@@ -171,26 +179,20 @@ const checkSubscribeToSession =
       }
     });
 
-/**
-//  * Attempt to subscribe to our publisher
-//  */
-// const checkLoggingServer =
-// (input: SubscribeToSessionResults): Promise<SubscribeToSessionResults> =>
-//   new Promise((resolve, reject) => {
-//     const subOpts = Object.assign({}, defaultSubsriberOptions);
-//     // The null in the argument is the element selector to insert the subscriber UI
-//     if (!publisher.stream) {
-//       reject(new e.FailedSubscribeToSessionError()); // TODO: Specific error for this
-//     } else {
-//       const subscriber = session.subscribe(publisher.stream, undefined, subOpts, (error: OT.OTError) => {
-//         if (error) {
-//           reject(new e.FailedSubscribeToSessionError());
-//         } else {
-//           resolve({ ...{ session }, ...{ publisher }, ...{ subscriber }, ...{ warnings } });
-//         }
-//       });
-//     }
-//   });
+
+const checkLoggingServer =
+  (input: SubscribeToSessionResults): Promise<SubscribeToSessionResults> =>
+    new Promise((resolve, reject) => {
+      axios.post('https://hlg.tokbox.com/prod/logging/ClientEvent')
+        .then((response) => {
+          if (response.status === 200) {
+            resolve(input);
+          } else {
+            const warnings = { warnings: input.warnings.concat(new FailedToConnectToLoggingServer()) };
+            reject({ ...input, ...warnings });
+          }
+        });
+    });
 
 /**
  * This method checks to see if the client can connect to TokBox servers required for using OpenTok
@@ -215,7 +217,7 @@ const checkConnectivity = (
     connectToSession(credentials)
       .then(session => checkPublishToSession(session, deviceOptions))
       .then(checkSubscribeToSession)
-      // .then(checkLoggingServer)
+      .then(checkLoggingServer)
       .then(onSuccess)
       .catch(onFailure);
 

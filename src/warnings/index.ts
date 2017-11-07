@@ -17,3 +17,9 @@ export class VideoDeviceNotAvailableWarning extends NetworkConnectivityWarning {
     super(`The video device with id ${id} does not exist. Falling back to default device.`);
   }
 }
+
+export class FailedToConnectToLoggingServer extends NetworkConnectivityWarning {
+  constructor(){
+    super(`Failed to connect to the OpenTok logging server.`);
+  }
+}
