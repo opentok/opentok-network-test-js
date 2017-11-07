@@ -12,6 +12,7 @@
 import * as Promise from 'promise';
 import * as OT from '@opentok/client';
 import * as e from '../../errors';
+import { ErrorType } from '../../errors/types';
 import { get, getOrElse } from '../../util';
 import {
   NetworkConnectivityWarning,
@@ -42,17 +43,18 @@ const defaultSubsriberOptions = {
   audioVolume: 0,
 };
 
-const hasCode = (obj: OT.OTError, code: number): Boolean => get('code', obj) === code;
+const errorHasCode = (error: OT.OTError | null = null, code: number): Boolean => get('code', error) === code;
+const errorHasName = (error: OT.OTError | null = null, name: ErrorType): Boolean => get('code', error) === name;
 
 const connectToSession = ({ apiKey, sessionId, token }: SessionCredentials): Promise<OT.Session> =>
   new Promise((resolve, reject) => {
     const session = OT.initSession(apiKey, sessionId);
     session.connect(token, (error?: OT.OTError) => {
-      if (error && error.code === 1004) {
+      if (errorHasName(error, ErrorType.AUTHENTICATION_ERROR)) {
         reject(new e.FailedConnectToSessionTokenError());
-      } else if (error && error.code === 1005) {
+      } else if (errorHasName(error, ErrorType.INVALID_SESSION_ID)) {
         reject(new e.FailedConnectToSessionSessionIdError());
-      } else if (error && error.code === 1006) {
+      } else if (errorHasName(error, ErrorType.CONNECT_FAILED)) {
         reject(new e.FailedConnectToSessionNetworkError());
       } else {
         resolve(session);
@@ -135,14 +137,10 @@ const checkPublishToSession = (session: OT.Session, deviceOptions?: DeviceOption
     checkCreateLocalPublisher(deviceOptions)
       .then(({ publisher, warnings }: CreateLocalPublisherResults) => {
         session.publish(publisher, (error: OT.OTError) => {
-          if (error && hasCode(error, 1010)) {
+          if (errorHasName(error, ErrorType.NOT_CONNECTED)) {
             reject(new e.FailedPublishToSessionNotConnectedError());
-          }
-          if (error && hasCode(error, 1500)) {
+          } else if (errorHasName(error, ErrorType.UNABLE_TO_PUBLISH)) {
             reject(new e.FailedPublishToSessionPermissionOrTimeoutError());
-          }
-          if (error && hasCode(error, 1601)) {
-            reject(new e.FailedPublishToSessionNetworkError());
           } else if (error) {
             reject(new e.FailedPublishToSessionError());
           } else {
@@ -164,9 +162,7 @@ const checkSubscribeToSession =
         reject(new e.FailedSubscribeToSessionError()); // TODO: Specific error for this
       } else {
         const subscriber = session.subscribe(publisher.stream, undefined, subOpts, (error: OT.OTError) => {
-          if (error && error.code === 1600) {
-            reject(new e.FailedSubscribeToStreamNetworkError());
-          } else if (error) {
+          if (error) {
             reject(new e.FailedSubscribeToSessionError());
           } else {
             resolve({ ...{ session }, ...{ publisher }, ...{ subscriber }, ...{ warnings } });
@@ -175,28 +171,26 @@ const checkSubscribeToSession =
       }
     });
 
-    /**
- * Attempt to subscribe to our publisher
- */
-const checkLoggingServer =
-(input: SubscribeToSessionResults): Promise<SubscribeToSessionResults> =>
-  new Promise((resolve, reject) => {
-    const subOpts = Object.assign({}, defaultSubsriberOptions);
-    // The null in the argument is the element selector to insert the subscriber UI
-    if (!publisher.stream) {
-      reject(new e.FailedSubscribeToSessionError()); // TODO: Specific error for this
-    } else {
-      const subscriber = session.subscribe(publisher.stream, undefined, subOpts, (error: OT.OTError) => {
-        if (error && error.code === 1600) {
-          reject(new e.FailedSubscribeToStreamNetworkError());
-        } else if (error) {
-          reject(new e.FailedSubscribeToSessionError());
-        } else {
-          resolve({ ...{ session }, ...{ publisher }, ...{ subscriber }, ...{ warnings } });
-        }
-      });
-    }
-  });
+/**
+//  * Attempt to subscribe to our publisher
+//  */
+// const checkLoggingServer =
+// (input: SubscribeToSessionResults): Promise<SubscribeToSessionResults> =>
+//   new Promise((resolve, reject) => {
+//     const subOpts = Object.assign({}, defaultSubsriberOptions);
+//     // The null in the argument is the element selector to insert the subscriber UI
+//     if (!publisher.stream) {
+//       reject(new e.FailedSubscribeToSessionError()); // TODO: Specific error for this
+//     } else {
+//       const subscriber = session.subscribe(publisher.stream, undefined, subOpts, (error: OT.OTError) => {
+//         if (error) {
+//           reject(new e.FailedSubscribeToSessionError());
+//         } else {
+//           resolve({ ...{ session }, ...{ publisher }, ...{ subscriber }, ...{ warnings } });
+//         }
+//       });
+//     }
+//   });
 
 /**
  * This method checks to see if the client can connect to TokBox servers required for using OpenTok
@@ -221,7 +215,7 @@ const checkConnectivity = (
     connectToSession(credentials)
       .then(session => checkPublishToSession(session, deviceOptions))
       .then(checkSubscribeToSession)
-      .then(checkLoggingServer)
+      // .then(checkLoggingServer)
       .then(onSuccess)
       .catch(onFailure);
 
