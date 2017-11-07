@@ -91,6 +91,12 @@ export class FailedConnectToSessionNetworkError extends NetworkConnectivityError
   }
 }
 
+export class FailedConnectToSessionError extends NetworkConnectivityError {
+  constructor() {
+    super('Precall failed to connect to the session due to a network error.');
+  }
+}
+
 export class FailedPublishToSessionNotConnectedError extends NetworkConnectivityError {
   constructor() {
     super('Precall failed to publish to the session because it was not connected.');

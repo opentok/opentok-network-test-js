@@ -9,9 +9,10 @@
  * Connectivity Test Flow
  */
 
+import axios from 'axios';
+import * as R from 'ramda';
 import * as Promise from 'promise';
 import * as OT from '@opentok/client';
-import axios from 'axios';
 import * as e from '../../errors';
 import { ErrorType } from '../../errors/types';
 import { get, getOrElse } from '../../util';
@@ -46,8 +47,9 @@ const DEFAULT_SUBSCRIBER_CONFIG = {
   audioVolume: 0,
 };
 
-const errorHasCode = (error: OT.OTError | null = null, code: number): Boolean => get('code', error) === code;
 const errorHasName = (error: OT.OTError | null = null, name: ErrorType): Boolean => get('code', error) === name;
+
+const tim = R.path(['tim']);
 
 const connectToSession = ({ apiKey, sessionId, token }: SessionCredentials): Promise<OT.Session> =>
   new Promise((resolve, reject) => {
@@ -59,6 +61,8 @@ const connectToSession = ({ apiKey, sessionId, token }: SessionCredentials): Pro
         reject(new e.FailedConnectToSessionSessionIdError());
       } else if (errorHasName(error, ErrorType.CONNECT_FAILED)) {
         reject(new e.FailedConnectToSessionNetworkError());
+      } else if (error) {
+        reject(new e.FailedConnectToSessionError());
       } else {
         resolve(session);
       }
