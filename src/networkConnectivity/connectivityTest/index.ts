@@ -75,7 +75,7 @@ const validateDevices = (deviceOptions?: DeviceOptions): Promise<UnavailableDevi
     type DeviceMap = { [deviceId: string]: OT.Device };
     type AvailableDevices = { audio: DeviceMap, video: DeviceMap };
 
-    OT.getDevices((error: OT.OTError, devices: OT.Device[] = []) => {
+    OT.getDevices((error?: OT.OTError, devices: OT.Device[] = []) => {
 
       if (error) {
         reject(new e.FailedToObtainMediaDevices());
@@ -144,7 +144,7 @@ const checkPublishToSession = (session: OT.Session, deviceOptions?: DeviceOption
   new Promise((resolve, reject) => {
     checkCreateLocalPublisher(deviceOptions)
       .then(({ publisher, warnings }: CreateLocalPublisherResults) => {
-        session.publish(publisher, (error: OT.OTError) => {
+        session.publish(publisher, (error?: OT.OTError) => {
           if (errorHasName(error, ErrorType.NOT_CONNECTED)) {
             reject(new e.FailedPublishToSessionNotConnectedError());
           } else if (errorHasName(error, ErrorType.UNABLE_TO_PUBLISH)) {
@@ -169,7 +169,7 @@ const checkSubscribeToSession =
       if (!publisher.stream) {
         reject(new e.FailedSubscribeToSessionError()); // TODO: Specific error for this
       } else {
-        const subscriber = session.subscribe(publisher.stream, undefined, subOpts, (error: OT.OTError) => {
+        const subscriber = session.subscribe(publisher.stream, undefined, subOpts, (error?: OT.OTError) => {
           if (error) {
             reject(new e.FailedSubscribeToSessionError());
           } else {
