@@ -11,6 +11,7 @@
 
 import axios from 'axios';
 import * as Promise from 'promise';
+import { path, pathOr } from 'ramda';
 import * as e from '../../errors';
 import { ErrorType } from '../../errors/types';
 import { get, getOrElse } from '../../util';
@@ -44,6 +45,11 @@ const DEFAULT_SUBSCRIBER_CONFIG = {
   testNetwork: true,
   audioVolume: 0,
 };
+
+const getTim = path(['tim']);
+const getTimOr = pathOr(33, ['tim']);
+
+
 
 const errorHasName = (error: OT.OTError | null = null, name: ErrorType): Boolean => get('code', error) === name;
 
@@ -127,7 +133,8 @@ const checkCreateLocalPublisher = (OT: OpenTok, deviceOptions?: DeviceOptions): 
         const videoSource = videoDevice && !warnings.video ? { videoInput: videoDevice } : {};
         const sourceOptions = { ...audioSource, ...videoSource };
         const publisherOptions = !!Object.keys(sourceOptions).length ? sourceOptions : undefined;
-        const publisher = OT.initPublisher(undefined, publisherOptions, (error?: OT.OTError) => {
+        const publisherDiv = document.createElement('div');
+        const publisher = OT.initPublisher(publisherDiv, publisherOptions, (error?: OT.OTError) => {
           if (!error) {
             resolve({ ...{ publisher }, warnings: Object.values(warnings) });
           } else {
@@ -172,7 +179,8 @@ const checkSubscribeToSession =
       if (!publisher.stream) {
         reject(new e.FailedSubscribeToSessionError()); // TODO: Specific error for this
       } else {
-        const subscriber = session.subscribe(publisher.stream, undefined, subOpts, (error?: OT.OTError) => {
+        const subscriberDiv = document.createElement('div');
+        const subscriber = session.subscribe(publisher.stream, subscriberDiv, subOpts, (error?: OT.OTError) => {
           if (error) {
             reject(new e.FailedSubscribeToSessionError());
           } else {
@@ -183,16 +191,20 @@ const checkSubscribeToSession =
     });
 
 
+/**
+ * Attempt to connect to the tokbox client logging server
+ */
 const checkLoggingServer =
-  (input: SubscribeToSessionResults): Promise<SubscribeToSessionResults> =>
+  (OT: OpenTok, input: SubscribeToSessionResults): Promise<SubscribeToSessionResults> =>
     new Promise((resolve, reject) => {
-      axios.post('https://hlg.tokbox.com/prod/logging/ClientEvent')
+      const url = `${OT.properties.loggingURL}/logging/ClientEvent`;
+      axios.post(url)
         .then((response) => {
           if (response.status === 200) {
             resolve(input);
           } else {
             const warnings = { warnings: input.warnings.concat(new FailedToConnectToLoggingServer()) };
-            reject({ ...input, ...warnings });
+            resolve({ ...input, ...warnings });
           }
         });
     });
@@ -218,10 +230,12 @@ const checkConnectivity = (
       return reject(error);
     };
 
+    console.log(getTimOr({}));
+
     connectToSession(OT, credentials)
       .then(session => checkPublishToSession(OT, session, deviceOptions))
       .then(checkSubscribeToSession)
-      .then(checkLoggingServer)
+      .then(results => checkLoggingServer(OT, results))
       .then(onSuccess)
       .catch(onFailure);
 
