@@ -1,5 +1,6 @@
 const path = require('path');
 const webpack = require('webpack');
+const nodeExternals = require('webpack-node-externals');
 const TypedocWebpackPlugin = require('typedoc-webpack-plugin');
 
 module.exports = {
@@ -14,9 +15,14 @@ module.exports = {
   resolve: {
     extensions: ['.ts', '.js', '.json']
   },
+  target: 'node',
+  externals: [nodeExternals()],
   output: {
     filename: 'index.js',
-    path: path.resolve(__dirname, 'dist')
+    path: path.resolve(__dirname, 'dist'),
+    library: 'OpenTokNetworkConnectivity',
+    libraryTarget: 'umd',
+    umdNamedDefine: true
   },
   plugins: [
     // new webpack.optimize.UglifyJsPlugin(),
