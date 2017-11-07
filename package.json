@@ -28,7 +28,6 @@
   },
   "homepage": "https://github.com/opentok/network-connectivity-js#readme",
   "dependencies": {
-    "@opentok/client": "^2.12.1",
     "@types/webrtc": "0.0.22",
     "axios": "^0.17.0",
     "lodash": "^4.17.4",

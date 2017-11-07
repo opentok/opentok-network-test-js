@@ -14,6 +14,12 @@ export class NetworkConnectivityError extends Error {
   }
 }
 
+export class MissingOpenTokInstanceError extends NetworkConnectivityError {
+  constructor() {
+    super('An instance of OT, the OpenTok.js client SDK, is required.');
+  }
+}
+
 export class IncompleteSessionCredentialsError extends NetworkConnectivityError {
   constructor() {
     super('NetworkConnectivity requires an apiKey, sessionId, and token.');

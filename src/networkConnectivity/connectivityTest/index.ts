@@ -10,9 +10,7 @@
  */
 
 import axios from 'axios';
-import * as R from 'ramda';
 import * as Promise from 'promise';
-import * as OT from '@opentok/client';
 import * as e from '../../errors';
 import { ErrorType } from '../../errors/types';
 import { get, getOrElse } from '../../util';
@@ -49,9 +47,7 @@ const DEFAULT_SUBSCRIBER_CONFIG = {
 
 const errorHasName = (error: OT.OTError | null = null, name: ErrorType): Boolean => get('code', error) === name;
 
-const tim = R.path(['tim']);
-
-const connectToSession = ({ apiKey, sessionId, token }: SessionCredentials): Promise<OT.Session> =>
+const connectToSession = (OT: OpenTok, { apiKey, sessionId, token }: SessionCredentials): Promise<OT.Session> =>
   new Promise((resolve, reject) => {
     const session = OT.initSession(apiKey, sessionId);
     session.connect(token, (error?: OT.OTError) => {
@@ -73,7 +69,7 @@ const connectToSession = ({ apiKey, sessionId, token }: SessionCredentials): Pro
  * Ensure that audio and video devices are available and validate any specified
  * device preferences are valid.
  */
-const validateDevices = (deviceOptions?: DeviceOptions): Promise<UnavailableDeviceWarnings> =>
+const validateDevices = (OT: OpenTok, deviceOptions?: DeviceOptions): Promise<UnavailableDeviceWarnings> =>
   new Promise((resolve, reject) => {
 
     type DeviceMap = { [deviceId: string]: OT.Device };
@@ -121,9 +117,9 @@ const validateDevices = (deviceOptions?: DeviceOptions): Promise<UnavailableDevi
 /**
  * Create a local publisher object with any specified device options
  */
-const checkCreateLocalPublisher = (deviceOptions?: DeviceOptions): Promise<CreateLocalPublisherResults> =>
+const checkCreateLocalPublisher = (OT: OpenTok, deviceOptions?: DeviceOptions): Promise<CreateLocalPublisherResults> =>
   new Promise((resolve, reject) => {
-    validateDevices(deviceOptions)
+    validateDevices(OT, deviceOptions)
       .then((warnings: UnavailableDeviceWarnings) => {
         const audioDevice = get('audioDevice', deviceOptions);
         const videoDevice = get('videoDevice', deviceOptions);
@@ -144,9 +140,12 @@ const checkCreateLocalPublisher = (deviceOptions?: DeviceOptions): Promise<Creat
 /**
  * Attempt to publish to the session
  */
-const checkPublishToSession = (session: OT.Session, deviceOptions?: DeviceOptions): Promise<PublishToSessionResults> =>
+const checkPublishToSession = (
+  OT: OpenTok,
+  session: OT.Session,
+  deviceOptions?: DeviceOptions): Promise<PublishToSessionResults> =>
   new Promise((resolve, reject) => {
-    checkCreateLocalPublisher(deviceOptions)
+    checkCreateLocalPublisher(OT, deviceOptions)
       .then(({ publisher, warnings }: CreateLocalPublisherResults) => {
         session.publish(publisher, (error?: OT.OTError) => {
           if (errorHasName(error, ErrorType.NOT_CONNECTED)) {
@@ -202,6 +201,7 @@ const checkLoggingServer =
  * This method checks to see if the client can connect to TokBox servers required for using OpenTok
  */
 const checkConnectivity = (
+  OT: OpenTok,
   credentials: SessionCredentials,
   environment: OpenTokEnvironment,
   deviceOptions?: DeviceOptions,
@@ -218,8 +218,8 @@ const checkConnectivity = (
       return reject(error);
     };
 
-    connectToSession(credentials)
-      .then(session => checkPublishToSession(session, deviceOptions))
+    connectToSession(OT, credentials)
+      .then(session => checkPublishToSession(OT, session, deviceOptions))
       .then(checkSubscribeToSession)
       .then(checkLoggingServer)
       .then(onSuccess)
