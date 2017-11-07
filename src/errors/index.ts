@@ -1,14 +1,26 @@
+/**
+ * @module Errors
+ */
 
-
+ /**
+  * Base class for errors used throughout Network Connectivity tests.
+  */
 export class NetworkConnectivityError extends Error {
-  constructor(message) {
+  constructor(message: string) {
     super(message);
+    Object.setPrototypeOf(this, NetworkConnectivityError.prototype);
     this.name = this.constructor.name;
     this.stack = (new Error(message)).stack;
   }
 }
 
-export class InvalidSessionCredentialsError extends NetworkConnectivityError {
+export class MissingOpenTokInstanceError extends NetworkConnectivityError {
+  constructor() {
+    super('An instance of OT, the OpenTok.js client SDK, is required.');
+  }
+}
+
+export class IncompleteSessionCredentialsError extends NetworkConnectivityError {
   constructor() {
     super('NetworkConnectivity requires an apiKey, sessionId, and token.');
   }
@@ -25,9 +37,21 @@ export class InvalidOnCompleteCallback extends NetworkConnectivityError {
   }
 }
 
+export class InvalidSessionCredentialsError extends NetworkConnectivityError {
+  constructor() {
+    super('NetworkConnectivity requires an apiKey, sessionId, and token.');
+  }
+}
+
 export class UnsupportedBrowserError extends NetworkConnectivityError {
   constructor() {
     super('This browser is not supported by OpenTok.');
+  }
+}
+
+export class FailedToObtainMediaDevices extends NetworkConnectivityError {
+  constructor() {
+    super('Failed to obtain media devices from OT.getDevices()');
   }
 }
 
@@ -73,6 +97,12 @@ export class FailedConnectToSessionNetworkError extends NetworkConnectivityError
   }
 }
 
+export class FailedConnectToSessionError extends NetworkConnectivityError {
+  constructor() {
+    super('Precall failed to connect to the session due to a network error.');
+  }
+}
+
 export class FailedPublishToSessionNotConnectedError extends NetworkConnectivityError {
   constructor() {
     super('Precall failed to publish to the session because it was not connected.');
@@ -97,13 +127,13 @@ export class FailedSubscribeToStreamNetworkError extends NetworkConnectivityErro
   }
 }
 
-export class FailedCheckPublishToSessionError extends NetworkConnectivityError {
+export class FailedPublishToSessionError extends NetworkConnectivityError {
   constructor() {
     super('Precall encountered an unknown error while attempting to publish to a session.');
   }
 }
 
-export class FailedCheckSubscribeToSessionError extends NetworkConnectivityError {
+export class FailedSubscribeToSessionError extends NetworkConnectivityError {
   constructor() {
     super('Precall encountered an unknown error while attempting to subscribe to a session.');
   }
