@@ -127,7 +127,7 @@ const checkCreateLocalPublisher = (OT: OpenTok, deviceOptions?: DeviceOptions): 
         const videoSource = videoDevice && !warnings.video ? { videoInput: videoDevice } : {};
         const sourceOptions = { ...audioSource, ...videoSource };
         const publisherOptions = !!Object.keys(sourceOptions).length ? sourceOptions : undefined;
-        const publisher = OT.initPublisher(undefined, publisherOptions, (error: OT.OTError) => {
+        const publisher = OT.initPublisher(undefined, publisherOptions, (error?: OT.OTError) => {
           if (!error) {
             resolve({ ...{ publisher }, warnings: Object.values(warnings) });
           } else {
