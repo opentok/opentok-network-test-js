@@ -1,6 +1,3 @@
 {
-  "plugins": [
-    "ramda"
-  ],
   "presets": ["env"]
 }

@@ -4,7 +4,7 @@ const nodeExternals = require('webpack-node-externals');
 const TypedocWebpackPlugin = require('typedoc-webpack-plugin');
 
 module.exports = {
-  entry: './src/networkConnectivity/index.ts',
+  entry: './src/networkTest/index.ts',
   devtool: 'source-map',
   module: {
     loaders: [{
@@ -16,7 +16,7 @@ module.exports = {
     extensions: ['.ts', '.js', '.json']
   },
   target: 'node',
-  externals: [nodeExternals({ whitelist: [/^ramda/] })],
+  externals: [nodeExternals()],
   output: {
     filename: 'index.js',
     path: path.resolve(__dirname, 'dist'),
@@ -29,7 +29,7 @@ module.exports = {
     new TypedocWebpackPlugin({
       name: 'OpenTok Network Connectivity Test',
       readme: './README.md',
-      exclude: '**/**/types.ts',
+      exclude: '**/**/{types|mapping}.ts',
       module: 'commonjs',
       // theme: 'minimal',
       includeDeclarations: true,

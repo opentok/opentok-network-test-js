@@ -1,5 +1,5 @@
 {
-  "name": "opentok-network-connectivity",
+  "name": "opentok-network-test-js",
   "version": "1.0.0",
   "description": "",
   "main": "dist/index.js",
@@ -15,8 +15,9 @@
   "keywords": [
     "tokbox",
     "opentok",
-    "network-test",
-    "connectivity"
+    "network test",
+    "connectivity",
+    "webrtc"
   ],
   "author": {
     "name": "TokBox",

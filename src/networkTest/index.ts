@@ -1,5 +1,5 @@
 /**
- * @module NetworkConnectivity
+ * @module NetworkTest
  */
 
 /**
@@ -15,7 +15,7 @@ import {
 } from './errors';
 import { propOr } from 'ramda';
 
-export default class NetworkConnectivity {
+export default class NetworkTest {
 
   credentials: SessionCredentials;
   environment: OpenTokEnvironment;
