@@ -16,7 +16,7 @@ module.exports = {
     extensions: ['.ts', '.js', '.json']
   },
   target: 'node',
-  externals: [nodeExternals({ whitelist: ['ramda'] })],
+  externals: [nodeExternals({ whitelist: [/^ramda/] })],
   output: {
     filename: 'index.js',
     path: path.resolve(__dirname, 'dist'),
@@ -25,11 +25,11 @@ module.exports = {
     umdNamedDefine: true
   },
   plugins: [
-    // new webpack.optimize.UglifyJsPlugin(),
+    new webpack.optimize.UglifyJsPlugin({ minimize: true }),
     new TypedocWebpackPlugin({
       name: 'OpenTok Network Connectivity Test',
       readme: './README.md',
-      exclude: '**/{errors,util}/*.ts',
+      exclude: '**/**/types.ts',
       module: 'commonjs',
       theme: 'minimal',
       includeDeclarations: true,
