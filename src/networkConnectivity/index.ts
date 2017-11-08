@@ -12,8 +12,8 @@ import {
   InvalidOnStatusCallback,
   InvalidOnCompleteCallback,
   MissingOpenTokInstanceError,
-} from '../errors';
-import { getOrElse } from '../util';
+} from './errors';
+import { propOr } from 'ramda';
 
 export default class NetworkConnectivity {
 
@@ -29,11 +29,11 @@ export default class NetworkConnectivity {
     this.validateCredentials(credentials);
     this.OT = OT;
     this.credentials = credentials;
-    this.environment = getOrElse('standard', 'environment', options);
+    this.environment = propOr('standard', 'environment', options);
   }
 
   private validateOT(OT: OpenTok) {
-    if (!OT || typeof OT !== 'object') {
+    if (!OT || typeof OT !== 'object' || !OT.initSession) {
       throw new MissingOpenTokInstanceError();
     }
   }

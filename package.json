@@ -28,9 +28,9 @@
   },
   "homepage": "https://github.com/opentok/network-connectivity-js#readme",
   "dependencies": {
+    "@opentok/client": "^2.12.1",
     "@types/webrtc": "0.0.22",
     "axios": "^0.17.0",
-    "lodash": "^4.17.4",
     "promise": "^8.0.1"
   },
   "devDependencies": {
@@ -39,9 +39,7 @@
     "@types/ramda": "^0.25.3",
     "babel-core": "^6.26.0",
     "babel-loader": "^7.1.2",
-    "babel-plugin-ramda": "^1.4.3",
     "babel-preset-env": "^1.6.1",
-    "ramda": "^0.25.0",
     "ts-loader": "^3.1.1",
     "tslint": "^5.8.0",
     "tslint-config-airbnb": "^5.3.0",

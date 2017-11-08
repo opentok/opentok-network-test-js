@@ -31,7 +31,7 @@ module.exports = {
       readme: './README.md',
       exclude: '**/**/types.ts',
       module: 'commonjs',
-      theme: 'minimal',
+      // theme: 'minimal',
       includeDeclarations: true,
       ignoreCompilerErrors: true,
       target: 'ES6',
