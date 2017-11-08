@@ -1,3 +1,10 @@
+/**
+ * @module Warnings
+ */
+
+ /**
+  * Base class for warnings used throughout Network Connectivity tests.
+  */
 
 export class NetworkConnectivityWarning {
   message: string;
