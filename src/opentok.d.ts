@@ -1,3 +1,11 @@
+/**
+ * @module Types/OpenTok
+ */
+
+/**
+ * OpenTok Client SDK types
+ */
+
 declare module OT {
 
   type Properties = {

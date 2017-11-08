@@ -1,11 +1,10 @@
 /**
- * @module Types
+ * @module Types/NetworkTest
  */
 
 /**
  * Define global types
  */
-
 
 type SessionCredentials = {
   apiKey: string,
