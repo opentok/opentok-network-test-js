@@ -13,7 +13,7 @@ type SessionCredentials = {
 }
 type OpenTokEnvironment = 'standard' | 'enterprise'
 type StatusCallback = (status: string) => void
-type CompletionCallback<A> = (error: Error | null, results: A | null) => void
+type CompletionCallback<A> = (error: Error | undefined, results: A | null) => void
 
 
 type DeviceId = string;

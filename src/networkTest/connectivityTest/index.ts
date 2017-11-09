@@ -181,26 +181,31 @@ export const connectivityTest = (
         success: true,
         failedTests: [],
       };
-      onComplete && onComplete(null, results);
+      onComplete && onComplete(undefined, results);
       return resolve(results);
     };
 
-    const onFailure = (error: e.ConnectivityError) => {
-      const results = (...errors: e.ConnectivityError[]): ConnectivityTestResults => ({
-        success: false,
-        failedTests: mapErrors(...errors),
-      });
+    const onFailure = (error: Error) => {
+
+      const handleResults = (...errors: e.ConnectivityError[]) => {
+        const results = {
+          success: false,
+          failedTests: mapErrors(...errors),
+        };
+        onComplete && onComplete(undefined, results);
+        resolve(results);
+      };
 
       /**
        * If we encounter an error before testing the connection to the logging server, let's perform
        * that test as well before returning results.
        */
       if (error.name === 'LoggingServerError') {
-        resolve(results(error));
+        handleResults(error);
       } else {
         checkLoggingServer(OT)
-          .then(() => resolve(results(error)))
-          .catch((loggingError: e.LoggingServerConnectionError) => resolve(results(error, loggingError)));
+          .then(() => handleResults(error))
+          .catch((loggingError: e.LoggingServerConnectionError) => handleResults(error, loggingError));
       }
     };
 
