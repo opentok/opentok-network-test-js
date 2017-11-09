@@ -1,3 +1,11 @@
+/**
+ * @module Errors/Connectivity/OpenTok
+ */
+
+/**
+ * Define errors returned by OpenTok.js
+ */
+
 
 export enum OTErrorType {
   JS_EXCEPTION = 'JS_EXCEPTION',

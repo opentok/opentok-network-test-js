@@ -6,7 +6,7 @@
 * Define Network Connectivy class
 */
 
-import connectivityTest from './connectivityTest';
+import { connectivityTest, ConnectivityTestResults } from './connectivityTest';
 import {
   IncompleteSessionCredentialsError,
   InvalidOnStatusCallback,
@@ -72,9 +72,8 @@ export default class NetworkTest {
    */
   checkConnectivity(
     deviceOptions?: DeviceOptions,
-    onComplete?: CompletionCallback<any>): Promise<any> {
+    onComplete?: CompletionCallback<any>): Promise<ConnectivityTestResults> {
     this.validateCallbacks(null, onComplete);
     return connectivityTest(this.OT, this.credentials, this.environment, deviceOptions, onComplete);
   }
 }
-

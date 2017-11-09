@@ -16,7 +16,7 @@ module.exports = {
     extensions: ['.ts', '.js', '.json']
   },
   target: 'node',
-  externals: [nodeExternals()],
+  externals: [nodeExternals( { whitelist: [/^axios/] })],
   output: {
     filename: 'index.js',
     path: path.resolve(__dirname, 'dist'),
@@ -31,7 +31,7 @@ module.exports = {
       readme: './README.md',
       exclude: '**/**/{types|mapping}.ts',
       module: 'commonjs',
-      // theme: 'minimal',
+      theme: 'minimal',
       includeDeclarations: true,
       ignoreCompilerErrors: true,
       target: 'ES6',

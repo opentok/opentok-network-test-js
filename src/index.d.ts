@@ -29,3 +29,4 @@ interface OpenTok {
   getDevices(callback: (error: OT.OTError | undefined, devices?: OT.Device[]) => void): void;
   properties: OT.Properties
 }
+

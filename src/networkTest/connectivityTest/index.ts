@@ -8,11 +8,11 @@
 /**
  * Connectivity Test Flow
  */
-
 import axios from 'axios';
 import * as Promise from 'promise';
 import * as e from './errors';
 import { OTErrorType } from './errors/types';
+import { mapErrors, FailureType } from './errors/mapping';
 import { get, getOr } from '../../util';
 import {
   NetworkConnectivityWarning,
@@ -21,32 +21,13 @@ import {
   FailedToConnectToLoggingServer,
 } from '../../warnings';
 
-interface UnavailableDeviceWarnings {
-  audio?: AudioDeviceNotAvailableWarning;
-  video?: VideoDeviceNotAvailableWarning;
-}
-
-interface CreateLocalPublisherResults {
-  publisher: OT.Publisher;
-  warnings: NetworkConnectivityWarning[];
-}
-
-interface PublishToSessionResults extends CreateLocalPublisherResults {
-  session: OT.Session;
-}
-
-interface SubscribeToSessionResults extends PublishToSessionResults {
-  subscriber: OT.Subscriber;
-}
-
-interface ConnectivityTestResult {}
-interface ConnectivityTestSuccess extends ConnectivityTestResult {
-  warnings: NetworkConnectivityWarning[];
-}
-interface ConnectivityTestFailure extends ConnectivityTestResult {
-  passedTests: any[];
-  failedAt: e.ConnectivityError;
-}
+type CreateLocalPublisherResults = { publisher: OT.Publisher };
+type PublishToSessionResults =  { session: OT.Session } & CreateLocalPublisherResults;
+type SubscribeToSessionResults = { subscriber: OT.Subscriber } & PublishToSessionResults;
+export type ConnectivityTestResults = {
+  success: boolean,
+  failedTests: FailureType[],
+};
 
 const errorHasName = (error: OT.OTError | null = null, name: OTErrorType): Boolean => get('code', error) === name;
 
@@ -76,7 +57,7 @@ const connectToSession = (OT: OpenTok, { apiKey, sessionId, token }: SessionCred
  * specified device preferences. Return warnings for any devices preferences
  * that are not available.
  */
-const validateDevices = (OT: OpenTok, deviceOptions?: DeviceOptions): Promise<UnavailableDeviceWarnings> =>
+const validateDevices = (OT: OpenTok): Promise<void> =>
   new Promise((resolve, reject) => {
 
     type DeviceMap = { [deviceId: string]: OT.Device };
@@ -95,27 +76,13 @@ const validateDevices = (OT: OpenTok, deviceOptions?: DeviceOptions): Promise<Un
           },
           { audio: {}, video: {} },
         );
+
         if (!Object.keys(availableDevices.audio).length) {
           reject(new e.NoAudioCaptureDevicesError());
         } else if (!Object.keys(availableDevices.video).length) {
           reject(new e.NoVideoCaptureDevicesError());
         } else {
-
-          const audioPreference: string | null = getOr(null, 'audioDevice', deviceOptions);
-          const videoPreference: string | null = getOr(null, 'videoDevice', deviceOptions);
-          const audioPreferenceAvailable = audioPreference ? availableDevices.audio[audioPreference] : true;
-          const videoPreferenceAvailable = videoPreference ? availableDevices.video[videoPreference] : true;
-
-          const audioWarning =
-            audioPreference && !audioPreferenceAvailable ?
-              { audio: new AudioDeviceNotAvailableWarning(audioPreference) }
-              : {};
-          const videoWarning =
-            videoPreference && !videoPreferenceAvailable ?
-              { video: new VideoDeviceNotAvailableWarning(videoPreference) }
-              : {};
-
-          resolve({ ...audioWarning, ...videoWarning });
+          resolve();
         }
       }
     });
@@ -124,20 +91,14 @@ const validateDevices = (OT: OpenTok, deviceOptions?: DeviceOptions): Promise<Un
 /**
  * Create a local publisher object using any specified device options
  */
-const checkCreateLocalPublisher = (OT: OpenTok, deviceOptions?: DeviceOptions): Promise<CreateLocalPublisherResults> =>
+const checkCreateLocalPublisher = (OT: OpenTok): Promise<CreateLocalPublisherResults> =>
   new Promise((resolve, reject) => {
-    validateDevices(OT, deviceOptions)
-      .then((warnings: UnavailableDeviceWarnings) => {
-        const audioDevice = get('audioDevice', deviceOptions);
-        const videoDevice = get('videoDevice', deviceOptions);
-        const audioSource = audioDevice && !warnings.audio ? { audioInput: audioDevice } : {};
-        const videoSource = videoDevice && !warnings.video ? { videoInput: videoDevice } : {};
-        const sourceOptions = { ...audioSource, ...videoSource };
-        const publisherOptions = !!Object.keys(sourceOptions).length ? sourceOptions : undefined;
+    validateDevices(OT)
+      .then(() => {
         const publisherDiv = document.createElement('div');
-        const publisher = OT.initPublisher(publisherDiv, publisherOptions, (error?: OT.OTError) => {
+        const publisher = OT.initPublisher(publisherDiv, undefined, (error?: OT.OTError) => {
           if (!error) {
-            resolve({ ...{ publisher }, warnings: Object.values(warnings) });
+            resolve({ publisher });
           } else {
             reject(new e.FailedToCreateLocalPublisher());
           }
@@ -153,8 +114,8 @@ const checkPublishToSession = (
   session: OT.Session,
   deviceOptions?: DeviceOptions): Promise<PublishToSessionResults> =>
   new Promise((resolve, reject) => {
-    checkCreateLocalPublisher(OT, deviceOptions)
-      .then(({ publisher, warnings }: CreateLocalPublisherResults) => {
+    checkCreateLocalPublisher(OT)
+      .then(({ publisher }: CreateLocalPublisherResults) => {
         session.publish(publisher, (error?: OT.OTError) => {
           if (errorHasName(error, OTErrorType.NOT_CONNECTED)) {
             reject(new e.PublishToSessionNotConnectedError());
@@ -163,7 +124,7 @@ const checkPublishToSession = (
           } else if (error) {
             reject(new e.PublishToSessionError());
           } else {
-            resolve({ ...{ session }, ...{ publisher }, ...{ warnings } });
+            resolve({ ...{ session }, ...{ publisher } });
           }
         });
       }).catch(reject);
@@ -173,7 +134,7 @@ const checkPublishToSession = (
  * Attempt to subscribe to our publisher
  */
 const checkSubscribeToSession =
-  ({ session, publisher, warnings }: PublishToSessionResults): Promise<SubscribeToSessionResults> =>
+  ({ session, publisher }: PublishToSessionResults): Promise<SubscribeToSessionResults> =>
     new Promise((resolve, reject) => {
       const config = { testNetwork: true, audioVolume: 0 };
       if (!publisher.stream) {
@@ -184,7 +145,7 @@ const checkSubscribeToSession =
           if (error) {
             reject(new e.SubscribeToSessionError());
           } else {
-            resolve({ ...{ session }, ...{ publisher }, ...{ subscriber }, ...{ warnings } });
+            resolve({ ...{ session }, ...{ publisher }, ...{ subscriber } });
           }
         });
       }
@@ -195,42 +156,52 @@ const checkSubscribeToSession =
  * Attempt to connect to the tokbox client logging server
  */
 const checkLoggingServer =
-  (OT: OpenTok, input: SubscribeToSessionResults): Promise<SubscribeToSessionResults> =>
+  (OT: OpenTok, input?: SubscribeToSessionResults): Promise<SubscribeToSessionResults> =>
     new Promise((resolve, reject) => {
       const url = `${OT.properties.loggingURL}/logging/ClientEvent`;
-      const handleFailure = () => {
-        const warnings = { warnings: input.warnings.concat(new FailedToConnectToLoggingServer()) };
-        resolve({ ...input, ...warnings });
-      };
+      const handleError = () => reject(new e.LoggingServerConnectionError());
       axios.post(url)
-        .then(response => response.status === 200 ? resolve(input) : handleFailure())
-        .catch(handleFailure);
+        .then(response => response.status === 200 ? resolve(input) : handleError())
+        .catch(handleError);
     });
 
 /**
  * This method checks to see if the client can connect to TokBox servers required for using OpenTok
  */
-const checkConnectivity = (
+export const connectivityTest = (
   OT: OpenTok,
   credentials: SessionCredentials,
   environment: OpenTokEnvironment,
   deviceOptions?: DeviceOptions,
-  onComplete?: CompletionCallback<any>): Promise<ConnectivityTestResult> =>
+  onComplete?: CompletionCallback<any>): Promise<ConnectivityTestResults> =>
   new Promise((resolve, reject) => {
 
     const onSuccess = (flowResults: SubscribeToSessionResults) => {
-      const results: ConnectivityTestSuccess = { warnings: flowResults.warnings };
+      const results: ConnectivityTestResults = {
+        success: true,
+        failedTests: [],
+      };
       onComplete && onComplete(null, results);
       return resolve(results);
     };
 
     const onFailure = (error: e.ConnectivityError) => {
-      // if (typeof error)
-      // onComplete && onComplete(error, null);
-      // const failure: ConnectivityTestFailure = {
-      //   failedAt: error,
-      // };
-      return reject(error);
+      const results = (...errors: e.ConnectivityError[]): ConnectivityTestResults => ({
+        success: false,
+        failedTests: mapErrors(...errors),
+      });
+
+      /**
+       * If we encounter an error before testing the connection to the logging server, let's perform
+       * that test as well before returning results.
+       */
+      if (error.name === 'LoggingServerError') {
+        resolve(results(error));
+      } else {
+        checkLoggingServer(OT)
+          .then(() => resolve(results(error)))
+          .catch((loggingError: e.LoggingServerConnectionError) => resolve(results(error, loggingError)));
+      }
     };
 
 
@@ -242,5 +213,3 @@ const checkConnectivity = (
       .catch(onFailure);
 
   });
-
-export default checkConnectivity;

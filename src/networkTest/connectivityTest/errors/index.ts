@@ -12,13 +12,13 @@ import { NetworkTestError } from '../../errors';
  * Base class for errors used throughout Network Connectivity test.
  */
 export class ConnectivityError extends NetworkTestError {
+  name: string;
   constructor(message: string) {
     super(message);
     Object.setPrototypeOf(this, ConnectivityError.prototype);
     this.name = this.constructor.name;
   }
 }
-
 
 /**
  * Session Errors
@@ -54,6 +54,17 @@ export class ConnectToSessionNetworkError extends ConnectToSessionError {
 /**
  * Missing Device Errors
  */
+
+export class MediaDeviceError extends ConnectivityError {
+  name: string;
+  constructor(message?: string) {
+    const defaultMessage = 'OpenTok failed to find media devices for this browser.';
+    super(message || defaultMessage);
+    Object.setPrototypeOf(this, MediaDeviceError.prototype);
+    this.name = this.constructor.name;
+  }
+}
+
 export class FailedToObtainMediaDevices extends ConnectivityError {
   constructor() {
     super('Failed to obtain media devices from OT.getDevices()');
@@ -69,12 +80,6 @@ export class NoVideoCaptureDevicesError extends ConnectivityError {
 export class NoAudioCaptureDevicesError extends ConnectivityError {
   constructor() {
     super('This browser has no audio capture devices.');
-  }
-}
-
-export class MissingCaptureDevicesError extends ConnectivityError {
-  constructor() {
-    super('This browser is missing media capture devices for audio or video.');
   }
 }
 
@@ -129,4 +134,16 @@ export class SubscribeToSessionError extends ConnectivityError {
     this.name = this.constructor.name;
   }
 }
+
+/**
+ * Logger Server Error
+ */
+export class LoggingServerConnectionError extends ConnectivityError {
+  constructor(){
+    super(`Failed to connect to the OpenTok logging server.`);
+    Object.setPrototypeOf(this, LoggingServerConnectionError.prototype);
+    this.name = this.constructor.name;
+  }
+}
+
 
