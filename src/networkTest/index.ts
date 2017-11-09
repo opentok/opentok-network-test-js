@@ -13,7 +13,7 @@ import {
   InvalidOnCompleteCallback,
   MissingOpenTokInstanceError,
 } from './errors';
-import { propOr } from 'ramda';
+import { getOr } from '../util';
 
 export default class NetworkTest {
 
@@ -29,7 +29,7 @@ export default class NetworkTest {
     this.validateCredentials(credentials);
     this.OT = OT;
     this.credentials = credentials;
-    this.environment = propOr('standard', 'environment', options);
+    this.environment = getOr('standard', 'environment', options);
   }
 
   private validateOT(OT: OpenTok) {
