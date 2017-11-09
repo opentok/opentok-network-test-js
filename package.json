@@ -6,7 +6,7 @@
   "scripts": {
     "build": "webpack --config webpack.config.js",
     "docs": "open dist/docs/index.html",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "karma start"
   },
   "repository": {
     "type": "git",
@@ -29,21 +29,28 @@
   },
   "homepage": "https://github.com/opentok/network-connectivity-js#readme",
   "dependencies": {
-    "@opentok/client": "^2.12.1",
     "@types/webrtc": "0.0.22",
     "axios": "^0.17.0",
     "promise": "^8.0.1"
   },
   "devDependencies": {
+    "@opentok/client": "^2.12.1",
     "@types/axios": "^0.14.0",
-    "@types/lodash": "^4.14.82",
-    "@types/ramda": "^0.25.3",
+    "@types/jasmine": "^2.6.3",
     "babel-core": "^6.26.0",
     "babel-loader": "^7.1.2",
     "babel-preset-env": "^1.6.1",
-    "jasmine": "^2.8.0",
+    "jasmine-core": "^2.8.0",
     "karma": "^1.7.1",
+    "karma-chrome-launcher": "^2.2.0",
+    "karma-cli": "^1.0.1",
+    "karma-firefox-launcher": "^1.0.1",
+    "karma-jasmine": "^1.1.0",
+    "karma-safari-launcher": "^1.0.0",
+    "karma-safaritechpreview-launcher": "0.0.6",
+    "karma-sauce-launcher": "^1.2.0",
     "karma-typescript": "^3.0.8",
+    "karma-webpack": "^2.0.5",
     "ts-loader": "^3.1.1",
     "tslint": "^5.8.0",
     "tslint-config-airbnb": "^5.3.0",

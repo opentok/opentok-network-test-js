@@ -1,4 +1,4 @@
-module.exports = function(config) {
+module.exports = function (config) {
   let sauceLaunchers = {
     ie: {
       base: 'SauceLabs',
@@ -35,19 +35,22 @@ module.exports = function(config) {
     basePath: '../',
 
     files: [
-      'https://tbdev.tokbox.com/v2/js/opentok.js',
-      'tests/unit/*.js'
+      'test/*.spec.ts',
+      'src/**/*.ts'
     ],
 
     autoWatch: true,
 
-    frameworks: ["jasmine", "karma-typescript"],
+    frameworks: ["jasmine"],
 
     customLaunchers: sauceLaunchers,
+
+    colors: true,
 
     browsers: [browser],
 
     plugins: [
+      'karma-jasmine',
       'karma-chrome-launcher',
       'karma-firefox-launcher',
       'karma-safari-launcher',
@@ -56,7 +59,8 @@ module.exports = function(config) {
     ],
 
     preprocessors: {
-      "**/*.ts": ["karma-typescript"], // *.tsx for React Jsx
+      'test/*.spec.ts': ['webpack'],
+      'src/**/*.ts': ['webpack'],
     },
 
     junitReporter: {
