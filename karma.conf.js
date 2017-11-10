@@ -17,7 +17,7 @@ module.exports = function (config) {
     },
     chrome: {
       base: 'Chrome',
-      // flags: ['--use-fake-ui-for-media-stream', '--use-fake-device-for-media-stream']
+      flags: ['--use-fake-ui-for-media-stream', '--use-fake-device-for-media-stream']
     },
     firefox: {
       base: 'Firefox',
