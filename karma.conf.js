@@ -39,9 +39,7 @@ module.exports = function (config) {
 
     files: [
       'test/**/*.spec.ts',
-      'https://static.opentok.com/v2/js/opentok.min.js',
-
-      // 'src/**/*.ts',
+      'src/**/*.ts',
     ],
 
     autoWatch: true,
@@ -65,12 +63,13 @@ module.exports = function (config) {
 
     preprocessors: {
       'test/*.spec.ts': ['webpack'],
-      // 'src/**/*.ts': ['webpack'],
+      'src/**/*.ts': ['webpack'],
     },
 
     webpack: {
       module: {
-        loaders: [{
+        loaders: [
+          {
             test: /\.js(x?)$/,
             loader: 'babel-loader',
           },
@@ -83,7 +82,8 @@ module.exports = function (config) {
           },
         ]
       },
-      resolve: webpackConfig.resolve
+      resolve: webpackConfig.resolve,
+      externals: webpackConfig.externals.concat({'websocket': 'window.WebSocket'})
     },
 
     mime: {
