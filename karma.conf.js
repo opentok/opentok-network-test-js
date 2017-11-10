@@ -40,27 +40,14 @@ module.exports = function (config) {
     files: [
       '*.spec.ts',
     ],
-    autoWatch: false,
+    autoWatch: true,
     frameworks: ['jasmine'],
     customLaunchers: sauceLaunchers,
-
     colors: true,
-
     browsers: [browser],
-
-    // plugins: [
-    //   'karma-jasmine',
-    //   'karma-chrome-launcher',
-    //   'karma-firefox-launcher',
-    //   'karma-safari-launcher',
-    //   'karma-safaritechpreview-launcher',
-    //   'karma-sauce-launcher'
-    // ],
-
     preprocessors: {
       '*.spec.ts': ['webpack', 'sourcemap'],
     },
-
     webpack: {
       module: {
         loaders: [
@@ -89,29 +76,20 @@ module.exports = function (config) {
         'websocket': 'window.WebSocket'
       })
     },
-
     webpackMiddleware: {
-      // webpack-dev-middleware configuration
-      // i. e.
       stats: 'errors-only'
     },
-
     mime: {
       'text/x-typescript': ['ts']
     },
-
     junitReporter: {
       outputFile: 'test_out/unit.xml',
       suite: 'unit'
     },
-
     sauceLabs: {
       startConnect: false,
       tunnelIdentifier: process.env.TRAVIS_JOB_NUMBER
     },
-
-    // reporters: ['progress', 'saucelabs']
-    reporters: ['progress']
-
+    reporters: ['progress', 'saucelabs']
   });
 };
