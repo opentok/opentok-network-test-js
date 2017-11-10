@@ -30,3 +30,4 @@ interface OpenTok {
   properties: OT.Properties
 }
 
+type StreamCreatedEvent = OT.Event<'streamCreated', OT.Publisher> & { stream: OT.Stream };
