@@ -1,6 +1,5 @@
 /* tslint:disable */
 ///<reference path="../src/types/index.d.ts"/>
-///<reference path="../src/NetworkTest/index.ts"/>
 
 import {
   InvalidSessionCredentialsError,
