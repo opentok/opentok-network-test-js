@@ -75,6 +75,14 @@ module.exports = function (config) {
               transpileOnly: true,
             }
           },
+          {
+            test: /opentok\.js/,
+            loader: 'string-replace-loader',
+            options: {
+              search: '_dereq_(\'ws\')',
+              replace: 'window.WebSocket',
+            },
+          },
         ]
       },
       resolve: webpackConfig.resolve,
