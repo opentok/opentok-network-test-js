@@ -12,21 +12,21 @@ otNetworkConnectivity.checkConnectivity(function(error, results) {
   console.log('checkConnectivity callback results', results);
 }).then(function(results) {
   console.log('checkConnectivity promise results', results);
-  testPublishing();
+  testQuality();
 }).catch(function(error) {
   console.log('checkConnectivity promise error', error);
 });
 
-function testPublishing() {
-  otNetworkConnectivity.testPublishing(function statusCallback(status) {
-    console.log('testPublishing statusCallback', status);
+function testQuality() {
+  otNetworkConnectivity.testQuality(function statusCallback(status) {
+    console.log('testQuality statusCallback', status);
     setStatus(status);
   }, function updateCallback(stats) {
-    console.log('testPublishing updateCallback', stats);
+    console.log('testQuality updateCallback', stats);
   }).then(function(results) {
-    console.log('testPublishing promise results', results);
+    console.log('testQuality promise results', results);
   }).catch(function(error) {
-    console.log('testPublishing promise error', error);
+    console.log('testQuality promise error', error);
   });
 }
 
@@ -41,7 +41,7 @@ function setStatus(statusText) {
 }
 
 /*
-otNetworkConnectivity.testPublishing(function statusCallback(text, icon) {
+otNetworkConnectivity.testQuality(function statusCallback(text, icon) {
   var statusMessageEl = statusContainerEl.querySelector('p');
 
   if (statusMessageEl.textContent) {

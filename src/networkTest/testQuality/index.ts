@@ -160,7 +160,7 @@ const cleanup = (options: any): Promise<any> => {
 /**
  * This method checks to see if the client can publish to an OpenTok session.
  */
-const testPublishing = (
+const testQuality = (
   otObj: OpenTok,
   credentialsObj: SessionCredentials,
   environment: OpenTokEnvironment,
@@ -173,7 +173,7 @@ const testPublishing = (
     session = ot.initSession(credentials.apiKey, credentials.sessionId);
     statusCallback = onStatus || function () {};
     updateCallback = onUpdate;
-    statusCallback('hello from testPublishing');
+    statusCallback('hello from testQuality');
     checkSubscriberQuality()
     // .then(cleanup)
       .then((result) => {
@@ -182,4 +182,4 @@ const testPublishing = (
       });
   });
 
-export default testPublishing;
+export default testQuality;

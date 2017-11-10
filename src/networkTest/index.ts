@@ -7,7 +7,7 @@
 */
 
 import { connectivityTest, ConnectivityTestResults } from './connectivityTest';
-import testPublishing from './testPublishing';
+import testQuality from './testQuality';
 import {
   IncompleteSessionCredentialsError,
   InvalidOnStatusCallback,
@@ -66,12 +66,12 @@ export default class NetworkTest {
    * audio bitrate, and the audio packet loss for the published stream, it returns
    * results indicating the recommended supported publisher settings.
    */
-  testPublishing(
+  testQuality(
     statusCallback: StatusCallback<any>,
     updateCallback: UpdateCallback<any>,
     completionCallback: CompletionCallback<any>): Promise<any> {
     this.validateCallbacks(statusCallback, updateCallback, completionCallback);
-    return testPublishing(
+    return testQuality(
       this.OT, this.credentials, this.environment, statusCallback, updateCallback, completionCallback);
   }
 
