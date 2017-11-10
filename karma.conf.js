@@ -62,7 +62,21 @@ module.exports = function (config) {
     },
 
     webpack: {
-      module: webpackConfig.module,
+      module: {
+        loaders: [
+          {
+            test: /\.js(x?)$/,
+            loader: 'babel-loader',
+          },
+          {
+            test: /\.ts(x?)$/,
+            loader: 'ts-loader',
+            options: {
+              transpileOnly: true,
+            }
+          },
+        ]
+      },
       resolve: webpackConfig.resolve,
       devtool: 'inline-source-map',
       plugins: [
