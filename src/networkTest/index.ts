@@ -15,7 +15,6 @@ import {
   MissingOpenTokInstanceError,
 } from './errors';
 import { getOr } from '../util';
-import { encode } from 'punycode';
 
 export default class NetworkTest {
 
