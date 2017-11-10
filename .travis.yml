@@ -25,7 +25,7 @@ matrix:
       env: BROWSER=firefox BVER=stable INTEGRATION_CMD=''
     - os: osx
       osx_image: xcode9
-      env: BROWSER=safari BVER=unstable OPENTOKJS_NO_BROWSER_OPEN=true
+      env: BROWSER=safari BVER=unstable
     - os: linux
       sudo: false
       env: BROWSER=ie BVER=11 SAUCELABS=true
