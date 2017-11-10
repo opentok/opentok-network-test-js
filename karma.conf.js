@@ -41,6 +41,7 @@ module.exports = function (config) {
       '*.spec.ts',
     ],
     autoWatch: true,
+    singleRun: true,
     frameworks: ['jasmine'],
     customLaunchers: sauceLaunchers,
     colors: true,
