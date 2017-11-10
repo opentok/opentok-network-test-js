@@ -10,7 +10,6 @@ import { connectivityTest, ConnectivityTestResults } from './connectivityTest';
 import testQuality from './testQuality';
 import {
   IncompleteSessionCredentialsError,
-  InvalidOnStatusCallback,
   InvalidOnCompleteCallback,
   MissingOpenTokInstanceError,
 } from './errors';
@@ -46,12 +45,11 @@ export default class NetworkTest {
   }
 
   private validateCallbacks(
-    onStatus: StatusCallback<any> | null,
     updateCallback: UpdateCallback<any> | null,
     onComplete?: CompletionCallback<any>) {
-    if (onStatus) {
-      if (typeof onStatus !== 'function' || onStatus.length !== 1) {
-        throw new InvalidOnStatusCallback();
+    if (updateCallback) {
+      if (typeof updateCallback !== 'function' || updateCallback.length !== 1) {
+        throw new InvalidOnUpdateCallback();
       }
     }
     if (onComplete) {
@@ -67,12 +65,11 @@ export default class NetworkTest {
    * results indicating the recommended supported publisher settings.
    */
   testQuality(
-    statusCallback: StatusCallback<any>,
     updateCallback: UpdateCallback<any>,
     completionCallback: CompletionCallback<any>): Promise<any> {
-    this.validateCallbacks(statusCallback, updateCallback, completionCallback);
+    this.validateCallbacks(updateCallback, completionCallback);
     return testQuality(
-      this.OT, this.credentials, this.environment, statusCallback, updateCallback, completionCallback);
+      this.OT, this.credentials, this.environment, updateCallback, completionCallback);
   }
 
   /**

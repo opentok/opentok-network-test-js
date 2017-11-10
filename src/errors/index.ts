@@ -28,9 +28,9 @@ export class IncompleteSessionCredentialsError extends NetworkConnectivityError 
   }
 }
 
-export class InvalidOnStatusCallback extends NetworkConnectivityError {
+export class InvalidOnUpdateCallback extends NetworkConnectivityError {
   constructor() {
-    super('The onStatus callback must be a function that accepts a single parameter.');
+    super('The onUpdatate callback must be a function that accepts a single parameter.');
   }
 }
 export class InvalidOnCompleteCallback extends NetworkConnectivityError {

@@ -26,9 +26,9 @@ export class IncompleteSessionCredentialsError extends NetworkTestError {
   }
 }
 
-export class InvalidOnStatusCallback extends NetworkTestError {
+export class InvalidOnUpdateCallback extends NetworkTestError {
   constructor() {
-    super('The onStatus callback must be a function that accepts a single parameter.');
+    super('The onUpdate callback must be a function that accepts a single parameter.');
   }
 }
 export class InvalidOnCompleteCallback extends NetworkTestError {

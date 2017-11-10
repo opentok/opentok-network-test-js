@@ -15,7 +15,6 @@ import * as e from '../../errors/index';
 const { generateRetValFromOptions } = require('./helpers/generateRetValFromOptions.js');
 import SubscriberMOS from './helpers/SubscriberMOS';
 
-let statusCallback: StatusCallback<any>;
 let updateCallback: UpdateCallback<any> | undefined;
 let ot:OpenTok;
 let session: OT.Session;
@@ -140,20 +139,16 @@ const testQuality = (
   otObj: OpenTok,
   credentialsObj: SessionCredentials,
   environment: OpenTokEnvironment,
-  onStatus?: StatusCallback<any>,
   onUpdate?: UpdateCallback<any>,
   onComplete?: CompletionCallback<any>): Promise<any> =>
   new Promise((resolve, reject) => {
     ot = otObj;
     credentials = credentialsObj;
     session = ot.initSession(credentials.apiKey, credentials.sessionId);
-    statusCallback = onStatus || function () {};
     updateCallback = onUpdate;
-    statusCallback('hello from testQuality');
     checkSubscriberQuality()
     // .then(cleanup)
       .then((result) => {
-        statusCallback('test complete');
         resolve(result);
       });
   });

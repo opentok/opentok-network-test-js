@@ -2,11 +2,10 @@
 
 import NetworkConnectivity from 'opentok-network-test-js';
 var OTNetworkTestOptions = require('./config.js');
-var statusContainerEl = document.getElementById('status_container');
 
 var otNetworkConnectivity = new NetworkConnectivity(OT, OTNetworkTestOptions);
 
-setStatus('testing connectivity')
+setStatus('Testing connectivity');
 otNetworkConnectivity.checkConnectivity(function(error, results) {
   console.log('checkConnectivity callback error', error);
   console.log('checkConnectivity callback results', results);
@@ -18,20 +17,19 @@ otNetworkConnectivity.checkConnectivity(function(error, results) {
 });
 
 function testQuality() {
-  otNetworkConnectivity.testQuality(function statusCallback(status) {
-    console.log('testQuality statusCallback', status);
-    setStatus(status);
-  }, function updateCallback(stats) {
+  setStatus('Testing quality.');
+  otNetworkConnectivity.testQuality(function updateCallback(stats) {
     console.log('testQuality updateCallback', stats);
   }).then(function(results) {
     console.log('testQuality promise results', results);
+    setStatus('Quality test done.');
   }).catch(function(error) {
     console.log('testQuality promise error', error);
   });
 }
 
 function setStatus(statusText) {
-  var statusMessageEl = statusContainerEl.querySelector('p');
+  var statusMessageEl = document.getElementById('status_container').querySelector('p');
 
   if (statusMessageEl.textContent) {
     statusMessageEl.textContent = statusText;
@@ -39,25 +37,3 @@ function setStatus(statusText) {
     statusMessageEl.innerText = statusText;
   }
 }
-
-/*
-otNetworkConnectivity.testQuality(function statusCallback(text, icon) {
-  var statusMessageEl = statusContainerEl.querySelector('p');
-
-  if (statusMessageEl.textContent) {
-    statusMessageEl.textContent = text;
-  } else if (statusMessageEl.innerText) {
-    statusMessageEl.innerText = text;
-  }
-
-  if (icon) {
-    statusContainerEl.querySelector('img').src = 'assets/icon_' + icon + '.svg';
-  }
-}, function resultsCallback(error, status) {
-  if (error) {
-    setStatus(error.message, 'error');
-    return;
-  }
-  setStatus(status.text, status.category);
-});
-*/
