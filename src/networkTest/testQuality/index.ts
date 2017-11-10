@@ -13,9 +13,7 @@ const config = require('./defaultConfig');
 import * as Promise from 'promise';
 import * as e from '../../errors/index';
 const { generateRetValFromOptions } = require('./helpers/generateRetValFromOptions.js');
-// const { cleanupOpentokObjectsFromResult } = require('./helpers/cleanupOpentokObjectsFromResult.js');
 import SubscriberMOS from './helpers/SubscriberMOS';
-// const { SubscriberMOS } = require('./helpers/SubscriberMOS.js');
 
 let statusCallback: StatusCallback<any>;
 let updateCallback: UpdateCallback<any> | undefined;
@@ -26,7 +24,6 @@ const testContainerDiv = document.createElement('div');
 
 const connectToSession = () => {
   return new Promise((resolve, reject) => {
-    console.log('session', session)
     if (session.connection) {
       resolve(session);
     }
@@ -135,27 +132,6 @@ const checkSubscriberQuality = () => {
     });
   });
 };
-
-/*
-const cleanup = (options: any): Promise<any> => {
-  const retVal = generateRetValFromOptions(options);
-
-  return new Promise((resolve, reject) => {
-    // TODO: this is a messy hack to avoid getStats intervals and teardown race conditions
-    setTimeout(
-      () => {
-        cleanupOpentokObjectsFromResult(retVal)
-        .then((result: any) => {
-          resolve(result);
-        })
-        .catch((error: any) => {
-          reject(error);
-        });
-      },
-      200);
-  });
-};
-*/
 
 /**
  * This method checks to see if the client can publish to an OpenTok session.
