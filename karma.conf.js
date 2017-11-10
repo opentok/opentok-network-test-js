@@ -36,16 +36,11 @@ module.exports = function (config) {
   config.set({
     hostname: '127.0.0.1',
     basePath: './',
-
     files: [
       'test/**/*.spec.ts',
-      'src/**/*.ts',
     ],
-
     autoWatch: true,
-
     frameworks: ['jasmine'],
-
     customLaunchers: sauceLaunchers,
 
     colors: true,
@@ -63,25 +58,10 @@ module.exports = function (config) {
 
     preprocessors: {
       'test/*.spec.ts': ['webpack'],
-      'src/**/*.ts': ['webpack'],
     },
 
     webpack: {
-      module: {
-        loaders: [
-          {
-            test: /\.js(x?)$/,
-            loader: 'babel-loader',
-          },
-          {
-            test: /\.ts(x?)$/,
-            loader: 'ts-loader',
-            options: {
-              transpileOnly: true,
-            }
-          },
-        ]
-      },
+      module: webpackConfig.module,
       resolve: webpackConfig.resolve,
       externals: webpackConfig.externals.concat({'websocket': 'window.WebSocket'})
     },

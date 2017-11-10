@@ -11,6 +11,6 @@
     "max-line-length": [true, 120]
   },
   "linterOptions": {
-    "excludes": ["./test/*.spec.ts"]
+    "exclude": ["test"]
   }
 }
