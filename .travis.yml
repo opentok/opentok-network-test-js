@@ -6,8 +6,6 @@ before_install:
 - export DISPLAY=:99.0
 - if [ -f /etc/init.d/xvfb ]; then sh -e /etc/init.d/xvfb start; fi
 - if [ $BROWSER == 'firefox' ]; then pulseaudio --start; fi
-before_script:
-- if [ "$BROWSER" = "ie" ]; then ./plugin-installer/packageSauceLabsInstaller.sh https://tbdev.tokbox.com/v2; fi
 script:
  - npm run test
 addons:
@@ -24,50 +22,15 @@ matrix:
       env: BROWSER=chrome  BVER=stable
     - os: linux
       sudo: false
-      env: BROWSER=chrome  BVER=beta
-    - os: linux
-      sudo: false
-      env: BROWSER=chrome  BVER=unstable
-    - os: linux
-      sudo: false
-      env: BROWSER=chrome BVER=54.0.2840.71
-    - os: linux
-      sudo: false
       env: BROWSER=firefox BVER=stable INTEGRATION_CMD=''
-    - os: linux
-      sudo: false
-      env: BROWSER=firefox BVER=beta INTEGRATION_CMD=''
-    - os: linux
-      sudo: false
-      env: BROWSER=firefox BVER=unstable INTEGRATION_CMD=''
-    - os: linux
-      sudo: false
-      env: BROWSER=firefox BVER=46.0.1
+    - os: osx
+      osx_image: xcode9
+      env: BROWSER=safari BVER=unstable OPENTOKJS_NO_BROWSER_OPEN=true
     - os: linux
       sudo: false
       env: BROWSER=ie BVER=11 SAUCELABS=true
-    - os: osx
-      sudo: required
-      osx_image: xcode9
-      env: BROWSER=safari BVER=stable INTEGRATION_CMD=''
-    - os: osx
-      sudo: required
-      osx_image: xcode9
-      env: BROWSER=safari BVER=unstable INTEGRATION_CMD=''
 
   fast_finish: true
-
-  allow_failures:
-  - os: linux
-    sudo: false
-    env: BROWSER=chrome  BVER=unstable
-  - os: linux
-    sudo: false
-    env: BROWSER=firefox BVER=unstable INTEGRATION_CMD=''
-  - os: osx
-    sudo: required
-    osx_image: xcode9
-    env: BROWSER=safari BVER=stable INTEGRATION_CMD=''
 
 env:
   global:
