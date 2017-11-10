@@ -29,14 +29,14 @@
   },
   "homepage": "https://github.com/opentok/network-connectivity-js#readme",
   "dependencies": {
-    "@types/webrtc": "0.0.22",
     "axios": "^0.17.0",
+    "jasmine": "^2.8.0",
     "promise": "^8.0.1"
   },
   "devDependencies": {
     "@opentok/client": "^2.12.1",
     "@types/axios": "^0.14.0",
-    "@types/jasmine": "^2.6.3",
+    "@types/webrtc": "0.0.22",
     "babel-core": "^6.26.0",
     "babel-loader": "^7.1.2",
     "babel-preset-env": "^1.6.1",
