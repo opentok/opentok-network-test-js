@@ -12,7 +12,6 @@ type SessionCredentials = {
   token: string
 }
 type OpenTokEnvironment = 'standard' | 'enterprise'
-type StatusCallback<A> = (status: string) => void
 type CompletionCallback<A> = (error: Error | undefined, results: A | null) => void
 type UpdateCallback<A> = (stats: OT.SubscriberStats) => void
 type TestQualityResults = {
