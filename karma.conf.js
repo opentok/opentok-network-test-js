@@ -94,7 +94,9 @@ module.exports = function (config) {
     },
     sauceLabs: {
       startConnect: false,
-      tunnelIdentifier: process.env.TRAVIS_JOB_NUMBER
+      tunnelIdentifier: process.env.TRAVIS_JOB_NUMBER,
+      username: process.env.SAUCE_USERNAME,
+      accessKey: process.env.SAUCE_ACCESS_KEY
     },
     reporters: ['progress', 'saucelabs']
   });
