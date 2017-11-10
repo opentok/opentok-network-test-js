@@ -1,5 +1,6 @@
 /* tslint:disable */
 ///<reference path="../src/types/index.d.ts"/>
+///<reference path="../src/NetworkTest/index.ts"/>
 
 import {
   InvalidSessionCredentialsError,
@@ -8,7 +9,6 @@ import {
 } from '../src/networkTest/errors';
 import * as OT from '@opentok/client';
 import NetworkTest from '../src/NetworkTest';
-
 type Util = jasmine.MatchersUtil;
 type CustomMatcher = jasmine.CustomMatcher;
 type EqualityTesters = jasmine.CustomEqualityTester[];
