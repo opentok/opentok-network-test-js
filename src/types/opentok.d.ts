@@ -1,4 +1,32 @@
+/**
+ * @module Types/OpenTok
+ */
+
+/**
+ * OpenTok Client SDK types
+ */
+
 declare module OT {
+
+  type Properties = {
+    version: string,
+    buildHash: string,
+    debug: boolean,
+    websiteURL: string,
+    cdnURL: string,
+    loggingURL: string,
+    apiURL: string,
+    supportSSL: boolean,
+    cdnURLSSL: string,
+    loggingURLSSL: string,
+    apiURLSSL: string,
+    minimumVersion: { firefox: number, chrome: number },
+    sentryDSN: string,
+    enableErrorReporting: boolean,
+    assetURL: string,
+    cssURL: string
+  }
+
   type OTError = {
     name: string;
     message: string;

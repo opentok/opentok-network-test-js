@@ -1,5 +1,5 @@
 {
-  "name": "opentok-network-connectivity",
+  "name": "opentok-network-test-js",
   "version": "1.0.0",
   "description": "",
   "main": "dist/index.js",
@@ -15,8 +15,9 @@
   "keywords": [
     "tokbox",
     "opentok",
-    "network-test",
-    "connectivity"
+    "network test",
+    "connectivity",
+    "webrtc"
   ],
   "author": {
     "name": "TokBox",
@@ -28,14 +29,15 @@
   },
   "homepage": "https://github.com/opentok/network-connectivity-js#readme",
   "dependencies": {
+    "@opentok/client": "^2.12.1",
     "@types/webrtc": "0.0.22",
     "axios": "^0.17.0",
-    "lodash": "^4.17.4",
     "promise": "^8.0.1"
   },
   "devDependencies": {
     "@types/axios": "^0.14.0",
     "@types/lodash": "^4.14.82",
+    "@types/ramda": "^0.25.3",
     "babel-core": "^6.26.0",
     "babel-loader": "^7.1.2",
     "babel-preset-env": "^1.6.1",

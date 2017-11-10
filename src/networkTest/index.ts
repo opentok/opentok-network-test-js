@@ -1,21 +1,21 @@
 /**
- * @module NetworkConnectivity
+ * @module NetworkTest
  */
 
 /**
 * Define Network Connectivy class
 */
 
-import connectivityTest from './connectivityTest';
+import { connectivityTest, ConnectivityTestResults } from './connectivityTest';
 import {
   IncompleteSessionCredentialsError,
   InvalidOnStatusCallback,
   InvalidOnCompleteCallback,
   MissingOpenTokInstanceError,
-} from '../errors';
-import { getOrElse } from '../util';
+} from './errors';
+import { getOr } from '../util';
 
-export default class NetworkConnectivity {
+export default class NetworkTest {
 
   credentials: SessionCredentials;
   environment: OpenTokEnvironment;
@@ -29,11 +29,11 @@ export default class NetworkConnectivity {
     this.validateCredentials(credentials);
     this.OT = OT;
     this.credentials = credentials;
-    this.environment = getOrElse('standard', 'environment', options);
+    this.environment = getOr('standard', 'environment', options);
   }
 
   private validateOT(OT: OpenTok) {
-    if (!OT || typeof OT !== 'object') {
+    if (!OT || typeof OT !== 'object' || !OT.initSession) {
       throw new MissingOpenTokInstanceError();
     }
   }
@@ -72,9 +72,8 @@ export default class NetworkConnectivity {
    */
   checkConnectivity(
     deviceOptions?: DeviceOptions,
-    onComplete?: CompletionCallback<any>): Promise<any> {
+    onComplete?: CompletionCallback<any>): Promise<ConnectivityTestResults> {
     this.validateCallbacks(null, onComplete);
     return connectivityTest(this.OT, this.credentials, this.environment, deviceOptions, onComplete);
   }
 }
-

@@ -1,5 +1,13 @@
+/**
+ * @module Errors/Connectivity/OpenTok
+ */
 
-export enum ErrorType {
+/**
+ * Define errors returned by OpenTok.js
+ */
+
+
+export enum OTErrorType {
   JS_EXCEPTION = 'JS_EXCEPTION',
   AUTHENTICATION_ERROR = 'AUTHENTICATION_ERROR',
   INVALID_SESSION_ID = 'INVALID_SESSION_ID',
@@ -30,3 +38,5 @@ export enum ErrorType {
   ANVIL_EMPTY_RESPONSE_BODY = 'ANVIL_EMPTY_RESPONSE_BODY',
   ANVIL_CONNECT_FAILED = 'ANVIL_CONNECT_FAILED',
 }
+
+
