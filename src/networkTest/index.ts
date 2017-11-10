@@ -8,7 +8,7 @@
 
 import { connectivityTest, ConnectivityTestResults } from './connectivityTest';
 import {
-  IncompleteSessionCredentialsError,
+  InvalidSessionCredentialsError,
   MissingSessionCredentialsError,
   InvalidOnStatusCallback,
   InvalidOnCompleteCallback,
@@ -45,7 +45,7 @@ export default class NetworkTest {
       throw new MissingSessionCredentialsError();
     }
     if (!credentials.apiKey || !credentials.sessionId || !credentials.token) {
-      throw new IncompleteSessionCredentialsError();
+      throw new InvalidSessionCredentialsError();
     }
   }
 

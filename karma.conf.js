@@ -1,3 +1,6 @@
+const path = require('path');
+const webpackConfig = require('./webpack.config');
+
 module.exports = function (config) {
   let sauceLaunchers = {
     ie: {
@@ -13,7 +16,7 @@ module.exports = function (config) {
     },
     chrome: {
       base: 'Chrome',
-      flags: ['--use-fake-ui-for-media-stream', '--use-fake-device-for-media-stream']
+      // flags: ['--use-fake-ui-for-media-stream', '--use-fake-device-for-media-stream']
     },
     firefox: {
       base: 'Firefox',
@@ -32,16 +35,18 @@ module.exports = function (config) {
   }
   config.set({
     hostname: '127.0.0.1',
-    basePath: '../',
+    basePath: './',
 
     files: [
-      'test/*.spec.ts',
-      'src/**/*.ts'
+      'test/**/*.spec.ts',
+      'https://static.opentok.com/v2/js/opentok.min.js',
+
+      // 'src/**/*.ts',
     ],
 
     autoWatch: true,
 
-    frameworks: ["jasmine"],
+    frameworks: ['jasmine'],
 
     customLaunchers: sauceLaunchers,
 
@@ -49,18 +54,40 @@ module.exports = function (config) {
 
     browsers: [browser],
 
-    plugins: [
-      'karma-jasmine',
-      'karma-chrome-launcher',
-      'karma-firefox-launcher',
-      'karma-safari-launcher',
-      'karma-safaritechpreview-launcher',
-      'karma-sauce-launcher'
-    ],
+    // plugins: [
+    //   'karma-jasmine',
+    //   'karma-chrome-launcher',
+    //   'karma-firefox-launcher',
+    //   'karma-safari-launcher',
+    //   'karma-safaritechpreview-launcher',
+    //   'karma-sauce-launcher'
+    // ],
 
     preprocessors: {
       'test/*.spec.ts': ['webpack'],
-      'src/**/*.ts': ['webpack'],
+      // 'src/**/*.ts': ['webpack'],
+    },
+
+    webpack: {
+      module: {
+        loaders: [{
+            test: /\.js(x?)$/,
+            loader: 'babel-loader',
+          },
+          {
+            test: /\.ts(x?)$/,
+            loader: 'ts-loader',
+            options: {
+              transpileOnly: true,
+            }
+          },
+        ]
+      },
+      resolve: webpackConfig.resolve
+    },
+
+    mime: {
+      'text/x-typescript': ['ts']
     },
 
     junitReporter: {
@@ -73,7 +100,8 @@ module.exports = function (config) {
       tunnelIdentifier: process.env.TRAVIS_JOB_NUMBER
     },
 
-    reporters: ['progress', 'saucelabs']
+    // reporters: ['progress', 'saucelabs']
+    reporters: ['progress']
 
   });
 };
