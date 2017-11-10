@@ -75,6 +75,14 @@ module.exports = function (config) {
               transpileOnly: true,
             }
           },
+          {
+            test: /opentok\.js/,
+            loader: 'string-replace-loader',
+            options: {
+              search: '_dereq_(\'ws\')',
+              replace: 'window.WebSocket',
+            },
+          },
         ]
       },
       resolve: webpackConfig.resolve,
@@ -85,9 +93,6 @@ module.exports = function (config) {
           test: /\.(ts|js)(x?)$/ // to allow webpack to pass sourcemap if the file is ts or js.
         })
       ],
-      externals: webpackConfig.externals.concat({
-        'websocket': 'window.WebSocket'
-      })
     },
 
     webpackMiddleware: {

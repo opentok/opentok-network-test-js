@@ -24,9 +24,9 @@ describe('Network Test Contructor', () => {
   };
 
   it('requires OT and valid session credentials', () => {
-    expect(new networkTest(validCredentials)).toThrow(new MissingOpenTokInstanceError());
-    expect(new networkTest(OT)).toThrow(new MissingSessionCredentialsError());
-    expect(new networkTest(OT, malformedCredentials)).toThrow(new InvalidSessionCredentialsError());
+    expect(() => new networkTest(validCredentials)).toThrow(new MissingOpenTokInstanceError());
+    expect(() => new networkTest(OT)).toThrow(new MissingSessionCredentialsError());
+    expect(() => new networkTest(OT, malformedCredentials)).toThrow(new InvalidSessionCredentialsError());
     // expect(new networkTest(OT, validCredentials)).toThrow(new InvalidSessionCredentialsError());
   });
 
