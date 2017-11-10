@@ -12,8 +12,17 @@ type SessionCredentials = {
   token: string
 }
 type OpenTokEnvironment = 'standard' | 'enterprise'
-type StatusCallback = (status: string) => void
 type CompletionCallback<A> = (error: Error | undefined, results: A | null) => void
+type UpdateCallback<A> = (stats: OT.SubscriberStats) => void
+type TestQualityResults = {
+  mos: number,
+  audio: {
+    bandwidth: number
+  },
+  video: {
+    bandwidth: number
+  },
+}
 
 
 type DeviceId = string;
@@ -30,3 +39,4 @@ interface OpenTok {
   properties: OT.Properties
 }
 
+type StreamCreatedEvent = OT.Event<'streamCreated', OT.Publisher> & { stream: OT.Stream };

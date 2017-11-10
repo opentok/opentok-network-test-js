@@ -7,9 +7,9 @@
 */
 
 import { connectivityTest, ConnectivityTestResults } from './connectivityTest';
+import testQuality from './testQuality';
 import {
   IncompleteSessionCredentialsError,
-  InvalidOnStatusCallback,
   InvalidOnCompleteCallback,
   MissingOpenTokInstanceError,
 } from './errors';
@@ -44,10 +44,12 @@ export default class NetworkTest {
     }
   }
 
-  private validateCallbacks(onStatus: StatusCallback | null, onComplete?: CompletionCallback<any>) {
-    if (onStatus) {
-      if (typeof onStatus !== 'function' || onStatus.length !== 1) {
-        throw new InvalidOnStatusCallback();
+  private validateCallbacks(
+    updateCallback: UpdateCallback<any> | null,
+    onComplete?: CompletionCallback<any>) {
+    if (updateCallback) {
+      if (typeof updateCallback !== 'function' || updateCallback.length !== 1) {
+        throw new InvalidOnUpdateCallback();
       }
     }
     if (onComplete) {
@@ -62,9 +64,12 @@ export default class NetworkTest {
    * audio bitrate, and the audio packet loss for the published stream, it returns
    * results indicating the recommended supported publisher settings.
    */
-  testPublishing(onStatus: StatusCallback, onComplete: CompletionCallback<any>): void {
-    this.validateCallbacks(onStatus, onComplete);
-    console.log(this.OT, this.credentials);
+  testQuality(
+    updateCallback: UpdateCallback<any>,
+    completionCallback: CompletionCallback<any>): Promise<any> {
+    this.validateCallbacks(updateCallback, completionCallback);
+    return testQuality(
+      this.OT, this.credentials, this.environment, updateCallback, completionCallback);
   }
 
   /**
@@ -73,7 +78,7 @@ export default class NetworkTest {
   checkConnectivity(
     deviceOptions?: DeviceOptions,
     onComplete?: CompletionCallback<any>): Promise<ConnectivityTestResults> {
-    this.validateCallbacks(null, onComplete);
+    this.validateCallbacks(null, null, onComplete);
     return connectivityTest(this.OT, this.credentials, this.environment, deviceOptions, onComplete);
   }
 }
