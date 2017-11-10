@@ -62,10 +62,10 @@ function calculateAudioScore(subscriber, stats) {
     // For 0 R 100: MOS = 1 + 0.035 R + 7.10E-6 R(R-60)(100-R)
     // For R > 100: MOS = 4.5
     const MOS = (mosR) => {
-      if (mosR < 0) {
+      if (R < 0) {
         return 1;
       }
-      if (mosR > 100) {
+      if (R > 100) {
         return 4.5;
       }
       return (1 + 0.035) * ((mosR + (7.10 / 1000000)) * (mosR * (mosR - 60) * (100 - mosR)));

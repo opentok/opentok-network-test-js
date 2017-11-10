@@ -45,7 +45,10 @@ export default class NetworkTest {
     }
   }
 
-  private validateCallbacks(onStatus: StatusCallback | null, onComplete?: CompletionCallback<any>) {
+  private validateCallbacks(
+    onStatus: StatusCallback<any> | null,
+    updateCallback: UpdateCallback<any> | null,
+    onComplete?: CompletionCallback<any>) {
     if (onStatus) {
       if (typeof onStatus !== 'function' || onStatus.length !== 1) {
         throw new InvalidOnStatusCallback();
@@ -63,10 +66,13 @@ export default class NetworkTest {
    * audio bitrate, and the audio packet loss for the published stream, it returns
    * results indicating the recommended supported publisher settings.
    */
-  testPublishing(onStatus: StatusCallback, onComplete: CompletionCallback<any>): Promise<any> {
-    this.validateCallbacks(onStatus, onComplete);
-    return testPublishing(this.OT, this.credentials, this.environment, onStatus, onComplete);
-    //return new Promise((resolve, reject) => { resolve(this.credentials); });
+  testPublishing(
+    statusCallback: StatusCallback<any>,
+    updateCallback: UpdateCallback<any>,
+    completionCallback: CompletionCallback<any>): Promise<any> {
+    this.validateCallbacks(statusCallback, updateCallback, completionCallback);
+    return testPublishing(
+      this.OT, this.credentials, this.environment, statusCallback, updateCallback, completionCallback);
   }
 
   /**
@@ -75,7 +81,7 @@ export default class NetworkTest {
   checkConnectivity(
     deviceOptions?: DeviceOptions,
     onComplete?: CompletionCallback<any>): Promise<ConnectivityTestResults> {
-    this.validateCallbacks(null, onComplete);
+    this.validateCallbacks(null, null, onComplete);
     return connectivityTest(this.OT, this.credentials, this.environment, deviceOptions, onComplete);
   }
 }

@@ -3,7 +3,6 @@
 import NetworkConnectivity from 'opentok-network-test-js';
 var OTNetworkTestOptions = require('./config.js');
 var statusContainerEl = document.getElementById('status_container');
-console.log('otNetworkConnectivity', NetworkConnectivity);
 
 var otNetworkConnectivity = new NetworkConnectivity(OT, OTNetworkTestOptions);
 
@@ -22,6 +21,8 @@ function testPublishing() {
   otNetworkConnectivity.testPublishing(function statusCallback(status) {
     console.log('testPublishing statusCallback', status);
     setStatus(status);
+  }, function updateCallback(stats) {
+    console.log('testPublishing updateCallback', stats);
   }).then(function(results) {
     console.log('testPublishing promise results', results);
   }).catch(function(error) {

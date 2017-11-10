@@ -1,5 +1,3 @@
-import OT from '@opentok/client';
-
 export default function destroyOpentokObject(otObject, callback) {
   if (otObject && (otObject instanceof OT.Publisher || otObject instanceof OT.Subscriber)) {
     otObject.off();

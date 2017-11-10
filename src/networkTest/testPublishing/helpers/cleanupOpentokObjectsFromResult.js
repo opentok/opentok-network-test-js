@@ -1,10 +1,9 @@
-import 'es6-object-assign/auto';
-import Promise from 'bluebird';
+import * as Promise from 'promise';
 import destroyOpentokObject from './destroyOpentokObject';
 import sortOrderOfOpentokObjects from './sortOrderOfOpentokObjects';
-import { FailedDestroyPrecallObjectsError } from '../errors/errors';
+import { FailedDestroyPrecallObjectsError } from '../../../errors';
 
-export default function cleanupOpentokObjectsFromResult(options) {
+exports.cleanupOpentokObjectsFromResult = (options) => {
   const keysToClean = ['mosEstimator', 'subscriber', 'publisher', 'session'];
 
   return new Promise((resolve, reject) => {

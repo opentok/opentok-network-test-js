@@ -1,4 +1,4 @@
-export default generateRetValFromOptions = (options) => {
+exports.generateRetValFromOptions = (options) => {
   // Copy primitives
   const retVal = Object.assign({}, options);
 

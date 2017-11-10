@@ -1,5 +1,3 @@
-import OT from '@opentok/client';
-
 // These helpers exists because teardown must go from Subscriber => Publisher => Session.
 // e.g. If you teardown Session first, the Publisher and Subscriber get torn down as well and we
 // the `destroyed` listeners for those don't fire - then we never know if teardown is complete.
