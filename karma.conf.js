@@ -85,9 +85,6 @@ module.exports = function (config) {
           test: /\.(ts|js)(x?)$/ // to allow webpack to pass sourcemap if the file is ts or js.
         })
       ],
-      externals: webpackConfig.externals.concat({
-        'websocket': 'window.WebSocket'
-      })
     },
 
     webpackMiddleware: {
