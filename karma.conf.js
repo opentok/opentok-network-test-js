@@ -1,4 +1,5 @@
 const path = require('path');
+const webpack = require('webpack');
 const webpackConfig = require('./webpack.config');
 
 module.exports = function (config) {
@@ -35,11 +36,11 @@ module.exports = function (config) {
   }
   config.set({
     hostname: '127.0.0.1',
-    basePath: './',
+    basePath: './test',
     files: [
-      'test/**/*.spec.ts',
+      '*.spec.ts',
     ],
-    autoWatch: true,
+    autoWatch: false,
     frameworks: ['jasmine'],
     customLaunchers: sauceLaunchers,
 
@@ -57,13 +58,28 @@ module.exports = function (config) {
     // ],
 
     preprocessors: {
-      'test/*.spec.ts': ['webpack'],
+      '*.spec.ts': ['webpack', 'sourcemap'],
     },
 
     webpack: {
       module: webpackConfig.module,
       resolve: webpackConfig.resolve,
-      externals: webpackConfig.externals.concat({'websocket': 'window.WebSocket'})
+      devtool: 'inline-source-map',
+      plugins: [
+        new webpack.SourceMapDevToolPlugin({
+          filename: null,
+          test: /\.(ts|js)(x?)$/ // to allow webpack to pass sourcemap if the file is ts or js.
+        })
+      ],
+      externals: webpackConfig.externals.concat({
+        'websocket': 'window.WebSocket'
+      })
+    },
+
+    webpackMiddleware: {
+      // webpack-dev-middleware configuration
+      // i. e.
+      stats: 'errors-only'
     },
 
     mime: {
