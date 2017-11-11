@@ -16,7 +16,6 @@
     "webpack": "^3.8.1"
   },
   "dependencies": {
-    "opentok-network-test-js": "^1.0.0",
-    "highcharts": "^6.0.2"
+    "opentok-network-test-js": "^1.0.0"
   }
 }

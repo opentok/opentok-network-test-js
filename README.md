@@ -271,6 +271,10 @@ promise. The promise is resolved on success, and the `results` object is passed 
 callback method of the promise's `then()` function, or the `error` object is passed into the
 promise's `catch()` function.
 
+The results, including the MOS score and the recommended video resolution and frame rate are
+subjective. You can adjust the values used in the source code, or you can use the data passed into
+the `updateCallback()` function and apply your own quality analysis algorithm.
+
 ## Building the module
 
 To build the module:

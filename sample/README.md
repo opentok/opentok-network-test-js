@@ -32,9 +32,9 @@ Make sure you have configured the app (see the previous section). Then:
 1. Run `npm install` (in the /sample directory).
 
    If you have locally modified the source code for the opentok-network-test-js package,
-   run `npm install; npm build` in the root directory of the project. Then run `npm link`
+   run `npm install; npm run build` in the root directory of the project. Then run `npm link`
    in the root directory. Then run `npm link opentok-network-test-js` in the /sample directory.
 
-2. Run `npm build` (in the /sample directory). (Run this any time you edit the source code.)
+2. Run `npm run build` (in the /sample directory). (Run this any time you edit the source code.)
 
 3. Open the /sample/index.html page in a web browser.
