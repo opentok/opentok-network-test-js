@@ -1,12 +1,12 @@
 /* global require */
 
-import NetworkConnectivity from 'opentok-network-test-js';
+import OTNetworkTest from 'opentok-network-test-js';
 var OTNetworkTestOptions = require('./config.js');
 
-var otNetworkConnectivity = new NetworkConnectivity(OT, OTNetworkTestOptions);
+var otNetworkTest = new OTNetworkTest(OT, OTNetworkTestOptions);
 
 setStatus('Testing connectivity');
-otNetworkConnectivity.checkConnectivity(function(error, results) {
+otNetworkTest.checkConnectivity(function(error, results) {
   console.log('checkConnectivity callback error', error);
   console.log('checkConnectivity callback results', results);
 }).then(function(results) {
@@ -18,7 +18,7 @@ otNetworkConnectivity.checkConnectivity(function(error, results) {
 
 function testQuality() {
   setStatus('Testing quality.');
-  otNetworkConnectivity.testQuality(function updateCallback(stats) {
+  otNetworkTest.testQuality(function updateCallback(stats) {
     console.log('testQuality updateCallback', stats);
   }).then(function(results) {
     console.log('testQuality promise results', results);

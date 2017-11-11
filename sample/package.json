@@ -1,5 +1,5 @@
 {
-  "name": "opentok-network-connectivity-sample",
+  "name": "opentok-network-test-sample",
   "version": "1.0.0",
   "description": "OpenTok Network Test Sample App",
   "scripts": {
@@ -16,6 +16,7 @@
     "webpack": "^3.8.1"
   },
   "dependencies": {
-    "opentok-network-test-js": "^1.0.0"
+    "opentok-network-test-js": "^1.0.0",
+    "highcharts": "^6.0.2"
   }
 }

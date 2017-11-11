@@ -22,7 +22,8 @@ export default class NetworkTest {
   OT: OpenTok;
 
   /**
-   * Returns an instance of NetworkConnectivity
+   * Returns an instance of NetworkConnectivity. See the "API reference" section of the
+   * README.md file in the root of the opentok-network-test-js project for details.
    */
   constructor(OT: OpenTok, credentials: SessionCredentials, options?: { environment: OpenTokEnvironment }) {
     this.validateOT(OT);
@@ -63,6 +64,9 @@ export default class NetworkTest {
    * This function runs a test publisher and based on the measured video bitrate,
    * audio bitrate, and the audio packet loss for the published stream, it returns
    * results indicating the recommended supported publisher settings.
+   *
+   * See the "API reference" section of the README.md file in the root of the
+   * opentok-network-test-js project for details.
    */
   testQuality(
     updateCallback: UpdateCallback<any>,
@@ -73,7 +77,11 @@ export default class NetworkTest {
   }
 
   /**
-   * This method checks to see if the client can connect to TokBox servers required for using OpenTok
+   * This method checks to see if the client can connect to TokBox servers required for
+   * using OpenTok.
+   *
+   * See the "API reference" section of the README.md file in the root of the
+   * opentok-network-test-js project for details.
    */
   checkConnectivity(
     deviceOptions?: DeviceOptions,
