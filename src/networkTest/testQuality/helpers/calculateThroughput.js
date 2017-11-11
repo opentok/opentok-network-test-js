@@ -1,28 +1,49 @@
 import getLatestSampleWindow from './getLatestSampleWindow';
-import calculateBitrates from './calculateBitrates';
+import calculateQualityStats from './calculateQualityStats';
+import getQualityEvaluation from './getQualityEvaluation';
 
-function getAverageBitrate(bitrateList) {
+function getAverageBitrateAndPlr(statsList, avType) {
   let sumKbps = 0;
-  let points = 0;
+  let sumPlr = 0;
+  let sumFrameRate = 0;
+  let isVideoStats = false;
 
-  bitrateList.forEach((bitrate) => {
-    sumKbps += bitrate.kbps;
-    points += 1;
+  statsList.forEach((stat) => {
+    sumKbps += stat.bandwidthKbps;
+    sumPlr += stat.packetLossRatio;
+    if (stat.frameRate) {
+      sumFrameRate =+ stat.frameRate;
+      isVideoStats = true;
+    }
   });
 
-  return sumKbps / points;
+  const averageStats = {
+    bitrate: sumKbps / statsList.length,
+    packetLoss: sumPlr / statsList.length,
+  };
+
+  const qualityEvaluation = getQualityEvaluation(averageStats, avType);
+
+  averageStats.qualityEvaluation = qualityEvaluation.quality;
+
+  if (isVideoStats) {
+    averageStats.frameRate = sumFrameRate / statsList.length;
+    averageStats.recommendedResolution = qualityEvaluation.recommendedResolution;
+  }
+
+  return averageStats;
 }
 
 export default function calculateThroughput(statsList) {
   const sampleWindow = getLatestSampleWindow(statsList);
-  const bitrates = calculateBitrates(sampleWindow);
-  const audioBitrates = bitrates.audio;
-  const videoBitrates = bitrates.video;
-  const averageAudioBandwidth = getAverageBitrate(audioBitrates);
-  const averageVideoBandwidth = getAverageBitrate(videoBitrates);
+  const qualityStats = calculateQualityStats(sampleWindow);
+  const audioQualityStats = qualityStats.audio;
+  const videoQualityStats = qualityStats.video;
+  const averageAudioStats = getAverageBitrateAndPlr(audioQualityStats, 'audio');
+  const averageVideoStats = getAverageBitrateAndPlr(videoQualityStats, 'video');
 
   return {
-    audio: averageAudioBandwidth,
-    video: averageVideoBandwidth,
+    audio: averageAudioStats,
+    video: averageVideoStats,
   };
 }

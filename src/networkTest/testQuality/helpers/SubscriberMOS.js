@@ -145,7 +145,7 @@ function SubscriberMOS({ subscriber, getStatsListener }, callback) {
         return null;
       }
 
-      obj.bandwidth = calculateThroughput(statsLog);
+      obj.stats = calculateThroughput(statsLog);
 
       const videoScore = calculateVideoScore(subscriber, statsLog);
       videoScoresLog.push(videoScore);
@@ -166,7 +166,7 @@ function SubscriberMOS({ subscriber, getStatsListener }, callback) {
       if (isBitrateSteadyState(statsLog)) {
         window.clearInterval(obj.intervalId);
         obj.intervalId = undefined;
-        return callback(obj.qualityScore(), obj.bandwidth);
+        return callback(obj.qualityScore(), obj.stats);
       }
 
       return null;

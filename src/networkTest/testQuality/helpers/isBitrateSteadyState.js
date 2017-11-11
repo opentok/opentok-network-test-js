@@ -1,5 +1,5 @@
 import getLatestSampleWindow from './getLatestSampleWindow';
-import calculateBitrates from './calculateBitrates';
+import calculateQualityStats from './calculateQualityStats';
 const defaultConfig = require('../defaultConfig');
 
 export default function isBitrateSteadyState(statsList) {
@@ -11,7 +11,7 @@ export default function isBitrateSteadyState(statsList) {
     return false;
   }
 
-  const statsBitrates = calculateBitrates(latestSamples);
+  const statsBitrates = calculateQualityStats(latestSamples);
 
   ['video', 'audio'].forEach((avType) => {
     for (let i = 1; i < statsBitrates[avType].length; i += 1) {

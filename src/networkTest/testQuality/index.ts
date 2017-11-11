@@ -72,10 +72,14 @@ const getFinalRetVal = (results: any): TestQualityResults => {
   return {
     mos: results.mosScore,
     audio: {
-      bandwidth: results.bandwidth.audio,
+      bandwidth: results.stats.audio.bitrate,
+      packetLoss: results.stats.audio.packetLoss,
     },
     video: {
-      bandwidth: results.bandwidth.video,
+      bandwidth: results.stats.video.bitrate,
+      packetLoss: results.stats.video.packetLoss,
+      frameRate: results.stats.video.frameRate,
+      recommendedResolution: results.stats.video.recommendedResolution,
     }
   };
 };
@@ -103,10 +107,10 @@ const checkSubscriberQuality = () => {
                 updateCallback && updateCallback(stats);
               },
             },
-            (qualityScore: number, bandwidth: number) => {
+            (qualityScore: number, stats: object) => {
               clearTimeout(mosEstimatorTimeoutId);
               retVal.mosScore = qualityScore;
-              retVal.bandwidth = bandwidth;
+              retVal.stats = stats;
               session.disconnect();
               resolve(getFinalRetVal(retVal));
             });
@@ -117,7 +121,7 @@ const checkSubscriberQuality = () => {
               retVal.bandwidth = retVal.mosEstimator.bandwidth;
               session.disconnect();
               resolve(getFinalRetVal(retVal));
-            }, 
+            },
             config.getStatsVideoAndAudioTestDuration);
         } catch (exception) {
           /* TBD:
