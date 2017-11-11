@@ -11,6 +11,7 @@ import testQuality from './testQuality';
 import {
   IncompleteSessionCredentialsError,
   InvalidOnCompleteCallback,
+  InvalidOnUpdateCallback,
   MissingOpenTokInstanceError,
 } from './errors';
 import { getOr } from '../util';
@@ -78,7 +79,7 @@ export default class NetworkTest {
   checkConnectivity(
     deviceOptions?: DeviceOptions,
     onComplete?: CompletionCallback<any>): Promise<ConnectivityTestResults> {
-    this.validateCallbacks(null, null, onComplete);
+    this.validateCallbacks(null, onComplete);
     return connectivityTest(this.OT, this.credentials, this.environment, deviceOptions, onComplete);
   }
 }
