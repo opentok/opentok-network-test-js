@@ -40,3 +40,9 @@ interface OpenTok {
 }
 
 type StreamCreatedEvent = OT.Event<'streamCreated', OT.Publisher> & { stream: OT.Stream };
+type StatsListener = (error?: OT.OTError, stats?: OT.SubscriberStats) => void;
+type MOSResultsCallback = (qualityScore: number, bandwidth: Bandwidth) => void;
+type Bandwidth = {
+  audio: number,
+  video: number,
+};
