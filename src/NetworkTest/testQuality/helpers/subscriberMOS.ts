@@ -3,11 +3,6 @@ import calculateThroughput from './calculateThroughput';
 import { getOr, last, nth } from '../../../util';
 import { currentId } from 'async_hooks';
 
-
-// const calculatePacketLoss = (stats: OT.TrackStats): number => {
-
-// }
-
 const getPacketsLost = (ts: OT.TrackStats): number => getOr(0, 'packetsLost', ts);
 const getPacketsReceived = (ts: OT.TrackStats): number => getOr(0, 'packetsReceived', ts);
 const getTotalPackets = (ts: OT.TrackStats): number => getPacketsLost(ts) + getPacketsReceived(ts);
@@ -21,14 +16,13 @@ const calculateBitRate = (type: 'audio' | 'video', current: OT.SubscriberStats, 
 };
 
 const calculateVideoScore = (subscriber: OT.Subscriber, stats: OT.SubscriberStats[]): number => {
+  const MIN_VIDEO_BITRATE = 30000;
   const targetBitrateForPixelCount = (pixelCount: number) => {
     // power function maps resolution to target bitrate, based on rumor config
     // values, with r^2 = 0.98. We're ignoring frame rate, assume 30.
     const y = 2.069924867 * (Math.log10(pixelCount) ** 0.6250223771);
     return 10 ** y;
   };
-
-  const MIN_VIDEO_BITRATE = 30000;
 
   const currentStats = last(stats);
   const lastStats = nth(-2, stats);
@@ -57,34 +51,23 @@ const calculateVideoScore = (subscriber: OT.Subscriber, stats: OT.SubscriberStat
 function calculateAudioScore(subscriber: OT.Subscriber, stats: OT.SubscriberStats[]) {
   const audioScore = (rtt: number, plr: number) => {
     const LOCAL_DELAY = 20; // 20 msecs: typical frame duration
-    function H(x) { return (x < 0 ? 0 : 1); }
+    const h = (x: number): number => x < 0 ? 0 : 1;
     const a = 0; // ILBC: a=10
     const b = 19.8;
     const c = 29.7;
 
-    const R = (rRtt: number, packetLoss: number): number => {
+    const R = (rRtt: number = 0, packetLoss: number = 0): number => {
       const d = rRtt + LOCAL_DELAY;
-      const Id = ((0.024 * d) + 0.11) * (d - 177.3) * H(d - 177.3);
-
-      const P = packetLoss;
-      const Ie = (a + b) * Math.log(1 + (c * P));
-
-      const rResult = 94.2 - Id - Ie;
-
-      return rResult;
+      const id = ((0.024 * d) + 0.11) * (d - 177.3) * h(d - 177.3);
+      const ie = (a + b) * Math.log(1 + (c * packetLoss));
+      return 94.2 - id - ie;
     };
 
-    // R = 94.2 − Id − Ie
-    // const R = calcR();
-
-    // For R < 0: MOS = 1
-    // For 0 R 100: MOS = 1 + 0.035 R + 7.10E-6 R(R-60)(100-R)
-    // For R > 100: MOS = 4.5
     const MOS = (mosR: number) => {
       if (R() < 0) {
         return 1;
       }
-      if (R > 100) {
+      if (R() > 100) {
         return 4.5;
       }
       return (1 + 0.035) * ((mosR + (7.10 / 1000000)) * (mosR * (mosR - 60) * (100 - mosR)));
@@ -103,9 +86,8 @@ function calculateAudioScore(subscriber: OT.Subscriber, stats: OT.SubscriberStat
   if (totalAudioPackets === 0) {
     return 0;
   }
-  const plr = getPacketsLost(currentStats.audio) - getPacketsLost(lastStats.audio) / totalAudioPackets;
-  const rtt = 0;
-  const score = audioScore(rtt, plr);
+  const packetLossRatio = getPacketsLost(currentStats.audio) - getPacketsLost(lastStats.audio) / totalAudioPackets;
+  const score = audioScore(0, packetLossRatio);
   return score;
 }
 
@@ -143,7 +125,7 @@ class MOSState {
     this.intervalId = undefined;
   }
 
-  trimAudioScores() {
+  pruneAudioScores() {
     const { audioScoresLog, maxLogLength } = this;
     while (audioScoresLog.length > maxLogLength) {
       audioScoresLog.shift();
@@ -151,7 +133,7 @@ class MOSState {
     this.audioScoresLog = audioScoresLog;
   }
 
-  trimVideoScores() {
+  pruneVideoScores() {
     const { videoScoresLog, maxLogLength } = this;
     while (videoScoresLog.length > maxLogLength) {
       videoScoresLog.shift();
@@ -189,8 +171,8 @@ function subsriberMOS(subscriber: OT.Subscriber, getStatsListener: StatsListener
         mosState.audioScoresLog.push(audioScore);
 
 
-        mosState.trimAudioScores();
-        mosState.trimVideoScores();
+        mosState.pruneAudioScores();
+        mosState.pruneVideoScores();
 
         // If bandwidth has reached a steady state, end the test early
         if (isBitrateSteadyState(mosState.statsLog)) {
