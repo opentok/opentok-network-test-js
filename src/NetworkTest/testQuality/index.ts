@@ -13,20 +13,20 @@ const config = require('./defaultConfig');
 import * as Promise from 'promise';
 import * as e from '../../errors/index';
 const { generateRetValFromOptions } = require('./helpers/generateRetValFromOptions.js');
-import SubscriberMOS from './helpers/SubscriberMOS';
+import subsriberMOS from './helpers/subscriberMOS';
 
 let updateCallback: UpdateCallback<any> | undefined;
-let ot:OpenTok;
-let session: OT.Session;
-let credentials: SessionCredentials;
+// let ot:OpenTok;
+// let session: OT.Session;
+// let credentials: SessionCredentials;
 const testContainerDiv = document.createElement('div');
 
-const connectToSession = () => {
+const connectToSession = (token: string) => {
   return new Promise((resolve, reject) => {
     if (session.connection) {
       resolve(session);
     }
-    session.connect(credentials.token, (error) => {
+    session.connect(token, (error) => {
       if (error) {
         reject(error);
       }
@@ -35,10 +35,10 @@ const connectToSession = () => {
   });
 };
 
-const subscribeToTestStream = () => {
+const subscribeToTestStream = (OT: OpenTok, credentials: SessionCredentials) => {
   return new Promise((resolve, reject) => {
-    connectToSession().then(() => {
-      const publisher = ot.initPublisher(testContainerDiv, {}, (error) => {
+    connectToSession(credentials.token).then(() => {
+      const publisher = OT.initPublisher(testContainerDiv, {}, (error) => {
         if (error) {
           reject(error);
         }
@@ -62,9 +62,9 @@ const subscribeToTestStream = () => {
         });
       });
     }).
-    catch((error) => {
-      reject(error);
-    });
+      catch((error) => {
+        reject(error);
+      });
   });
 };
 
@@ -76,49 +76,39 @@ const getFinalRetVal = (results: any): TestQualityResults => {
     },
     video: {
       bandwidth: results.bandwidth.video,
-    }
+    },
   };
 };
 
-const checkSubscriberQuality = () => {
+const checkSubscriberQuality = (OT: OpenTok, credentials: SessionCredentials) => {
   let mosEstimatorTimeoutId: number;
   let getStatsListenerIntervalId: number;
 
   return new Promise((resolve, reject) => {
-    subscribeToTestStream().then((subscriber) => {
-      const retVal = generateRetValFromOptions({
-        subscriber,
-        apiKey: credentials.apiKey,
-        sessionId: credentials.sessionId,
-        token: credentials.token,
-      });
-      if (!retVal.subscriber) {
+    subscribeToTestStream(OT, credentials).then((subscriber) => {
+      const retVal = generateRetValFromOptions({ ... { subscriber }, ...credentials });
+      if (subscriber) {
         reject(new e.FailedCheckSubscriberQualityMissingSubscriberError());
       } else {
         try {
-          SubscriberMOS(
-            {
-              subscriber: retVal.subscriber,
-              getStatsListener: (error: string, stats: OT.SubscriberStats) => {
-                updateCallback && updateCallback(stats);
-              },
-            },
-            (qualityScore: number, bandwidth: number) => {
-              clearTimeout(mosEstimatorTimeoutId);
-              retVal.mosScore = qualityScore;
-              retVal.bandwidth = bandwidth;
-              session.disconnect();
-              resolve(getFinalRetVal(retVal));
-            });
-          mosEstimatorTimeoutId = setTimeout(
-            () => {
-              clearInterval(getStatsListenerIntervalId);
-              retVal.mosScore = retVal.mosEstimator.qualityScore();
-              retVal.bandwidth = retVal.mosEstimator.bandwidth;
-              session.disconnect();
-              resolve(getFinalRetVal(retVal));
-            }, 
-            config.getStatsVideoAndAudioTestDuration);
+          const getStatsListener = (error: string, stats: OT.SubscriberStats) => {
+            updateCallback && updateCallback(stats);
+          };
+          const resultsCallback = (qualityScore: number, bandwidth: number) => {
+            clearTimeout(mosEstimatorTimeoutId);
+            retVal.mosScore = qualityScore;
+            retVal.bandwidth = bandwidth;
+            session.disconnect();
+            resolve(getFinalRetVal(retVal));
+          };
+          subsriberMOS(subscriber, getStatsListener, resultsCallback);
+          mosEstimatorTimeoutId = setTimeout(() => {
+            clearInterval(getStatsListenerIntervalId);
+            retVal.mosScore = retVal.mosEstimator.qualityScore();
+            retVal.bandwidth = retVal.mosEstimator.bandwidth;
+            session.disconnect();
+            resolve(getFinalRetVal(retVal));
+          }, config.getStatsVideoAndAudioTestDuration);
         } catch (exception) {
           /* TBD:
           if (exception instanceof e.PrecallError) {
@@ -136,21 +126,18 @@ const checkSubscriberQuality = () => {
  * This method checks to see if the client can publish to an OpenTok session.
  */
 const testQuality = (
-  otObj: OpenTok,
-  credentialsObj: SessionCredentials,
+  OT: OpenTok,
+  credentials: SessionCredentials,
   environment: OpenTokEnvironment,
   onUpdate?: UpdateCallback<any>,
   onComplete?: CompletionCallback<any>): Promise<any> =>
   new Promise((resolve, reject) => {
-    ot = otObj;
-    credentials = credentialsObj;
-    session = ot.initSession(credentials.apiKey, credentials.sessionId);
+    // ot = otObj;
+    // credentials = credentialsObj;
+    const session = OT.initSession(credentials.apiKey, credentials.sessionId);
     updateCallback = onUpdate;
-    checkSubscriberQuality()
-    // .then(cleanup)
-      .then((result) => {
-        resolve(result);
-      });
+    // If all we're doing is resolving the result, we can just return
+    return checkSubscriberQuality(OT, session, credentials);
   });
 
 export default testQuality;

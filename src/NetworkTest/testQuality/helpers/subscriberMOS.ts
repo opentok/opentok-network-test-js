@@ -1,7 +1,26 @@
 import isBitrateSteadyState from './isBitrateSteadyState';
 import calculateThroughput from './calculateThroughput';
+import { getOr, last, nth } from '../../../util';
+import { currentId } from 'async_hooks';
 
-function calculateVideoScore(subscriber: OT.Subscriber, stats: OT.SubscriberStats[]) {
+
+// const calculatePacketLoss = (stats: OT.TrackStats): number => {
+
+// }
+
+const getPacketsLost = (ts: OT.TrackStats): number => getOr(0, 'packetsLost', ts);
+const getPacketsReceived = (ts: OT.TrackStats): number => getOr(0, 'packetsReceived', ts);
+const getTotalPackets = (ts: OT.TrackStats): number => getPacketsLost(ts) + getPacketsReceived(ts);
+
+const calculateTotalPackets = (type: 'audio' | 'video', current: OT.SubscriberStats, last: OT.SubscriberStats) =>
+  getTotalPackets(current[type]) - getTotalPackets(last[type]);
+
+const calculateBitRate = (type: 'audio' | 'video', current: OT.SubscriberStats, last: OT.SubscriberStats): number => {
+  const interval = current.timestamp - last.timestamp;
+  return (8 * (current[type].bytesReceived - last[type].bytesReceived)) / (interval / 1000);
+};
+
+const calculateVideoScore = (subscriber: OT.Subscriber, stats: OT.SubscriberStats[]): number => {
   const targetBitrateForPixelCount = (pixelCount: number) => {
     // power function maps resolution to target bitrate, based on rumor config
     // values, with r^2 = 0.98. We're ignoring frame rate, assume 30.
@@ -10,21 +29,19 @@ function calculateVideoScore(subscriber: OT.Subscriber, stats: OT.SubscriberStat
   };
 
   const MIN_VIDEO_BITRATE = 30000;
-  if (stats.length < 2) {
+
+  const currentStats = last(stats);
+  const lastStats = nth(-2, stats);
+
+  if (!currentStats || !lastStats || !subscriber.stream) {
     return 0;
   }
-  const currentStats = stats[stats.length - 1];
-  const lastStats = stats[stats.length - 2];
-  const totalPackets =
-    (currentStats.video.packetsLost + currentStats.video.packetsReceived) -
-    (lastStats.video.packetsLost + lastStats.video.packetsReceived);
-  const packetLoss = // eslint-disable-line
-    (currentStats.video.packetsLost - lastStats.video.packetsLost) / totalPackets;
+
+  const totalPackets = calculateTotalPackets('video', currentStats, lastStats);
+  const packetLoss = getPacketsLost(currentStats.video) - getPacketsLost(lastStats.video) / totalPackets;
   const interval = currentStats.timestamp - lastStats.timestamp;
-  let bitrate = (8 * (currentStats.video.bytesReceived - lastStats.video.bytesReceived)) /
-    (interval / 1000);
-  const pixelCount = subscriber.stream.videoDimensions.width *
-    subscriber.stream.videoDimensions.height;
+  let bitrate = calculateBitRate('video', currentStats, lastStats);
+  const pixelCount = subscriber.stream.videoDimensions.width * subscriber.stream.videoDimensions.height;
   const targetBitrate = targetBitrateForPixelCount(pixelCount);
 
   if (bitrate < MIN_VIDEO_BITRATE) {
@@ -35,18 +52,17 @@ function calculateVideoScore(subscriber: OT.Subscriber, stats: OT.SubscriberStat
   const score =
     ((Math.log(bitrate / MIN_VIDEO_BITRATE) / Math.log(targetBitrate / MIN_VIDEO_BITRATE)) * 4) + 1;
   return score;
-}
+};
 
 function calculateAudioScore(subscriber: OT.Subscriber, stats: OT.SubscriberStats[]) {
-  const audioScore = (rtt, plr) => {
+  const audioScore = (rtt: number, plr: number) => {
     const LOCAL_DELAY = 20; // 20 msecs: typical frame duration
     function H(x) { return (x < 0 ? 0 : 1); }
     const a = 0; // ILBC: a=10
     const b = 19.8;
     const c = 29.7;
 
-    // R = 94.2 − Id − Ie
-    const R = (rRtt, packetLoss) => {
+    const R = (rRtt: number, packetLoss: number): number => {
       const d = rRtt + LOCAL_DELAY;
       const Id = ((0.024 * d) + 0.11) * (d - 177.3) * H(d - 177.3);
 
@@ -58,11 +74,14 @@ function calculateAudioScore(subscriber: OT.Subscriber, stats: OT.SubscriberStat
       return rResult;
     };
 
+    // R = 94.2 − Id − Ie
+    // const R = calcR();
+
     // For R < 0: MOS = 1
     // For 0 R 100: MOS = 1 + 0.035 R + 7.10E-6 R(R-60)(100-R)
     // For R > 100: MOS = 4.5
-    const MOS = (mosR) => {
-      if (R < 0) {
+    const MOS = (mosR: number) => {
+      if (R() < 0) {
         return 1;
       }
       if (R > 100) {
@@ -74,26 +93,18 @@ function calculateAudioScore(subscriber: OT.Subscriber, stats: OT.SubscriberStat
     return MOS(R(rtt, plr));
   };
 
-  if (stats.length < 2) {
+  const currentStats = last(stats);
+  const lastStats = nth(-2, stats);
+
+  if (!currentStats || !lastStats || !subscriber.stream) {
     return 0;
   }
-
-  const currentStats = stats[stats.length - 1];
-  const lastStats = stats[stats.length - 2];
-
-  const totalAudioPackets =
-    (currentStats.audio.packetsLost - lastStats.audio.packetsLost) +
-    (currentStats.audio.packetsReceived - lastStats.audio.packetsReceived);
-
+  const totalAudioPackets = calculateTotalPackets('audio', currentStats, lastStats);
   if (totalAudioPackets === 0) {
     return 0;
   }
-
-  const plr = (currentStats.audio.packetsLost - lastStats.audio.packetsLost) /
-    totalAudioPackets;
-  // missing from js getStats :-(
+  const plr = getPacketsLost(currentStats.audio) - getPacketsLost(lastStats.audio) / totalAudioPackets;
   const rtt = 0;
-
   const score = audioScore(rtt, plr);
   return score;
 }
