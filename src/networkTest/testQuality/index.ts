@@ -11,10 +11,21 @@
 
 
 import * as Promise from 'promise';
+import { get, getOr } from '../../util';
 import * as e from '../../errors/index';
 import subscriberMOS from './helpers/subscriberMOS';
+import MOSState from './helpers/MOSState';
 import defaultConfig from './helpers/defaultConfig';
-import { generateRetValFromOptions } from './helpers/generateRetValFromOptions.js';
+// import { generateRetValFromOptions } from './helpers/generateRetValFromOptions.js';
+
+type QualityTestResultsBuilder = {
+  state: MOSState,
+  subscriber: OT.Subscriber,
+  credentials: SessionCredentials,
+  mosScore?: number,
+  bandwidth?: Bandwidth,
+};
+type MOSResultsCallback = (state: MOSState) => void;
 
 /**
  * If not already connected, connect to the OpenTok Session
@@ -58,21 +69,22 @@ const publishAndSubscribe = (session: OT.Session): Promise<OT.Subscriber> =>
 /**
  *  Connect to the OpenTok session, create a publisher, and subsribe to the publisher's stream
  */
-const subscribeToTestStream = (OT: OpenTok, session: OT.Session, credentials: SessionCredentials) =>
-  new Promise((resolve, reject) => {
-    connectToSession(session, credentials.token)
-      .then(publishAndSubscribe)
-      .catch(reject);
-  });
+const subscribeToTestStream =
+  (OT: OpenTok, session: OT.Session, credentials: SessionCredentials): Promise<OT.Subscriber> =>
+    new Promise((resolve, reject) => {
+      connectToSession(session, credentials.token)
+        .then(publishAndSubscribe)
+        .catch(reject);
+    });
 
-const getFinalRetVal = (results: any): TestQualityResults => {
+const buildResults = (builder: QualityTestResultsBuilder): QualityTestResults => {
   return {
-    mos: results.mosScore,
+    mos: builder.state.qualityScore(),
     audio: {
-      bandwidth: results.bandwidth.audio,
+      bandwidth: get('state.bandwidth.audio', builder),
     },
     video: {
-      bandwidth: results.bandwidth.video,
+      bandwidth: get('state.bandwidth.video', builder),
     },
   };
 };
@@ -81,34 +93,42 @@ const checkSubscriberQuality = (
   OT: OpenTok,
   session: OT.Session,
   credentials: SessionCredentials,
-  onUpdate?: UpdateCallback<OT.SubscriberStats>): Promise<TestQualityResults> => {
+  onUpdate?: UpdateCallback<OT.SubscriberStats>): Promise<QualityTestResults> => {
 
   let mosEstimatorTimeoutId: number;
 
   return new Promise((resolve, reject) => {
-    subscribeToTestStream(OT, session, credentials).then((subscriber) => {
-      const retVal = generateRetValFromOptions({ ... { subscriber }, ...credentials });
-      if (subscriber) {
+    subscribeToTestStream(OT, session, credentials).then((subscriber: OT.Subscriber) => {
+      if (!subscriber) {
         reject(new e.FailedCheckSubscriberQualityMissingSubscriberError());
       } else {
         try {
+          const builder: QualityTestResultsBuilder = {
+            state: new MOSState(),
+            ... { subscriber },
+            ... { credentials },
+          };
+
           const getStatsListener = (error?: OT.OTError, stats?: OT.SubscriberStats) => {
             stats && onUpdate && onUpdate(stats);
           };
-          const resultsCallback = (qualityScore: number, bandwidth: Bandwidth) => {
+
+          const resultsCallback: MOSResultsCallback = (state: MOSState) => {
             clearTimeout(mosEstimatorTimeoutId);
-            retVal.mosScore = qualityScore;
-            retVal.bandwidth = bandwidth;
+            builder.state = state;
             session.disconnect();
-            resolve(getFinalRetVal(retVal));
+            resolve(buildResults(builder));
           };
-          subscriberMOS(subscriber, getStatsListener, resultsCallback);
+
+          subscriberMOS(builder.state, subscriber, getStatsListener, resultsCallback);
+
           mosEstimatorTimeoutId = window.setTimeout(() => {
-            retVal.mosScore = retVal.mosEstimator.qualityScore();
-            retVal.bandwidth = retVal.mosEstimator.bandwidth;
+            builder.mosScore = builder.state.qualityScore();
+            builder.bandwidth = builder.state.bandwidth;
             session.disconnect();
-            resolve(getFinalRetVal(retVal));
+            resolve(buildResults(builder));
           }, defaultConfig.getStatsVideoAndAudioTestDuration);
+
         } catch (exception) {
           reject(new e.FailedCheckSubscriberQualityGetStatsError());
         }
@@ -125,13 +145,11 @@ const testQuality = (
   credentials: SessionCredentials,
   environment: OpenTokEnvironment,
   onUpdate?: UpdateCallback<OT.SubscriberStats>,
-  onComplete?: CompletionCallback<TestQualityResults>): Promise<TestQualityResults> =>
+  onComplete?: CompletionCallback<QualityTestResults>): Promise<QualityTestResults> =>
   new Promise((resolve, reject) => {
     const session = OT.initSession(credentials.apiKey, credentials.sessionId);
-    // updateCallback = onUpdate;
-    // If all we're doing is resolving the result, we can just return
     checkSubscriberQuality(OT, session, credentials, onUpdate)
-      .then((results: TestQualityResults) => {
+      .then((results: QualityTestResults) => {
         onComplete && onComplete(undefined, results);
         resolve(results);
       })
