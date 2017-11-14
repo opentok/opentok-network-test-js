@@ -12,49 +12,49 @@ module.exports = {
   qualityThresholds: {
     video: [
       {
-        kbps: 1000,
+        bps: 1000000,
         plr: 0.005,
         recommendedSetting: '1280x720 @ 30FPS'
       },
       {
-        kbps: 600,
+        bps: 600000,
         plr: 0.005,
         recommendedSetting: '640x480 @ 30FPS'
       },
       {
-        kbps: 300,
+        bps: 300000,
         plr: 0.005,
         recommendedSetting: '352x288 @ 30FPS'
       },
       {
-        kbps: 300,
+        bps: 300000,
         plr: 0.005,
         recommendedSetting: '320x240 @ 30FPS'
       },
       {
-        kbps: 350,
+        bps: 350000,
         plr: 0.03,
         recommendedSetting: '1280x720 @ 30FPS'
       },
       {
-        kbps: 250,
+        bps: 250000,
         plr: 0.03,
         recommendedSetting: '640x480 @ 30FPS'
       },
       {
-        kbps: 150,
+        bps: 150000,
         plr: 0.03,
         recommendedSetting: '352x288 @ 30FPS'
       },
       {
-        kbps: 150,
+        bps: 150000,
         plr: 0.03,
         recommendedSetting: '320x240 @ 30'
       }
     ],
     audio: [
       {
-        kbps: 25,
+        bps: 25000,
         plr: 0.05,
       }
     ]

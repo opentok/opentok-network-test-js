@@ -10,7 +10,7 @@ export default function getQualityEvaluation(stats, avType) {
 
   for (var i = 0; i < thresholds.length; i++) {
     const threshold = thresholds[i];
-    if (bitrate >= threshold.kbps && packetLoss <= threshold.plr) {
+    if (bitrate >= threshold.bps && packetLoss <= threshold.plr) {
       supported = true;
       if (avType === 'video') {
         recommendedResolution = threshold.recommendedSetting;
