@@ -16,10 +16,9 @@ export default function calculateQualityStats(latestSamples) {
       if (currStat[avType] && prevStat[avType]) {
         const bytesIncreased = currStat[avType].bytesReceived - prevStat[avType].bytesReceived;
         const bitsIncreased = bytesIncreased * 8;
-        const kilobitsIncreased = bitsIncreased / 1000;
         const msIncreased = currStat.timestamp - prevStat.timestamp;
         const secondsElapsed = msIncreased / 1000;
-        const bandwidthKbps = kilobitsIncreased / secondsElapsed;
+        const averageBitrate = bitsIncreased / secondsElapsed;
 
         const packetsReceived = currStat[avType].packetsReceived;
         const packetsLost = currStat[avType].packetsLost;
@@ -28,7 +27,7 @@ export default function calculateQualityStats(latestSamples) {
         const frameRate = currStat[avType].frameRate;
 
         qualityStats[avType].push({
-          bandwidthKbps,
+          averageBitrate,
           packetLossRatio,
           frameRate,
         });

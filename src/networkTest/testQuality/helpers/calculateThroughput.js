@@ -3,12 +3,12 @@ import calculateQualityStats from './calculateQualityStats';
 import getRecommendedVideoResolution from './getRecommendedVideoResolution';
 
 function getAverageBitrateAndPlr(statsList, avType) {
-  let sumKbps = 0;
+  let sumBps = 0;
   let sumPlr = 0;
   let sumFrameRate = 0;
 
   statsList.forEach((stat) => {
-    sumKbps += stat.bandwidthKbps;
+    sumBps += stat.averageBitrate;
     sumPlr += stat.packetLossRatio;
     if (avType === 'video') {
       sumFrameRate =+ stat.frameRate;
@@ -16,7 +16,7 @@ function getAverageBitrateAndPlr(statsList, avType) {
   });
 
   const averageStats = {
-    bitrate: sumKbps / statsList.length,
+    bitrate: sumBps / statsList.length,
     packetLoss: sumPlr / statsList.length,
   };
 

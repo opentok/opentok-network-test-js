@@ -72,11 +72,11 @@ const getFinalRetVal = (results: any): TestQualityResults => {
   return {
     mos: results.mosScore,
     audio: {
-      bandwidth: results.stats.audio.bitrate,
+      bitrate: results.stats.audio.bitrate,
       packetLoss: results.stats.audio.packetLoss,
     },
     video: {
-      bandwidth: results.stats.video.bitrate,
+      bitrate: results.stats.video.bitrate,
       packetLoss: results.stats.video.packetLoss,
       frameRate: results.stats.video.frameRate,
       recommendedResolution: results.stats.video.recommendedResolution,
