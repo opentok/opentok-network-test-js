@@ -29,7 +29,7 @@ const isBitrateSteadyState = (statsList: OT.SubscriberStats[]): boolean => {
   });
 
   return isSteadyState;
-}
+};
 
 export default isBitrateSteadyState;
 

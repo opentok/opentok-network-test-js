@@ -21,22 +21,26 @@ type SessionCredentials = {
 type OpenTokEnvironment = 'standard' | 'enterprise'
 type CompletionCallback<A> = (error: Error | undefined, results: A | null) => void
 type UpdateCallback<A> = (stats: OT.SubscriberStats) => void
-type TestQualityResults = {
-  mos: number,
-  audio: {
-    bandwidth: number
-  },
-  video: {
-    bandwidth: number
-  },
-}
-
 type AV = 'audio' | 'video';
 type DeviceId = string;
 type InputDeviceType = 'audioInput' | 'videoInput';
 type DeviceOptions = {
   audioDevice?: DeviceId,
   videoDevice?: DeviceId
+}
+
+
+/**
+ * Quality Test
+ */
+
+ interface HasAudioVideo<A> {
+   audio: A;
+   video: A;
+ }
+
+interface QualityTestResults extends HasAudioVideo<{bandwidth: number}> {
+  mos: number;
 }
 
 type QualityTestConfig = {
@@ -53,13 +57,6 @@ type QualityTestConfig = {
 };
 
 type StatsListener = (error?: OT.OTError, stats?: OT.SubscriberStats) => void;
-type MOSResultsCallback = (qualityScore: number, bandwidth: Bandwidth) => void;
 interface Kbps { kbps: number }
-interface KbpsMap {
-  audio: Kbps[];
-  video: Kbps[];
-}
-interface Bandwidth {
-  audio: number;
-  video: number;
-}
+interface KbpsMap extends HasAudioVideo<Kbps[]> {}
+interface Bandwidth extends HasAudioVideo<number> {}

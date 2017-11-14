@@ -1,7 +1,7 @@
 import * as Promise from 'promise';
 import * as e from '../../connectivityTest/errors';
 
-const filterDevicesForType = (OT: OpenTok, type: 'audioInput' | 'videoInput') =>
+const filterDevicesForType = (OT: OpenTok, type: InputDeviceType) =>
   new Promise((resolve, reject) => {
     OT.getDevices((error?: OT.OTError, devices: OT.Device[] = []) => {
       if (error) {

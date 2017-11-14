@@ -1,5 +1,6 @@
 import isBitrateSteadyState from './isBitrateSteadyState';
 import calculateThroughput from './calculateThroughput';
+import MOSState from './MOSState';
 import { getOr, last, nth } from '../../../util';
 import { currentId } from 'async_hooks';
 
@@ -13,7 +14,7 @@ const calculateBitRate = (type: AV, current: OT.SubscriberStats, last: OT.Subscr
   return (8 * (current[type].bytesReceived - last[type].bytesReceived)) / (interval / 1000);
 };
 
-const calculateVideoScore = (subscriber: OT.Subscriber, stats: OT.SubscriberStats[]): number => {
+function calculateVideoScore(subscriber: OT.Subscriber, stats: OT.SubscriberStats[]): number {
   const MIN_VIDEO_BITRATE = 30000;
   const targetBitrateForPixelCount = (pixelCount: number) => {
     // power function maps resolution to target bitrate, based on rumor config
@@ -44,9 +45,9 @@ const calculateVideoScore = (subscriber: OT.Subscriber, stats: OT.SubscriberStat
   const score =
     ((Math.log(bitrate / MIN_VIDEO_BITRATE) / Math.log(targetBitrate / MIN_VIDEO_BITRATE)) * 4) + 1;
   return score;
-};
+}
 
-const calculateAudioScore = (subscriber: OT.Subscriber, stats: OT.SubscriberStats[]) => {
+function calculateAudioScore(subscriber: OT.Subscriber, stats: OT.SubscriberStats[]): number {
 
   const audioScore = (roundTripTime: number, packetLossRatio: number) => {
     const LOCAL_DELAY = 20; // 20 msecs: typical frame duration
@@ -93,65 +94,13 @@ const calculateAudioScore = (subscriber: OT.Subscriber, stats: OT.SubscriberStat
   }
   const packetLossRatio = getPacketsLost(currentStats.audio) - getPacketsLost(lastStats.audio) / totalAudioPackets;
   return audioScore(0, packetLossRatio);
-};
-
-
-class MOSState {
-  statsLog: OT.SubscriberStats[];
-  audioScoresLog: number[];
-  videoScoresLog: number[];
-  bandwidth: Bandwidth;
-  intervalId?: number;
-  maxLogLength: number;
-  scoreInterval: number;
-
-  constructor() {
-    this.statsLog = [];
-    this.audioScoresLog = [];
-    this.videoScoresLog = [];
-  }
-
-  static readonly maxLogLength: number = 1000;
-  static readonly scoreInterval: number = 1000;
-
-  private audioScore(): number {
-    return this.audioScoresLog.reduce((acc, score) => acc + score, 0);
-  }
-
-  private videoScore(): number {
-    return this.videoScoresLog.reduce((acc, score) => acc + score, 0);
-  }
-
-  clearInterval() {
-    if (this.intervalId) {
-      window.clearInterval(this.intervalId);
-    }
-    this.intervalId = undefined;
-  }
-
-  pruneAudioScores() {
-    const { audioScoresLog, maxLogLength } = this;
-    while (audioScoresLog.length > maxLogLength) {
-      audioScoresLog.shift();
-    }
-    this.audioScoresLog = audioScoresLog;
-  }
-
-  pruneVideoScores() {
-    const { videoScoresLog, maxLogLength } = this;
-    while (videoScoresLog.length > maxLogLength) {
-      videoScoresLog.shift();
-    }
-    this.videoScoresLog = videoScoresLog;
-  }
-
-  qualityScore(): number {
-    return Math.min(this.audioScore(), this.videoScore());
-  }
 }
 
-function subsriberMOS(subscriber: OT.Subscriber, getStatsListener: StatsListener, callback: MOSResultsCallback) {
-  const mosState = new MOSState();
+export default function subscriberMOS(
+  mosState: MOSState,
+  subscriber: OT.Subscriber,
+  getStatsListener: StatsListener,
+  callback: (state: MOSState) => void) {
   mosState.intervalId = window.setInterval(
     () => {
       subscriber.getStats((error?: OT.OTError, stats?: OT.SubscriberStats) => {
@@ -181,7 +130,7 @@ function subsriberMOS(subscriber: OT.Subscriber, getStatsListener: StatsListener
         // If bandwidth has reached a steady state, end the test early
         if (isBitrateSteadyState(mosState.statsLog)) {
           mosState.clearInterval();
-          return callback(mosState.qualityScore(), mosState.bandwidth);
+          return callback(mosState);
         }
 
         return null;
@@ -191,5 +140,3 @@ function subsriberMOS(subscriber: OT.Subscriber, getStatsListener: StatsListener
   subscriber.on('destroyed', mosState.clearInterval);
   return mosState;
 }
-
-export default subsriberMOS;
