@@ -235,23 +235,34 @@ is invoked when the connectivity check completes. This callback function takes t
 
 * `results` -- An object that contains the following properties:
 
+  * `mos` (Number) -- The MOS for the call quality. This will be in a range from 0 to 5.
+    Values less than 1 indicate inadequate quality. Values greater than 4 are considered
+    excellent quality.
+
   * `video` (Object) -- Contains the following properties:
 
       * `supported` (Boolean) -- Whether the results indicate that video is supported.
 
-      * `recommendedFrameRate` (Number) -- The recommended video frame rate. This is the
-        highest rated frame rate in the result matrix. However, if all results are `'Bad'`, this
-        is set to `null`.
+      * `recommendedFrameRate` (Number) -- The recommended video frame rate. However, if
+        video is unsupported, this is set to `null`.
 
-      * `recommendedResolution` (String) -- The recommended video resolution. This is the
-        highest rated resolution in the result matrix. However, if all results are `'Bad'`, this
-        is set to `null`.
+      * `recommendedResolution` (String) -- The recommended video resolution. This will be
+        set to `'1280x720'`, `'640x480'`, or `'320x240`. However, if video is unsupported,
+        this is set to `null`.
 
       * `reason` (String) -- A string describing the reason for an unsupported video recommendation.
         For example, `'No microphone was found.'`
 
-      * `mos` (Number) -- The MOS for the video quality. This will be in a range from 0 to 5.
-        Values less than 1 indicate that video is unsupported. 5 is considered excellent quality.
+      * `bitrate` (Number) -- The average number of video bits per second during the last
+        five seconds of the test. 
+
+      * `frameRate` (Number) -- The average number of frames per second during the last five seconds
+        of the test. Note that this is different than the `recommendedFrameRate`. The `frameRate`
+        value is the actual frame rate observed during the test, and the `recommendedFrameRate`
+        is the recommended frame rate.
+
+      * `packetLossRatio` (Number) -- The audio packet loss ratio during the last five seconds
+        of the test. 
 
   * `audio` (Object) -- Contains the following properties:
 
@@ -260,8 +271,11 @@ is invoked when the connectivity check completes. This callback function takes t
     * `reason` (String) -- A string describing the reason for an unsupported audio recommendation.
       For example, `'No microphone was found.'`
 
-    * `mos` (Number) -- The MOS for the audio quality. This will be in a range from 0 to 5.
-      Values less than 1 indicate that audio is unsupported. 5 is considered excellent quality.
+    * `bitrate` (Number) -- The average number of audio bits per second during the last five seconds
+      of the test. 
+
+    * `packetLossRatio` (Number) -- The video packet loss ratio during the last five seconds
+      of the test. 
 
   `results` is undefined if there was an error in running the tests (and the `error` parameter
   is unset).
