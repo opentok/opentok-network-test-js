@@ -10,7 +10,6 @@ import { connectivityTest, ConnectivityTestResults } from './connectivityTest';
 import testQuality from './testQuality';
 import {
   IncompleteSessionCredentialsError,
-  InvalidOnUpdateCallback,
   InvalidOnCompleteCallback,
   InvalidOnUpdateCallback,
   MissingOpenTokInstanceError,
