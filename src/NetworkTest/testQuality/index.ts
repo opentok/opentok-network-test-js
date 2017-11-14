@@ -16,10 +16,6 @@ import subscriberMOS from './helpers/subscriberMOS';
 import defaultConfig from './helpers/defaultConfig';
 import { generateRetValFromOptions } from './helpers/generateRetValFromOptions.js';
 
-const testContainerDiv = document.createElement('div');
-type StreamCreatedEvent = OT.Event<'streamCreated', OT.Publisher> & { stream: OT.Stream };
-
-
 /**
  * If not already connected, connect to the OpenTok Session
  */
@@ -37,7 +33,8 @@ const connectToSession = (session: OT.Session, token: string): Promise<OT.Sessio
  */
 const publishAndSubscribe = (session: OT.Session): Promise<OT.Subscriber> =>
   new Promise((resolve, reject) => {
-
+    type StreamCreatedEvent = OT.Event<'streamCreated', OT.Publisher> & { stream: OT.Stream };
+    const testContainerDiv = document.createElement('div');
     const publisher = OT.initPublisher(testContainerDiv, {}, (error?: OT.OTError) => {
       if (error) {
         reject(error);
@@ -56,7 +53,6 @@ const publishAndSubscribe = (session: OT.Session): Promise<OT.Subscriber> =>
           return subscribeError ? reject(subscribeError) : resolve(subscriber);
         });
     });
-
   });
 
 /**
@@ -88,7 +84,6 @@ const checkSubscriberQuality = (
   onUpdate?: UpdateCallback<OT.SubscriberStats>): Promise<TestQualityResults> => {
 
   let mosEstimatorTimeoutId: number;
-  let getStatsListenerIntervalId: number; // This is never used
 
   return new Promise((resolve, reject) => {
     subscribeToTestStream(OT, session, credentials).then((subscriber) => {
@@ -108,8 +103,7 @@ const checkSubscriberQuality = (
             resolve(getFinalRetVal(retVal));
           };
           subscriberMOS(subscriber, getStatsListener, resultsCallback);
-          mosEstimatorTimeoutId = setTimeout(() => {
-            clearInterval(getStatsListenerIntervalId);
+          mosEstimatorTimeoutId = window.setTimeout(() => {
             retVal.mosScore = retVal.mosEstimator.qualityScore();
             retVal.bandwidth = retVal.mosEstimator.bandwidth;
             session.disconnect();

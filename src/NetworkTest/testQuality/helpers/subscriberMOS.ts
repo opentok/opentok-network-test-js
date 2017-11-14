@@ -6,11 +6,9 @@ import { currentId } from 'async_hooks';
 const getPacketsLost = (ts: OT.TrackStats): number => getOr(0, 'packetsLost', ts);
 const getPacketsReceived = (ts: OT.TrackStats): number => getOr(0, 'packetsReceived', ts);
 const getTotalPackets = (ts: OT.TrackStats): number => getPacketsLost(ts) + getPacketsReceived(ts);
-
-const calculateTotalPackets = (type: 'audio' | 'video', current: OT.SubscriberStats, last: OT.SubscriberStats) =>
+const calculateTotalPackets = (type: AV, current: OT.SubscriberStats, last: OT.SubscriberStats) =>
   getTotalPackets(current[type]) - getTotalPackets(last[type]);
-
-const calculateBitRate = (type: 'audio' | 'video', current: OT.SubscriberStats, last: OT.SubscriberStats): number => {
+const calculateBitRate = (type: AV, current: OT.SubscriberStats, last: OT.SubscriberStats): number => {
   const interval = current.timestamp - last.timestamp;
   return (8 * (current[type].bytesReceived - last[type].bytesReceived)) / (interval / 1000);
 };
@@ -34,46 +32,53 @@ const calculateVideoScore = (subscriber: OT.Subscriber, stats: OT.SubscriberStat
   const totalPackets = calculateTotalPackets('video', currentStats, lastStats);
   const packetLoss = getPacketsLost(currentStats.video) - getPacketsLost(lastStats.video) / totalPackets;
   const interval = currentStats.timestamp - lastStats.timestamp;
-  let bitrate = calculateBitRate('video', currentStats, lastStats);
+  const baseBitrate = calculateBitRate('video', currentStats, lastStats);
   const pixelCount = subscriber.stream.videoDimensions.width * subscriber.stream.videoDimensions.height;
   const targetBitrate = targetBitrateForPixelCount(pixelCount);
 
-  if (bitrate < MIN_VIDEO_BITRATE) {
+  if (baseBitrate < MIN_VIDEO_BITRATE) {
     return 0;
   }
-  bitrate = Math.min(bitrate, targetBitrate);
+  const bitrate = Math.min(baseBitrate, targetBitrate);
 
   const score =
     ((Math.log(bitrate / MIN_VIDEO_BITRATE) / Math.log(targetBitrate / MIN_VIDEO_BITRATE)) * 4) + 1;
   return score;
 };
 
-function calculateAudioScore(subscriber: OT.Subscriber, stats: OT.SubscriberStats[]) {
-  const audioScore = (rtt: number, plr: number) => {
+const calculateAudioScore = (subscriber: OT.Subscriber, stats: OT.SubscriberStats[]) => {
+
+  const audioScore = (roundTripTime: number, packetLossRatio: number) => {
     const LOCAL_DELAY = 20; // 20 msecs: typical frame duration
     const h = (x: number): number => x < 0 ? 0 : 1;
     const a = 0; // ILBC: a=10
     const b = 19.8;
     const c = 29.7;
 
-    const R = (rRtt: number, packetLoss: number): number => {
-      const d = rRtt + LOCAL_DELAY;
-      const id = ((0.024 * d) + 0.11) * (d - 177.3) * h(d - 177.3);
-      const ie = (a + b) * Math.log(1 + (c * packetLoss));
-      return 94.2 - id - ie;
+    /**
+     * Calculate the transmission rating factor, R
+     */
+    const calculateR = (): number => {
+      const d = roundTripTime + LOCAL_DELAY;
+      const delayImpairment = ((0.024 * d) + 0.11) * (d - 177.3) * h(d - 177.3);
+      const equipmentImpairment = (a + b) * Math.log(1 + (c * packetLossRatio));
+      return 94.2 - delayImpairment - equipmentImpairment;
     };
 
-    const MOS = (mosR: number): number => {
-      if (mosR < 0) {
+    /**
+     * Calculate the Mean Opinion Score based on R
+     */
+    const calculateMOS = (R: number): number => {
+      if (R < 0) {
         return 1;
       }
-      if (mosR > 100) {
+      if (R > 100) {
         return 4.5;
       }
-      return (1 + 0.035) * ((mosR + (7.10 / 1000000)) * (mosR * (mosR - 60) * (100 - mosR)));
+      return (1 + 0.035) * ((R + (7.10 / 1000000)) * (R * (R - 60) * (100 - R)));
     };
 
-    return MOS(R(rtt, plr));
+    return calculateMOS(calculateR());
   };
 
   const currentStats = last(stats);
@@ -87,9 +92,8 @@ function calculateAudioScore(subscriber: OT.Subscriber, stats: OT.SubscriberStat
     return 0;
   }
   const packetLossRatio = getPacketsLost(currentStats.audio) - getPacketsLost(lastStats.audio) / totalAudioPackets;
-  const score = audioScore(0, packetLossRatio);
-  return score;
-}
+  return audioScore(0, packetLossRatio);
+};
 
 
 class MOSState {

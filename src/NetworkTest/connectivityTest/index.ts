@@ -71,7 +71,7 @@ const validateDevices = (OT: OpenTok): Promise<void> =>
 
         const availableDevices: AvailableDevices = devices.reduce(
           (acc: AvailableDevices, device: OT.Device) => {
-            const type = device.kind === 'audioInput' ? 'audio' : 'video';
+            const type: AV = device.kind === 'audioInput' ? 'audio' : 'video';
             return { ...acc, [type]: { ...acc[type], [device.deviceId]: device } };
           },
           { audio: {}, video: {} },
