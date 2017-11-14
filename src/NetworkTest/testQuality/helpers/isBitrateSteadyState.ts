@@ -1,19 +1,21 @@
 import getLatestSampleWindow from './getLatestSampleWindow';
 import calculateBitrates from './calculateBitrates';
-const defaultConfig = require('../defaultConfig');
+import defaultConfig from './defaultConfig';
 
-export default function isBitrateSteadyState(statsList) {
+const isBitrateSteadyState = (statsList: OT.SubscriberStats[]): boolean => {
   const latestSamples = getLatestSampleWindow(statsList);
   const steadyStateAllowedDelta = defaultConfig.steadyStateAllowedDelta;
-  let isSteadyState = true;
 
   if (latestSamples.length < defaultConfig.minimumVideoAndAudioTestSampleSize) {
     return false;
   }
 
-  const statsBitrates = calculateBitrates(latestSamples);
+  const statsBitrates: KbpsMap = calculateBitrates(latestSamples);
+  let isSteadyState = true;
 
-  ['video', 'audio'].forEach((avType) => {
+
+  const avTypes: AV[] = ['video', 'audio'];
+  avTypes.forEach((avType: 'audio' | 'video') => {
     for (let i = 1; i < statsBitrates[avType].length; i += 1) {
       const currBitrate = statsBitrates[avType][i].kbps;
       const prevBitrate = statsBitrates[avType][i - 1].kbps;
@@ -27,5 +29,7 @@ export default function isBitrateSteadyState(statsList) {
   });
 
   return isSteadyState;
-}
+};
+
+export default isBitrateSteadyState;
 

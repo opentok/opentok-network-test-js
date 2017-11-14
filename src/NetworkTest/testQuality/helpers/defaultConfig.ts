@@ -1,4 +1,5 @@
-module.exports = {
+
+const config: QualityTestConfig = {
   getStatsInterval: 1000,
   getStatsVideoAndAudioTestDuration: 30000,
   getStatsAudioOnlyDuration: 10000,
@@ -10,3 +11,5 @@ module.exports = {
   steadyStateSampleWindow: 5000, // this is also used to calculate bandwidth
   steadyStateAllowedDelta: 0.10, // 1 = 100%, from point to point
 };
+
+export default config;

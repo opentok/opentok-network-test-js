@@ -1,0 +1,142 @@
+import isBitrateSteadyState from './isBitrateSteadyState';
+import calculateThroughput from './calculateThroughput';
+import MOSState from './MOSState';
+import { getOr, last, nth } from '../../../util';
+import { currentId } from 'async_hooks';
+
+const getPacketsLost = (ts: OT.TrackStats): number => getOr(0, 'packetsLost', ts);
+const getPacketsReceived = (ts: OT.TrackStats): number => getOr(0, 'packetsReceived', ts);
+const getTotalPackets = (ts: OT.TrackStats): number => getPacketsLost(ts) + getPacketsReceived(ts);
+const calculateTotalPackets = (type: AV, current: OT.SubscriberStats, last: OT.SubscriberStats) =>
+  getTotalPackets(current[type]) - getTotalPackets(last[type]);
+const calculateBitRate = (type: AV, current: OT.SubscriberStats, last: OT.SubscriberStats): number => {
+  const interval = current.timestamp - last.timestamp;
+  return (8 * (current[type].bytesReceived - last[type].bytesReceived)) / (interval / 1000);
+};
+
+function calculateVideoScore(subscriber: OT.Subscriber, stats: OT.SubscriberStats[]): number {
+  const MIN_VIDEO_BITRATE = 30000;
+  const targetBitrateForPixelCount = (pixelCount: number) => {
+    // power function maps resolution to target bitrate, based on rumor config
+    // values, with r^2 = 0.98. We're ignoring frame rate, assume 30.
+    const y = 2.069924867 * (Math.log10(pixelCount) ** 0.6250223771);
+    return 10 ** y;
+  };
+
+  const currentStats = last(stats);
+  const lastStats = nth(-2, stats);
+
+  if (!currentStats || !lastStats || !subscriber.stream) {
+    return 0;
+  }
+
+  const totalPackets = calculateTotalPackets('video', currentStats, lastStats);
+  const packetLoss = getPacketsLost(currentStats.video) - getPacketsLost(lastStats.video) / totalPackets;
+  const interval = currentStats.timestamp - lastStats.timestamp;
+  const baseBitrate = calculateBitRate('video', currentStats, lastStats);
+  const pixelCount = subscriber.stream.videoDimensions.width * subscriber.stream.videoDimensions.height;
+  const targetBitrate = targetBitrateForPixelCount(pixelCount);
+
+  if (baseBitrate < MIN_VIDEO_BITRATE) {
+    return 0;
+  }
+  const bitrate = Math.min(baseBitrate, targetBitrate);
+
+  const score =
+    ((Math.log(bitrate / MIN_VIDEO_BITRATE) / Math.log(targetBitrate / MIN_VIDEO_BITRATE)) * 4) + 1;
+  return score;
+}
+
+function calculateAudioScore(subscriber: OT.Subscriber, stats: OT.SubscriberStats[]): number {
+
+  const audioScore = (roundTripTime: number, packetLossRatio: number) => {
+    const LOCAL_DELAY = 20; // 20 msecs: typical frame duration
+    const h = (x: number): number => x < 0 ? 0 : 1;
+    const a = 0; // ILBC: a=10
+    const b = 19.8;
+    const c = 29.7;
+
+    /**
+     * Calculate the transmission rating factor, R
+     */
+    const calculateR = (): number => {
+      const d = roundTripTime + LOCAL_DELAY;
+      const delayImpairment = ((0.024 * d) + 0.11) * (d - 177.3) * h(d - 177.3);
+      const equipmentImpairment = (a + b) * Math.log(1 + (c * packetLossRatio));
+      return 94.2 - delayImpairment - equipmentImpairment;
+    };
+
+    /**
+     * Calculate the Mean Opinion Score based on R
+     */
+    const calculateMOS = (R: number): number => {
+      if (R < 0) {
+        return 1;
+      }
+      if (R > 100) {
+        return 4.5;
+      }
+      return (1 + 0.035) * ((R + (7.10 / 1000000)) * (R * (R - 60) * (100 - R)));
+    };
+
+    return calculateMOS(calculateR());
+  };
+
+  const currentStats = last(stats);
+  const lastStats = nth(-2, stats);
+
+  if (!currentStats || !lastStats || !subscriber.stream) {
+    return 0;
+  }
+  const totalAudioPackets = calculateTotalPackets('audio', currentStats, lastStats);
+  if (totalAudioPackets === 0) {
+    return 0;
+  }
+  const packetLossRatio = getPacketsLost(currentStats.audio) - getPacketsLost(lastStats.audio) / totalAudioPackets;
+  return audioScore(0, packetLossRatio);
+}
+
+export default function subscriberMOS(
+  mosState: MOSState,
+  subscriber: OT.Subscriber,
+  getStatsListener: StatsListener,
+  callback: (state: MOSState) => void) {
+  mosState.intervalId = window.setInterval(
+    () => {
+      subscriber.getStats((error?: OT.OTError, stats?: OT.SubscriberStats) => {
+        if (!stats) {
+          return null;
+        }
+        stats && mosState.statsLog.push(stats);
+
+        if (getStatsListener && typeof getStatsListener === 'function') {
+          getStatsListener(error, stats);
+        }
+
+        if (mosState.statsLog.length < 2) {
+          return null;
+        }
+
+        mosState.bandwidth = calculateThroughput(mosState.statsLog);
+        const videoScore = calculateVideoScore(subscriber, mosState.statsLog);
+        mosState.videoScoresLog.push(videoScore);
+        const audioScore = calculateAudioScore(subscriber, mosState.statsLog);
+        mosState.audioScoresLog.push(audioScore);
+
+
+        mosState.pruneAudioScores();
+        mosState.pruneVideoScores();
+
+        // If bandwidth has reached a steady state, end the test early
+        if (isBitrateSteadyState(mosState.statsLog)) {
+          mosState.clearInterval();
+          return callback(mosState);
+        }
+
+        return null;
+      });
+    }, mosState.scoreInterval);
+
+  subscriber.on('destroyed', mosState.clearInterval);
+  return mosState;
+}
