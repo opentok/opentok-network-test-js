@@ -1,6 +1,6 @@
 import getLatestSampleWindow from './getLatestSampleWindow';
 import calculateBitrates from './calculateBitrates';
-import defaultConfig from '../defaultConfig';
+import defaultConfig from './defaultConfig';
 
 const isBitrateSteadyState = (statsList: OT.SubscriberStats[]): boolean => {
   const latestSamples = getLatestSampleWindow(statsList);

@@ -1,4 +1,4 @@
-import defaultConfig from '../defaultConfig';
+import defaultConfig from './defaultConfig';
 import { getOr, last } from '../../../util';
 
 const getLatestSampleWindow = (stats: OT.SubscriberStats[]): OT.SubscriberStats[] =>  {
