@@ -15,10 +15,7 @@ import * as e from '../../errors/index';
 const { generateRetValFromOptions } = require('./helpers/generateRetValFromOptions.js');
 import subscriberMOS from './helpers/subscriberMOS';
 
-// let updateCallback: UpdateCallback<any> | undefined;
-// let ot:OpenTok;
-// let session: OT.Session;
-// let credentials: SessionCredentials;
+
 const testContainerDiv = document.createElement('div');
 
 const connectToSession = (session: OT.Session, token: string) =>

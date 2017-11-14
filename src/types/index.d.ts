@@ -39,10 +39,16 @@ interface OpenTok {
   properties: OT.Properties
 }
 
+type AV = 'audio' | 'video';
 type StreamCreatedEvent = OT.Event<'streamCreated', OT.Publisher> & { stream: OT.Stream };
 type StatsListener = (error?: OT.OTError, stats?: OT.SubscriberStats) => void;
 type MOSResultsCallback = (qualityScore: number, bandwidth: Bandwidth) => void;
-type Bandwidth = {
-  audio: number,
-  video: number,
-};
+interface Kbps { kbps: number }
+interface KbpsMap {
+  audio: Kbps[];
+  video: Kbps[];
+}
+interface Bandwidth {
+  audio: number;
+  video: number;
+}
