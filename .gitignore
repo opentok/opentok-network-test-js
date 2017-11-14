@@ -60,4 +60,6 @@ typings/
 # build files
 dist/
 
-sample/bundle.js
+# sample
+sample
+
