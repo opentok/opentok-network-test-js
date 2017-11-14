@@ -56,18 +56,18 @@ function calculateAudioScore(subscriber: OT.Subscriber, stats: OT.SubscriberStat
     const b = 19.8;
     const c = 29.7;
 
-    const R = (rRtt: number = 0, packetLoss: number = 0): number => {
+    const R = (rRtt: number, packetLoss: number): number => {
       const d = rRtt + LOCAL_DELAY;
       const id = ((0.024 * d) + 0.11) * (d - 177.3) * h(d - 177.3);
       const ie = (a + b) * Math.log(1 + (c * packetLoss));
       return 94.2 - id - ie;
     };
 
-    const MOS = (mosR: number) => {
-      if (R() < 0) {
+    const MOS = (mosR: number): number => {
+      if (mosR < 0) {
         return 1;
       }
-      if (R() > 100) {
+      if (mosR > 100) {
         return 4.5;
       }
       return (1 + 0.035) * ((mosR + (7.10 / 1000000)) * (mosR * (mosR - 60) * (100 - mosR)));
