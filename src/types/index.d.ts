@@ -6,6 +6,13 @@
  * Define global types
  */
 
+interface OpenTok {
+  initSession: (partnerId: string, sessionId: string) => OT.Session;
+  initPublisher: (targetElement?: HTMLElement | string, properties?: OT.PublisherProperties, callback?: (error?: OT.OTError) => void) => OT.Publisher;
+  getDevices(callback: (error: OT.OTError | undefined, devices?: OT.Device[]) => void): void;
+  properties: OT.Properties
+}
+
 type SessionCredentials = {
   apiKey: string,
   sessionId: string,
@@ -24,7 +31,7 @@ type TestQualityResults = {
   },
 }
 
-
+type AV = 'audio' | 'video';
 type DeviceId = string;
 type InputDeviceType = 'audioInput' | 'videoInput';
 type DeviceOptions = {
@@ -32,15 +39,19 @@ type DeviceOptions = {
   videoDevice?: DeviceId
 }
 
-interface OpenTok {
-  initSession: (partnerId: string, sessionId: string) => OT.Session;
-  initPublisher: (targetElement?: HTMLElement | string, properties?: OT.PublisherProperties, callback?: (error?: OT.OTError) => void) => OT.Publisher;
-  getDevices(callback: (error: OT.OTError | undefined, devices?: OT.Device[]) => void): void;
-  properties: OT.Properties
-}
+type QualityTestConfig = {
+  getStatsInterval: number,
+  getStatsVideoAndAudioTestDuration: number,
+  getStatsAudioOnlyDuration: number,
+  subscribeOptions: {
+    testNetwork: boolean,
+    audioVolume: number,
+  },
+  minimumVideoAndAudioTestSampleSize: number,
+  steadyStateSampleWindow: number, // this is also used to calculate bandwidth
+  steadyStateAllowedDelta: number, //
+};
 
-type AV = 'audio' | 'video';
-type StreamCreatedEvent = OT.Event<'streamCreated', OT.Publisher> & { stream: OT.Stream };
 type StatsListener = (error?: OT.OTError, stats?: OT.SubscriberStats) => void;
 type MOSResultsCallback = (qualityScore: number, bandwidth: Bandwidth) => void;
 interface Kbps { kbps: number }

@@ -1,15 +1,3 @@
-type QualityTestConfig = {
-  getStatsInterval: number,
-  getStatsVideoAndAudioTestDuration: number,
-  getStatsAudioOnlyDuration: number,
-  subscribeOptions: {
-    testNetwork: boolean,
-    audioVolume: number,
-  },
-  minimumVideoAndAudioTestSampleSize: number,
-  steadyStateSampleWindow: number, // this is also used to calculate bandwidth
-  steadyStateAllowedDelta: number, //
-};
 
 const config: QualityTestConfig = {
   getStatsInterval: 1000,

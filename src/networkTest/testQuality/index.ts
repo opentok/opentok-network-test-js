@@ -9,16 +9,21 @@
  * Publishing Test Flow
  */
 
-const config = require('./defaultConfig');
+
 import * as Promise from 'promise';
 import * as e from '../../errors/index';
-const { generateRetValFromOptions } = require('./helpers/generateRetValFromOptions.js');
 import subscriberMOS from './helpers/subscriberMOS';
-
+import defaultConfig from './helpers/defaultConfig';
+import { generateRetValFromOptions } from './helpers/generateRetValFromOptions.js';
 
 const testContainerDiv = document.createElement('div');
+type StreamCreatedEvent = OT.Event<'streamCreated', OT.Publisher> & { stream: OT.Stream };
 
-const connectToSession = (session: OT.Session, token: string) =>
+
+/**
+ * If not already connected, connect to the OpenTok Session
+ */
+const connectToSession = (session: OT.Session, token: string): Promise<OT.Session> =>
   new Promise((resolve, reject) => {
     if (session.connection) {
       resolve(session);
@@ -27,39 +32,42 @@ const connectToSession = (session: OT.Session, token: string) =>
     }
   });
 
-const subscribeToTestStream = (OT: OpenTok, session: OT.Session, credentials: SessionCredentials) => {
-  return new Promise((resolve, reject) => {
-    connectToSession(session, credentials.token).then(() => {
-      const publisher = OT.initPublisher(testContainerDiv, {}, (error) => {
-        if (error) {
-          reject(error);
-        } else {
-          session.publish(publisher, (error) => {
-            if (error) {
-              reject(error);
-              return;
-            }
-          });
-        }
-      });
-      publisher.on('streamCreated', (event: StreamCreatedEvent) => {
-        const subProps = {
-          testNetwork: true,
-        };
-        const subscriber = session.subscribe(event.stream, testContainerDiv, subProps, (error) => {
-          if (error) {
-            reject(error);
-          } else {
-            resolve(subscriber);
+/**
+ * Create a test publisher and subscribe to the publihser's stream
+ */
+const publishAndSubscribe = (session: OT.Session): Promise<OT.Subscriber> =>
+  new Promise((resolve, reject) => {
+
+    const publisher = OT.initPublisher(testContainerDiv, {}, (error?: OT.OTError) => {
+      if (error) {
+        reject(error);
+      } else {
+        session.publish(publisher, (publishError?: OT.OTError) => {
+          if (publishError) {
+            return reject(publishError);
           }
         });
-      });
-    }).
-      catch((error) => {
-        reject(error);
-      });
+      }
+    });
+
+    publisher.on('streamCreated', (event: StreamCreatedEvent) => {
+      const subscriber =
+        session.subscribe(event.stream, testContainerDiv, { testNetwork: true }, (subscribeError?: OT.OTError) => {
+          return subscribeError ? reject(subscribeError) : resolve(subscriber);
+        });
+    });
+
   });
-};
+
+/**
+ *  Connect to the OpenTok session, create a publisher, and subsribe to the publisher's stream
+ */
+const subscribeToTestStream = (OT: OpenTok, session: OT.Session, credentials: SessionCredentials) =>
+  new Promise((resolve, reject) => {
+    connectToSession(session, credentials.token)
+      .then(publishAndSubscribe)
+      .catch(reject);
+  });
 
 const getFinalRetVal = (results: any): TestQualityResults => {
   return {
@@ -106,7 +114,7 @@ const checkSubscriberQuality = (
             retVal.bandwidth = retVal.mosEstimator.bandwidth;
             session.disconnect();
             resolve(getFinalRetVal(retVal));
-          }, config.getStatsVideoAndAudioTestDuration);
+          }, defaultConfig.getStatsVideoAndAudioTestDuration);
         } catch (exception) {
           reject(new e.FailedCheckSubscriberQualityGetStatsError());
         }
