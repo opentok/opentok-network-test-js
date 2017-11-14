@@ -16,7 +16,7 @@ module.exports = {
     extensions: ['.ts', '.js', '.json']
   },
   target: 'node',
-  externals: [nodeExternals( { whitelist: [/^axios/] })],
+  externals: [nodeExternals( { whitelist: [/^axios/, /^promise/] })],
   output: {
     filename: 'index.js',
     path: path.resolve(__dirname, 'dist'),
