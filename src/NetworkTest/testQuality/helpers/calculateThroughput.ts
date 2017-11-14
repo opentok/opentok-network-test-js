@@ -1,7 +1,7 @@
 import getLatestSampleWindow from './getLatestSampleWindow';
 import calculateBitrates from './calculateBitrates';
 
-const getAverageBitrate = (bitrateList: number[]): number => {
+const getAverageBitrate = (bitrateList: Kbps[]): number => {
   let sumKbps = 0;
   let points = 0;
 
