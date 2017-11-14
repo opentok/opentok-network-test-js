@@ -17,10 +17,18 @@ type UpdateCallback<A> = (stats: OT.SubscriberStats) => void
 type TestQualityResults = {
   mos: number,
   audio: {
-    bandwidth: number
+    bitrate: number,
+    packetLoss: number,
+    supported: boolean,
+    reason?: string,
   },
   video: {
-    bandwidth: number
+    bitrate: number,
+    packetLoss: number,
+    frameRate: number,
+    recommendedResolution?: string,
+    supported: boolean,
+    reason?: string,
   },
 }
 

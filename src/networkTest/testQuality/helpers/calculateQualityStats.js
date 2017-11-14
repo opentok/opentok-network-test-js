@@ -1,9 +1,9 @@
-export default function calculateBitrateDeltas(latestSamples) {
+export default function calculateQualityStats(latestSamples) {
   if (latestSamples.length < 2) {
     throw new Error('Cannot calculate bitrate with less than two data points.');
   }
 
-  const statsBitrates = {
+  const qualityStats = {
     video: [],
     audio: [],
   };
@@ -16,15 +16,24 @@ export default function calculateBitrateDeltas(latestSamples) {
       if (currStat[avType] && prevStat[avType]) {
         const bytesIncreased = currStat[avType].bytesReceived - prevStat[avType].bytesReceived;
         const bitsIncreased = bytesIncreased * 8;
-        const kilobitsIncreased = bitsIncreased / 1000;
         const msIncreased = currStat.timestamp - prevStat.timestamp;
         const secondsElapsed = msIncreased / 1000;
-        const bandwidthKbps = kilobitsIncreased / secondsElapsed;
+        const averageBitrate = bitsIncreased / secondsElapsed;
 
-        statsBitrates[avType].push({ kbps: bandwidthKbps });
+        const packetsReceived = currStat[avType].packetsReceived;
+        const packetsLost = currStat[avType].packetsLost;
+        const packetLossRatio = packetsLost / packetsReceived;
+
+        const frameRate = currStat[avType].frameRate;
+
+        qualityStats[avType].push({
+          averageBitrate,
+          packetLossRatio,
+          frameRate,
+        });
       }
     });
   }
 
-  return statsBitrates;
+  return qualityStats;
 }

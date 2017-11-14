@@ -69,15 +69,45 @@ const subscribeToTestStream = () => {
 };
 
 const getFinalRetVal = (results: any): TestQualityResults => {
-  return {
+  const finalReturnValue = {
     mos: results.mosScore,
     audio: {
-      bandwidth: results.bandwidth.audio,
+      bitrate: results.stats.audio.bitrate,
+      packetLossRatio: results.stats.audio.packetLoss,
+      supported: results.stats.audio.supported,
+      reason: results.stats.audio.reason,
     },
     video: {
-      bandwidth: results.bandwidth.video,
+      bitrate: results.stats.video.bitrate,
+      packetLossRatio: results.stats.video.packetLoss,
+      frameRate: results.stats.video.frameRate,
+      recommendedResolution: results.stats.video.recommendedResolution,
+      supported: results.stats.video.supported,
+      reason: results.stats.video.reason,
     }
   };
+
+  if (!results.stats.video.supported) {
+    delete finalReturnValue.video.recommendedResolution;
+    if (results.stats.video.reason === config.strings.noCam) {
+      delete finalReturnValue.video.bitrate;
+      delete finalReturnValue.video.packetLoss;
+      delete finalReturnValue.video.frameRate;
+    }
+  } else {
+    delete finalReturnValue.video.reason;
+  }
+
+  if (!results.stats.audio.supported) {
+    if (results.stats.audio.reason === config.strings.noMic) {
+      delete finalReturnValue.audio.bitrate;
+      delete finalReturnValue.audio.packetLoss;
+    }
+  } else {
+    delete finalReturnValue.audio.reason;
+  }
+
+  return finalReturnValue;
 };
 
 const checkSubscriberQuality = () => {
@@ -103,10 +133,10 @@ const checkSubscriberQuality = () => {
                 updateCallback && updateCallback(stats);
               },
             },
-            (qualityScore: number, bandwidth: number) => {
+            (qualityScore: number, stats: object) => {
               clearTimeout(mosEstimatorTimeoutId);
               retVal.mosScore = qualityScore;
-              retVal.bandwidth = bandwidth;
+              retVal.stats = stats;
               session.disconnect();
               resolve(getFinalRetVal(retVal));
             });
@@ -117,7 +147,7 @@ const checkSubscriberQuality = () => {
               retVal.bandwidth = retVal.mosEstimator.bandwidth;
               session.disconnect();
               resolve(getFinalRetVal(retVal));
-            }, 
+            },
             config.getStatsVideoAndAudioTestDuration);
         } catch (exception) {
           /* TBD:
