@@ -18,13 +18,17 @@ type TestQualityResults = {
   mos: number,
   audio: {
     bitrate: number,
-    packetLoss: number
+    packetLoss: number,
+    supported: boolean,
+    reason?: string,
   },
   video: {
     bitrate: number,
     packetLoss: number,
     frameRate: number,
-    recommendedResolution: string
+    recommendedResolution?: string,
+    supported: boolean,
+    reason?: string,
   },
 }
 

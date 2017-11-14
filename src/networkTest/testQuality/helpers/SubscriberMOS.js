@@ -1,6 +1,9 @@
 import isBitrateSteadyState from './isBitrateSteadyState';
 import calculateThroughput from './calculateThroughput';
 
+let missingVideoTrack = false;
+let missingAudioTrack = false;
+
 function calculateVideoScore(subscriber, stats) {
   const targetBitrateForPixelCount = (pixelCount) => {
     // power function maps resolution to target bitrate, based on rumor config
@@ -11,6 +14,10 @@ function calculateVideoScore(subscriber, stats) {
 
   const MIN_VIDEO_BITRATE = 30000;
   if (stats.length < 2) {
+    return 0;
+  }
+  if (!stats[0].video) {
+    missingVideoTrack = true;
     return 0;
   }
   const currentStats = stats[stats.length - 1];
@@ -62,19 +69,24 @@ function calculateAudioScore(subscriber, stats) {
     // For 0 R 100: MOS = 1 + 0.035 R + 7.10E-6 R(R-60)(100-R)
     // For R > 100: MOS = 4.5
     const MOS = (mosR) => {
-      if (R < 0) {
+      if (mosR < 0) {
         return 1;
       }
-      if (R > 100) {
+      if (mosR > 100) {
         return 4.5;
       }
-      return (1 + 0.035) * ((mosR + (7.10 / 1000000)) * (mosR * (mosR - 60) * (100 - mosR)));
+      return 1 + (0.035 * mosR) + ((7.10 / 1000000) * mosR) * (mosR - 60) * (100-mosR);
     };
 
     return MOS(R(rtt, plr));
   };
 
   if (stats.length < 2) {
+    return 0;
+  }
+
+  if (!stats[0].audio) {
+    missingAudioTrack = true;
     return 0;
   }
 
@@ -128,7 +140,17 @@ function SubscriberMOS({ subscriber, getStatsListener }, callback) {
     return sum / videoScoresLog.length;
   };
 
-  obj.qualityScore = () => Math.min(obj.audioScore(), obj.videoScore());
+  obj.qualityScore = () =>  {
+    if (!missingVideoTrack && !missingAudioTrack) {
+      return Math.min(obj.audioScore(), obj.videoScore();
+    } else if (missingVideoTrack && !missingAudioTrack) {
+      return obj.audioScore();
+    } else if (!missingVideoTrack && missingAudioTrack) {
+      return obj.videoScore();
+    } else if (missingVideoTrack && missingAudioTrack) {
+      return 0;
+    }
+  });
 
   obj.intervalId = window.setInterval(() => {
     subscriber.getStats((error, stats) => {
@@ -145,7 +167,10 @@ function SubscriberMOS({ subscriber, getStatsListener }, callback) {
         return null;
       }
 
-      obj.stats = calculateThroughput(statsLog);
+      obj.stats = calculateThroughput(statsLog, {
+        missingAudioTrack,
+        missingVideoTrack,
+      });
 
       const videoScore = calculateVideoScore(subscriber, statsLog);
       videoScoresLog.push(videoScore);

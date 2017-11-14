@@ -69,19 +69,45 @@ const subscribeToTestStream = () => {
 };
 
 const getFinalRetVal = (results: any): TestQualityResults => {
-  return {
+  const finalReturnValue = {
     mos: results.mosScore,
     audio: {
       bitrate: results.stats.audio.bitrate,
       packetLoss: results.stats.audio.packetLoss,
+      supported: results.stats.audio.supported,
+      reason: results.stats.audio.reason,
     },
     video: {
       bitrate: results.stats.video.bitrate,
       packetLoss: results.stats.video.packetLoss,
       frameRate: results.stats.video.frameRate,
       recommendedResolution: results.stats.video.recommendedResolution,
+      supported: results.stats.video.supported,
+      reason: results.stats.video.reason,
     }
   };
+
+  if (!results.stats.video.supported) {
+    delete finalReturnValue.video.recommendedResolution;
+    if (results.stats.video.reason === config.strings.noCam) {
+      delete finalReturnValue.video.bitrate;
+      delete finalReturnValue.video.packetLoss;
+      delete finalReturnValue.video.frameRate;
+    }
+  } else {
+    delete finalReturnValue.video.reason;
+  }
+
+  if (!results.stats.audio.supported) {
+    if (results.stats.audio.reason === config.strings.noMic) {
+      delete finalReturnValue.audio.bitrate;
+      delete finalReturnValue.audio.packetLoss;
+    }
+  } else {
+    delete finalReturnValue.audio.reason;
+  }
+
+  return finalReturnValue;
 };
 
 const checkSubscriberQuality = () => {

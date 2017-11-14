@@ -1,6 +1,8 @@
 import getLatestSampleWindow from './getLatestSampleWindow';
 import calculateQualityStats from './calculateQualityStats';
-import getRecommendedVideoResolution from './getRecommendedVideoResolution';
+import getQualityEvaluation from './getQualityEvaluation';
+
+const config = require('../defaultConfig');
 
 function getAverageBitrateAndPlr(statsList, avType) {
   let sumBps = 0;
@@ -20,21 +22,41 @@ function getAverageBitrateAndPlr(statsList, avType) {
     packetLoss: sumPlr / statsList.length,
   };
 
+  const qualityEval = getQualityEvaluation(averageStats, avType);
+  averageStats.supported = qualityEval.supported;
+  averageStats.reason = qualityEval.reason;
+
   if (avType === 'video') {
     averageStats.frameRate = sumFrameRate / statsList.length;
-    averageStats.recommendedResolution = getRecommendedVideoResolution(averageStats);
+    averageStats.recommendedResolution = qualityEval.recommendedResolution;
   }
 
   return averageStats;
 }
 
-export default function calculateThroughput(statsList) {
+export default function calculateThroughput(statsList, { missingAudioTrack, missingVideoTrack }) {
   const sampleWindow = getLatestSampleWindow(statsList);
   const qualityStats = calculateQualityStats(sampleWindow);
-  const audioQualityStats = qualityStats.audio;
-  const videoQualityStats = qualityStats.video;
-  const averageAudioStats = getAverageBitrateAndPlr(audioQualityStats, 'audio');
-  const averageVideoStats = getAverageBitrateAndPlr(videoQualityStats, 'video');
+  let averageAudioStats;
+  let averageVideoStats;
+
+  if (missingAudioTrack) {
+    averageAudioStats = {
+      supported: false,
+      reason: config.strings.noMic
+    }
+  } else {
+    averageAudioStats = getAverageBitrateAndPlr(qualityStats.audio, 'audio');
+  }
+
+  if (missingVideoTrack) {
+    averageVideoStats = {
+      supported: false,
+      reason: config.strings.noCam,
+    }
+  } else {
+    averageVideoStats = getAverageBitrateAndPlr(qualityStats.video, 'video');
+  }
 
   return {
     audio: averageAudioStats,
