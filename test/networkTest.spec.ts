@@ -29,7 +29,7 @@ describe('Network Test Contructor', () => {
 
   const malformedCredentials = {
     apiKey: '1234',
-    sessionID: '1234',
+    invalidProp: '1234',
     token: '1234',
   };
 
