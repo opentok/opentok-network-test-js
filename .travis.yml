@@ -1,0 +1,41 @@
+language: node_js
+dist: trusty
+node_js:
+- '8'
+before_install:
+- export DISPLAY=:99.0
+- if [ -f /etc/init.d/xvfb ]; then sh -e /etc/init.d/xvfb start; fi
+- if [ $BROWSER == 'firefox' ]; then pulseaudio --start; fi
+script:
+ - npm run test
+addons:
+  apt:
+    sources:
+      - ubuntu-toolchain-r-test
+    packages:
+      - g++-4.8
+      - pulseaudio
+matrix:
+  include:
+    - os: linux
+      sudo: false
+      env: BROWSER=chrome  BVER=stable
+    - os: linux
+      sudo: false
+      env: BROWSER=firefox BVER=stable INTEGRATION_CMD=''
+    # - os: osx
+    #   osx_image: xcode9
+    #   env: BROWSER=safari BVER=unstable
+    # - os: linux
+    #   sudo: false
+    #   env: BROWSER=ie BVER=11 SAUCELABS=true
+
+  fast_finish: true
+
+env:
+  global:
+  - CXX=g++-4.8
+  - secure: V/xx3j4avTpS2+dkf1Ogpk5cAhehHPr1zDGKaywujip9Xpecw3VRnMlOejbaqEHQxMHz+4tSph9I6zVGTnU2Lvlv5WFmp4t6UDGx2AVeXIzKhn7GMkV7eMbrt7ZoP7No/OAm1NNcjTeCIlOXW6tUqY1ubFdDXIu7N7hy/ThmgJI78cA4uW3a8Yl6Bc9nMWqbgvnOtNoa9asjbiL/tlSs18ykJdxa8uh951H+TnnhfE43eH0XiNZqEdEh5OF0v09r9RTEK7Ve9ihXJe8TDKgdD/KXmASB9Vpvf/GHHKYTVcEgQiiOA/biLQm25UCI9iSyxHIp2rI5jBrO83RnLbQWI9gvnfH0G6LWZignsKlw4sdMmqjIatliJaDp5auAbe9gmWV5pNc3wQg3qqfjgF2PyA/acZp58UnRmgYBbRmqYPE7Q8knK8c3rD999L82zl/bWRqHY3uJhtoeeeEo/RpXaf3KWY+YRrGseB2UXrC1AlLiTJC/iE5HSnMw4Tckzl3//H2veE2j0wRzvuuNAYvwFECp6YyJOmgzuO9pwS7/buu/MXSZhdjMIlK22pKWnfWaZZRM96LOHu2mEKRjLR7QqdlbzdKxt+5i1SgmeO7iuxvsBcE0j7KYrlVKH5IUOFozBsLfziOAHMCPTdcrMcD4rJRNq4Z2Y2hu2zjQJ3xIpw8=
+  - secure: Lb0wdKnaN/k6xRT1694q7N+oId9ATVuX1hBdRpW8ScQJ1S+6FVV4dCxK1YOLzNm2GW2DQjS5xHvSsksuPhv1KE1fXuqBbAee+XFV9/pU/ZEuMoyvUu770MZEM7QuymNE5yEpNBGuz/dukQLsE/gGLc8mDAHpwS5czSqs/d4O6P9hSwmiywu2xsqfIUS3/DEWYc8Q18JiNzIbbgjujXQl9ENoCdZq2Oxl6hTDkPE07gmEw//XDrZf8vOYcjn0g2SxVCC4x9kuNqCFKimupmUR305rZiiLvOKd6N9q6mJJo2JPK8b3f8ZHXTsheMGd2/RO8VzFnf5uUQhyWGMcxkXqBypItmxMobzf+3UlUbZF9nvWtCRZ4pcLixAhh/mpEB+G5BZMXIzx3HsaTjZa489Y4L+EV4tPbXq8klMJT6Z3oXx3ip1EIj2ZhFZRErYfPOCmiUH03lwOHBP5mpUkizw1rD6NHe4QJ54Sy/EYL2KJ7vG2IDBJamewieORIIaxcVPqy7+xxjPKftSqsz3HMg5UL3Cxs1/FvVgQaPidofvpqv+LHsxPa8AL4TWYN0XfowAUhUpb9bVDppQ/1nfo9W4U6jEA4rSSfv042AvmD2S8hjiV/2z8HqsxkfHkrySHrjqj1Y46kGoPpr5JJy3vm/VhtpaT8fz49f2YSsvcJqi5wZA=
+  - secure: pnK8mVY6/4skzIQ7eUMk1dMYd8q+vBvbrKxqJjF1afhyla3B2AXZ0WbYNb4RR6SYcgkWHLTZj2A+dKARMPdSoxkFqqE1wIw0KeWGNL1NpGOmM0Yr2tgB9w9YqSsdE+jwOf+EKnX0MZTNLsw17JTNMcUhepYZ5QMBpKyoH4SNp06/Kg1vnQQgcgB83yqYEpky5js5F1apP7sz7zgh1GaMSHl8w45w1iD97SyrPpfdupCTe/l84yQY5oAR75aKMpoFRKxgaI3Bkk4Hv1+x4LEtRhx1ErNFeGrnM6b8rS0xWZD3qf0HmNtxZ9c8i6zXMtEzux37rwduKS3g2iDJ9dfuWqTytaxm+afS5xJ8cUQ5fhtRiELtLo8Ee/pZQbD87+z+lqiAdVDXin/g3zVvtqL3+X90nKlWGXgMBL68Ky3gux0lEK3JgXZc6NTmkQ9tf4qle42pi4WDSGj+jmJPTCRZjytaLteKhy6pAYwivCYZoiMjD8QyREcB75ou8UGHU6KbKkJKySM8FZtLiVuE+mIQ2ZmEH1IJ7vCp274fWEcYfUSxBpIIXrBRwxr3VMNxSJzakAdhX0mcKvcEyy635ZxXDRHAbv4j9ngdvKJkVOTZc3qdQEDteJ3DQtz/ku1a1Cito4EV1GaVFTRbtyf2ZICPZTsBaZCHZfYG3s+9LtkGgkU=
+  - secure: hTxXSZZ0EW/WDWWRZaF2DqqTB//xuXwUcJR5WDgRsLucRfLytdbCjkWsYVdx+pOKYPkL6gGdkmRu/GwK/upkqN6U/5//QoUQ51H2ApHxbYz9LUW77IpimowhNabx+T+X2UU4CuHTf4h+9hRcIaguaEhkzkkcdPzijCDB9CgnnyVWsyHlJ6P9zQjTlUKKQFK+w8pcOmLuuW8k1HCT+9pGwCmhY8smDrWI83/IgEoF14pXOS0/qlgrRGsKRibNXfuVs5r7nPX4GumNX54uqZ+LTwh5uInL1IBtsjf7hdpDQnmIaizKhXygSFxYgtU/M4KwcdzZtvS0DQymJQTSPCCg7qF/mpMLaZBE7hrQu1hhfJQZMYoNS3upi6BOx9umxrYAo6yaWJXNizWmSLIoUNF0UidwyNJIS/4UawBE9WCq7qvWj0JNx1u0lDOkWlHuv8ub1C6XsyOaBQHfucLs84e/XDV5xlj26HIoqBTJ9fLjWISM7jRo40VfPTCpLnPNRcKVGKQt5GBeMSmH4vpcTTKb5kFxH+RyzRx+wa9HVyQjjjnUFwPhBvlJ6a3bUQ04x83FnT7Q8jg3EtC6UbJIt3IldS6ITqJmToSxUbeyvm5rMeI4fqk+/6DREhTOrzbvdRSe/pvUWriviY4rINnfu6IEabQ2nbu6nYGO6WciOuOHYfs=

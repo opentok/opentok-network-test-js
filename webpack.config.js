@@ -4,7 +4,7 @@ const nodeExternals = require('webpack-node-externals');
 const TypedocWebpackPlugin = require('typedoc-webpack-plugin');
 
 module.exports = {
-  entry: './src/networkTest/index.ts',
+  entry: './src/NetworkTest/index.ts',
   devtool: 'source-map',
   module: {
     loaders: [{

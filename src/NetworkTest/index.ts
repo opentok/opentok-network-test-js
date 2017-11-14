@@ -13,6 +13,7 @@ import {
   InvalidOnCompleteCallback,
   InvalidOnUpdateCallback,
   MissingOpenTokInstanceError,
+  MissingSessionCredentialsError,
 } from './errors';
 import { getOr } from '../util';
 
@@ -25,12 +26,12 @@ export default class NetworkTest {
   /**
    * Returns an instance of NetworkConnectivity
    */
-  constructor(OT: OpenTok, credentials: SessionCredentials, options?: { environment: OpenTokEnvironment }) {
+  constructor(OT: OpenTok, credentials: SessionCredentials, environment: OpenTokEnvironment = 'standard') {
     this.validateOT(OT);
     this.validateCredentials(credentials);
     this.OT = OT;
     this.credentials = credentials;
-    this.environment = getOr('standard', 'environment', options);
+    this.environment = environment;
   }
 
   private validateOT(OT: OpenTok) {
@@ -40,11 +41,13 @@ export default class NetworkTest {
   }
 
   private validateCredentials(credentials: SessionCredentials) {
-    if (!credentials || !credentials.apiKey || !credentials.sessionId || !credentials.token) {
+    if (!credentials) {
+      throw new MissingSessionCredentialsError();
+    }
+    if (!credentials.apiKey || !credentials.sessionId || !credentials.token) {
       throw new IncompleteSessionCredentialsError();
     }
   }
-
   private validateCallbacks(
     updateCallback: UpdateCallback<any> | null,
     onComplete?: CompletionCallback<any>) {
