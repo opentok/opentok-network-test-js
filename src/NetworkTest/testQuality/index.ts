@@ -12,7 +12,7 @@
 
 import * as Promise from 'promise';
 import { get, getOr, pick } from '../../util';
-import * as e from '../../errors/index';
+import * as e from './errors/';
 import subscriberMOS from './helpers/subscriberMOS';
 import MOSState from './helpers/MOSState';
 import config from './helpers/config';
@@ -34,7 +34,7 @@ function connectToSession(session: OT.Session, token: string): Promise<OT.Sessio
     if (session.connection) {
       resolve(session);
     } else {
-      session.connect(token, (error?: OT.OTError) => error ? reject(error) : resolve(session));
+      session.connect(token, (error?: OT.OTError) => error ? reject(new e.SessionConnectionError()) : resolve(session));
     }
   });
 }
@@ -42,17 +42,17 @@ function connectToSession(session: OT.Session, token: string): Promise<OT.Sessio
 /**
  * Create a test publisher and subscribe to the publihser's stream
  */
-function publishAndSubscribe (session: OT.Session): Promise<OT.Subscriber> {
+function publishAndSubscribe(session: OT.Session): Promise<OT.Subscriber> {
   return new Promise((resolve, reject) => {
     type StreamCreatedEvent = OT.Event<'streamCreated', OT.Publisher> & { stream: OT.Stream };
     const testContainerDiv = document.createElement('div');
     const publisher = OT.initPublisher(testContainerDiv, {}, (error?: OT.OTError) => {
       if (error) {
-        reject(error);
+        reject(new e.InitPublisherError());
       } else {
         session.publish(publisher, (publishError?: OT.OTError) => {
           if (publishError) {
-            return reject(publishError);
+            return reject(new e.PublishToSessionError());
           }
         });
       }
@@ -61,7 +61,7 @@ function publishAndSubscribe (session: OT.Session): Promise<OT.Subscriber> {
     publisher.on('streamCreated', (event: StreamCreatedEvent) => {
       const subscriber =
         session.subscribe(event.stream, testContainerDiv, { testNetwork: true }, (subscribeError?: OT.OTError) => {
-          return subscribeError ? reject(subscribeError) : resolve(subscriber);
+          return subscribeError ? reject(new e.SubscribeError()) : resolve(subscriber);
         });
     });
   });
@@ -98,39 +98,41 @@ function checkSubscriberQuality(
   let mosEstimatorTimeoutId: number;
 
   return new Promise((resolve, reject) => {
-    subscribeToTestStream(OT, session, credentials).then((subscriber: OT.Subscriber) => {
-      if (!subscriber) {
-        reject(new e.FailedCheckSubscriberQualityMissingSubscriberError());
-      } else {
-        try {
-          const builder: QualityTestResultsBuilder = {
-            state: new MOSState(),
-            ... { subscriber },
-            ... { credentials },
-          };
+    subscribeToTestStream(OT, session, credentials)
+      .then((subscriber: OT.Subscriber) => {
+        if (!subscriber) {
+          reject(new e.MissingSubscriberError());
+        } else {
+          try {
+            const builder: QualityTestResultsBuilder = {
+              state: new MOSState(),
+              ... { subscriber },
+              ... { credentials },
+            };
 
-          const getStatsListener = (error?: OT.OTError, stats?: OT.SubscriberStats) => {
-            stats && onUpdate && onUpdate(stats);
-          };
+            const getStatsListener = (error?: OT.OTError, stats?: OT.SubscriberStats) => {
+              stats && onUpdate && onUpdate(stats);
+            };
 
-          const resultsCallback: MOSResultsCallback = (state: MOSState) => {
-            clearTimeout(mosEstimatorTimeoutId);
-            session.disconnect();
-            resolve(buildResults(builder));
-          };
+            const resultsCallback: MOSResultsCallback = (state: MOSState) => {
+              clearTimeout(mosEstimatorTimeoutId);
+              session.disconnect();
+              resolve(buildResults(builder));
+            };
 
-          subscriberMOS(builder.state, subscriber, getStatsListener, resultsCallback);
+            subscriberMOS(builder.state, subscriber, getStatsListener, resultsCallback);
 
-          mosEstimatorTimeoutId = window.setTimeout(() => {
-            session.disconnect();
-            resolve(buildResults(builder));
-          }, config.getStatsVideoAndAudioTestDuration);
+            mosEstimatorTimeoutId = window.setTimeout(() => {
+              session.disconnect();
+              resolve(buildResults(builder));
+            }, config.getStatsVideoAndAudioTestDuration);
 
-        } catch (exception) {
-          reject(new e.FailedCheckSubscriberQualityGetStatsError());
+          } catch (exception) {
+            reject(new e.SubscriberGetStatsError());
+          }
         }
-      }
-    });
+      })
+      .catch(reject);
   });
 }
 
