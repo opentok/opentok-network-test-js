@@ -1,8 +1,8 @@
 import * as Promise from 'promise';
 import * as e from '../../connectivityTest/errors';
 
-const filterDevicesForType = (OT: OpenTok, type: InputDeviceType) =>
-  new Promise((resolve, reject) => {
+export default function filterDevicesForType(OT: OpenTok, type: InputDeviceType) {
+  return new Promise((resolve, reject) => {
     OT.getDevices((error?: OT.OTError, devices: OT.Device[] = []) => {
       if (error) {
         reject(new e.FailedToObtainMediaDevices());
@@ -18,5 +18,4 @@ const filterDevicesForType = (OT: OpenTok, type: InputDeviceType) =>
       }
     });
   });
-
-export default filterDevicesForType;
+}

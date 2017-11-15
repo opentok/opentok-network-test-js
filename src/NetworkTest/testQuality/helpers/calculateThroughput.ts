@@ -1,32 +1,63 @@
 import getLatestSampleWindow from './getLatestSampleWindow';
-import calculateBitrates from './calculateBitrates';
+import calculateQualityStats from './calculateQualityStats';
+import getQualityEvaluation from './getQualityEvaluation';
+import config from './config';
+import MOSState from './MOSState';
+import { getOr } from '../../../util';
 
-const getAverageBitrate = (bitrateList: Kbps[]): number => {
-  let sumKbps = 0;
-  let points = 0;
+function getAverageBitrateAndPlr(type: AV, statsList: QualityStats[]): AverageStats {
+  let sumBps = 0;
+  let sumPlr = 0;
+  let sumFrameRate = 0;
 
-  bitrateList.forEach((bitrate) => {
-    sumKbps += bitrate.kbps;
-    points += 1;
+  statsList.forEach((stat) => {
+    sumBps += stat.averageBitrate;
+    sumPlr += stat.packetLossRatio;
+    if (type === 'video') {
+      sumFrameRate += getOr(0, 'frameRate', stat);
+    }
   });
 
-  return sumKbps / points;
-};
+  const averageStats: AverageStatsBase = {
+    bitrate: sumBps / statsList.length,
+    packetLossRatio: sumPlr / statsList.length,
+  };
+  const { supported, reason, recommendedResolution } = getQualityEvaluation(averageStats, type);
+  const videoStats =
+    type === 'video' ? { recommendedResolution, frameRate: sumFrameRate / statsList.length } : {};
 
+  return { ...averageStats, supported, reason, ...videoStats };
+}
 
-export default function calculateThroughput(statsList: OT.SubscriberStats[]) {
-  const sampleWindow = getLatestSampleWindow(statsList);
-  if (sampleWindow.length < 2) {
-    return { audio: 0, video: 0 };
-  } else {
-    const bitrates = calculateBitrates(sampleWindow);
-    const audioBitrates = bitrates.audio;
-    const videoBitrates = bitrates.video;
-    const averageAudioBandwidth = getAverageBitrate(audioBitrates);
-    const averageVideoBandwidth = getAverageBitrate(videoBitrates);
-    return {
-      audio: averageAudioBandwidth,
-      video: averageVideoBandwidth,
-    };
-  }
+export default function calculateThroughput(state: MOSState): HasAudioVideo<AverageStats> {
+
+  const sampleWindow = getLatestSampleWindow(state.statsLog);
+  const qualityStats = calculateQualityStats(sampleWindow);
+
+  const averageAudioStats = () => {
+    if (!state.hasAudioTrack()) {
+      return {
+        supported: false,
+        reason: config.strings.noMic,
+      };
+    } else {
+      return getAverageBitrateAndPlr('audio', qualityStats.audio);
+    }
+  };
+
+  const averageVideoStats = () => {
+    if (!state.hasVideoTrack()) {
+      return {
+        supported: false,
+        reason: config.strings.noCam,
+      };
+    } else {
+      return getAverageBitrateAndPlr('video', qualityStats.video);
+    }
+  };
+
+  return {
+    audio: averageAudioStats(),
+    video: averageVideoStats(),
+  };
 }

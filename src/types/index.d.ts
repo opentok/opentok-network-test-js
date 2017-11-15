@@ -22,6 +22,25 @@ type OpenTokEnvironment = 'standard' | 'enterprise'
 type CompletionCallback<A> = (error: Error | undefined, results: A | null) => void
 type UpdateCallback<A> = (stats: OT.SubscriberStats) => void
 type AV = 'audio' | 'video';
+type TestQualityResults = {
+  mos: number,
+  audio: {
+    bitrate: number,
+    packetLoss: number,
+    supported: boolean,
+    reason?: string,
+  },
+  video: {
+    bitrate: number,
+    packetLoss: number,
+    frameRate: number,
+    recommendedResolution?: string,
+    supported: boolean,
+    reason?: string,
+  },
+}
+
+
 type DeviceId = string;
 type InputDeviceType = 'audioInput' | 'videoInput';
 type DeviceOptions = {
@@ -39,24 +58,40 @@ type DeviceOptions = {
    video: A;
  }
 
-interface QualityTestResults extends HasAudioVideo<{bandwidth: number}> {
+interface QualityTestResults extends HasAudioVideo<AverageStats> {
   mos: number;
 }
 
-type QualityTestConfig = {
-  getStatsInterval: number,
-  getStatsVideoAndAudioTestDuration: number,
-  getStatsAudioOnlyDuration: number,
-  subscribeOptions: {
-    testNetwork: boolean,
-    audioVolume: number,
-  },
-  minimumVideoAndAudioTestSampleSize: number,
-  steadyStateSampleWindow: number, // this is also used to calculate bandwidth
-  steadyStateAllowedDelta: number, //
-};
+interface AudioThreshold { bps: number, plr: number }
+interface VideoThreshold extends AudioThreshold { recommendedSetting: string }
 
 type StatsListener = (error?: OT.OTError, stats?: OT.SubscriberStats) => void;
 interface Kbps { kbps: number }
 interface KbpsMap extends HasAudioVideo<Kbps[]> {}
 interface Bandwidth extends HasAudioVideo<number> {}
+
+interface AverageStatsBase {
+  bitrate: number;
+  packetLossRatio: number;
+}
+
+interface AverageStats {
+  bitrate?: number;
+  packetLossRatio?: number;
+  supported?: boolean;
+  reason?: string;
+  frameRate?: number;
+  recommendedResolution?: string;
+}
+
+type QualityEvaluationResults = {
+  supported: boolean,
+  recommendedResolution: string,
+  reason?: string,
+};
+
+type QualityStats = {
+  averageBitrate: number,
+  packetLossRatio: number,
+  frameRate?: number,
+};

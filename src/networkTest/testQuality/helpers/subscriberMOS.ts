@@ -88,6 +88,7 @@ function calculateAudioScore(subscriber: OT.Subscriber, stats: OT.SubscriberStat
   if (!currentStats || !lastStats || !subscriber.stream) {
     return 0;
   }
+
   const totalAudioPackets = calculateTotalPackets('audio', currentStats, lastStats);
   if (totalAudioPackets === 0) {
     return 0;
@@ -117,15 +118,14 @@ export default function subscriberMOS(
           return null;
         }
 
-        mosState.bandwidth = calculateThroughput(mosState.statsLog);
+        // mosState.bandwidth = calculateThroughput(mosState);
+        mosState.stats = calculateThroughput(mosState);
         const videoScore = calculateVideoScore(subscriber, mosState.statsLog);
         mosState.videoScoresLog.push(videoScore);
         const audioScore = calculateAudioScore(subscriber, mosState.statsLog);
         mosState.audioScoresLog.push(audioScore);
 
-
-        mosState.pruneAudioScores();
-        mosState.pruneVideoScores();
+        mosState.pruneScores();
 
         // If bandwidth has reached a steady state, end the test early
         if (isBitrateSteadyState(mosState.statsLog)) {

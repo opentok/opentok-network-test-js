@@ -1,5 +1,4 @@
-
-const calculateDeltas = (type: 'audio' | 'video', samples: OT.SubscriberStats[]): Kbps[] => {
+function calculateDeltas(type: AV, samples: OT.SubscriberStats[]): Kbps[] {
   const bitrates: Kbps[] = [];
   for (let i = 1; i < samples.length; i += 1) {
     const currStat = samples[i];
@@ -15,10 +14,9 @@ const calculateDeltas = (type: 'audio' | 'video', samples: OT.SubscriberStats[])
     }
   }
   return bitrates;
-};
+}
 
-
-const calculateBitrateDeltas = (latestSamples: OT.SubscriberStats[]): KbpsMap => {
+export default function calculateBitrateDeltas(latestSamples: OT.SubscriberStats[]): KbpsMap {
 
   if (latestSamples.length < 2) {
     throw new Error('Cannot calculate bitrate with less than two data points.');
@@ -28,7 +26,4 @@ const calculateBitrateDeltas = (latestSamples: OT.SubscriberStats[]): KbpsMap =>
     audio: calculateDeltas('audio', latestSamples),
     video: calculateDeltas('video', latestSamples),
   };
-};
-
-export default calculateBitrateDeltas;
-
+}

@@ -2,6 +2,7 @@ export default class MOSState {
   statsLog: OT.SubscriberStats[];
   audioScoresLog: number[];
   videoScoresLog: number[];
+  stats: HasAudioVideo<AverageStats>;
   bandwidth: Bandwidth;
   intervalId?: number;
   maxLogLength: number;
@@ -15,6 +16,9 @@ export default class MOSState {
 
   static readonly maxLogLength: number = 1000;
   static readonly scoreInterval: number = 1000;
+
+  readonly hasAudioTrack = (): boolean => this.statsLog[0] && !!this.statsLog[0].audio;
+  readonly hasVideoTrack = (): boolean => this.statsLog[0] && !!this.statsLog[0].video;
 
   private audioScore(): number {
     return this.audioScoresLog.reduce((acc, score) => acc + score, 0);
@@ -31,7 +35,7 @@ export default class MOSState {
     this.intervalId = undefined;
   }
 
-  pruneAudioScores() {
+  private pruneAudioScores() {
     const { audioScoresLog, maxLogLength } = this;
     while (audioScoresLog.length > maxLogLength) {
       audioScoresLog.shift();
@@ -39,7 +43,7 @@ export default class MOSState {
     this.audioScoresLog = audioScoresLog;
   }
 
-  pruneVideoScores() {
+  private pruneVideoScores() {
     const { videoScoresLog, maxLogLength } = this;
     while (videoScoresLog.length > maxLogLength) {
       videoScoresLog.shift();
@@ -47,7 +51,22 @@ export default class MOSState {
     this.videoScoresLog = videoScoresLog;
   }
 
+  pruneScores() {
+    this.pruneAudioScores();
+    this.pruneVideoScores();
+  }
+
   qualityScore(): number {
-    return Math.min(this.audioScore(), this.videoScore());
+    const hasAudioTrack = this.hasAudioTrack();
+    const hasVideoTrack = this.hasVideoTrack();
+    if (hasAudioTrack && hasVideoTrack) {
+      return Math.min(this.audioScore(), this.videoScore());
+    } else if (hasAudioTrack && !hasVideoTrack) {
+      return this.audioScore();
+    } else if (!hasAudioTrack && hasVideoTrack) {
+      return this.videoScore();
+    } else {
+      return 0;
+    }
   }
 }
