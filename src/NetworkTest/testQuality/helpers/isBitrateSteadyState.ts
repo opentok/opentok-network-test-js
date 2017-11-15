@@ -1,13 +1,13 @@
 import getLatestSampleWindow from './getLatestSampleWindow';
 import calculateQualityStats from './calculateQualityStats';
-const defaultConfig = require('../defaultConfig');
+import config from './config';
 
 export default function isBitrateSteadyState(statsList: OT.SubscriberStats[]): boolean {
   const latestSamples = getLatestSampleWindow(statsList);
-  const steadyStateAllowedDelta = defaultConfig.steadyStateAllowedDelta;
+  const steadyStateAllowedDelta = config.steadyStateAllowedDelta;
   let isSteadyState = true;
 
-  if (latestSamples.length < defaultConfig.minimumVideoAndAudioTestSampleSize) {
+  if (latestSamples.length < config.minimumVideoAndAudioTestSampleSize) {
     return false;
   }
 

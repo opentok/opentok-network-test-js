@@ -1,9 +1,11 @@
-const defaultConfig = require('../defaultConfig');
+import config from './config';
+import { get } from '../../../util';
+
 
 export default function getQualityEvaluation(stats: AverageStatsBase, type: AV): QualityEvaluationResults {
-  const qualityThresholds = defaultConfig.qualityThresholds;
+  const qualityThresholds = config.qualityThresholds;
   const bitrate = stats.bitrate;
-  const packetLoss = stats.packetLoss;
+  const packetLoss = stats.packetLossRatio;
   const thresholds = qualityThresholds[type];
   let supported = false;
   let recommendedResolution;
@@ -13,7 +15,7 @@ export default function getQualityEvaluation(stats: AverageStatsBase, type: AV):
     if (bitrate >= threshold.bps && packetLoss <= threshold.plr) {
       supported = true;
       if (type === 'video') {
-        recommendedResolution = threshold.recommendedSetting;
+        recommendedResolution = get('recommendedSetting', threshold);
       }
       break;
     }
@@ -22,7 +24,7 @@ export default function getQualityEvaluation(stats: AverageStatsBase, type: AV):
   const result: QualityEvaluationResults = { supported, recommendedResolution };
 
   if (!supported) {
-    result.reason = defaultConfig.strings.bandwidthLow;
+    result.reason = config.strings.bandwidthLow;
   } else if (supported && type === 'video') {
     result.recommendedResolution = recommendedResolution;
   }
