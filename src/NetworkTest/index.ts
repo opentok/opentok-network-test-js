@@ -14,8 +14,10 @@ import {
   InvalidOnUpdateCallback,
   MissingOpenTokInstanceError,
   MissingSessionCredentialsError,
+  InvalidEnvironmentError,
 } from './errors';
 import { getOr } from '../util';
+import { encode } from 'punycode';
 
 export default class NetworkTest {
 
@@ -29,6 +31,7 @@ export default class NetworkTest {
   constructor(OT: OpenTok, credentials: SessionCredentials, environment: OpenTokEnvironment = 'standard') {
     this.validateOT(OT);
     this.validateCredentials(credentials);
+    this.validateEnvironment(environment);
     this.OT = OT;
     this.credentials = credentials;
     this.environment = environment;
@@ -48,6 +51,13 @@ export default class NetworkTest {
       throw new IncompleteSessionCredentialsError();
     }
   }
+
+  private validateEnvironment(environment: OpenTokEnvironment) {
+    if (environment !== 'standard' && environment !== 'enterprise') {
+      throw new InvalidEnvironmentError();
+    }
+  }
+
   private validateCallbacks(
     updateCallback: UpdateCallback<any> | null,
     onComplete?: CompletionCallback<any>) {
