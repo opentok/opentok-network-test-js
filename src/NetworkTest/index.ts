@@ -16,10 +16,8 @@ import {
   MissingSessionCredentialsError,
 } from './errors';
 import { getOr } from '../util';
-import { encode } from 'punycode';
 
 export default class NetworkTest {
-
   credentials: SessionCredentials;
   OT: OpenTok;
 
