@@ -112,11 +112,7 @@ function checkCreateLocalPublisher(OT: OpenTok): Promise<CreateLocalPublisherRes
 /**
  * Attempt to publish to the session
  */
-function checkPublishToSession(
-  OT: OpenTok,
-  session: OT.Session,
-  deviceOptions?: DeviceOptions,
-): Promise<PublishToSessionResults> {
+function checkPublishToSession(OT: OpenTok, session: OT.Session): Promise<PublishToSessionResults> {
   return new Promise((resolve, reject) => {
     checkCreateLocalPublisher(OT)
       .then(({ publisher }: CreateLocalPublisherResults) => {
@@ -176,7 +172,6 @@ function checkLoggingServer(OT: OpenTok, input?: SubscribeToSessionResults): Pro
 export function testConnectivity(
   OT: OpenTok,
   credentials: SessionCredentials,
-  deviceOptions?: DeviceOptions,
   onComplete?: CompletionCallback<any>): Promise<ConnectivityTestResults> {
   return new Promise((resolve, reject) => {
 
@@ -214,7 +209,7 @@ export function testConnectivity(
     };
 
     connectToSession(OT, credentials)
-      .then(session => checkPublishToSession(OT, session, deviceOptions))
+      .then(session => checkPublishToSession(OT, session))
       .then(checkSubscribeToSession)
       .then(results => checkLoggingServer(OT, results))
       .then(onSuccess)

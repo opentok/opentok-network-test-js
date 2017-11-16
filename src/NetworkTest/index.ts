@@ -68,21 +68,16 @@ export default class NetworkTest {
    * audio bitrate, and the audio packet loss for the published stream, it returns
    * results indicating the recommended supported publisher settings.
    */
-  testQuality(
-    updateCallback: UpdateCallback<any>,
-    completionCallback: CompletionCallback<any>): Promise<any> {
+  testQuality(updateCallback: UpdateCallback<any>, completionCallback: CompletionCallback<any>): Promise<any> {
     this.validateCallbacks(updateCallback, completionCallback);
-    return testQuality(
-      this.OT, this.credentials, updateCallback, completionCallback);
+    return testQuality(this.OT, this.credentials, updateCallback, completionCallback);
   }
 
   /**
    * This method checks to see if the client can connect to TokBox servers required for using OpenTok
    */
-  testConnectivity(
-    deviceOptions?: DeviceOptions,
-    onComplete?: CompletionCallback<any>): Promise<ConnectivityTestResults> {
+  testConnectivity(onComplete?: CompletionCallback<any>): Promise<ConnectivityTestResults> {
     this.validateCallbacks(null, onComplete);
-    return testConnectivity(this.OT, this.credentials, deviceOptions, onComplete);
+    return testConnectivity(this.OT, this.credentials, onComplete);
   }
 }
