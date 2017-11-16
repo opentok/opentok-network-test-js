@@ -48,9 +48,7 @@ export default class NetworkTest {
     }
   }
 
-  private validateCallbacks(
-    updateCallback: UpdateCallback<any> | null,
-    onComplete?: CompletionCallback<any>) {
+  private validateCallbacks(updateCallback: UpdateCallback<any> | null, onComplete?: CompletionCallback<any>) {
     if (updateCallback) {
       if (typeof updateCallback !== 'function' || updateCallback.length !== 1) {
         throw new InvalidOnUpdateCallback();
@@ -64,6 +62,14 @@ export default class NetworkTest {
   }
 
   /**
+   * This method checks to see if the client can connect to TokBox servers required for using OpenTok
+   */
+  testConnectivity(onComplete?: CompletionCallback<any>): Promise<ConnectivityTestResults> {
+    this.validateCallbacks(null, onComplete);
+    return testConnectivity(this.OT, this.credentials, onComplete);
+  }
+
+  /**
    * This function runs a test publisher and based on the measured video bitrate,
    * audio bitrate, and the audio packet loss for the published stream, it returns
    * results indicating the recommended supported publisher settings.
@@ -71,13 +77,5 @@ export default class NetworkTest {
   testQuality(updateCallback: UpdateCallback<any>, completionCallback: CompletionCallback<any>): Promise<any> {
     this.validateCallbacks(updateCallback, completionCallback);
     return testQuality(this.OT, this.credentials, updateCallback, completionCallback);
-  }
-
-  /**
-   * This method checks to see if the client can connect to TokBox servers required for using OpenTok
-   */
-  testConnectivity(onComplete?: CompletionCallback<any>): Promise<ConnectivityTestResults> {
-    this.validateCallbacks(null, onComplete);
-    return testConnectivity(this.OT, this.credentials, onComplete);
   }
 }
