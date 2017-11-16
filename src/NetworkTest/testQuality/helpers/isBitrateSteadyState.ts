@@ -16,8 +16,8 @@ export default function isBitrateSteadyState(statsList: OT.SubscriberStats[]): b
   const avTypes: AV[] = ['video', 'audio'];
   avTypes.forEach((avType: 'audio' | 'video') => {
     for (let i = 1; i < statsBitrates[avType].length; i += 1) {
-      const currBitrate = statsBitrates[avType][i].kbps;
-      const prevBitrate = statsBitrates[avType][i - 1].kbps;
+      const currBitrate = statsBitrates[avType][i].averageBitrate;
+      const prevBitrate = statsBitrates[avType][i - 1].averageBitrate;
       const bitrateDelta = currBitrate - prevBitrate;
       const allowableBitrateDelta = (prevBitrate * steadyStateAllowedDelta);
 
