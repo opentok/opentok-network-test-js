@@ -14,7 +14,6 @@ import {
   InvalidOnUpdateCallback,
   MissingOpenTokInstanceError,
   MissingSessionCredentialsError,
-  InvalidEnvironmentError,
 } from './errors';
 import { getOr } from '../util';
 import { encode } from 'punycode';
@@ -28,13 +27,11 @@ export default class NetworkTest {
   /**
    * Returns an instance of NetworkConnectivity
    */
-  constructor(OT: OpenTok, credentials: SessionCredentials, environment: OpenTokEnvironment = 'standard') {
+  constructor(OT: OpenTok, credentials: SessionCredentials) {
     this.validateOT(OT);
     this.validateCredentials(credentials);
-    this.validateEnvironment(environment);
     this.OT = OT;
     this.credentials = credentials;
-    this.environment = environment;
   }
 
   private validateOT(OT: OpenTok) {
@@ -49,12 +46,6 @@ export default class NetworkTest {
     }
     if (!credentials.apiKey || !credentials.sessionId || !credentials.token) {
       throw new IncompleteSessionCredentialsError();
-    }
-  }
-
-  private validateEnvironment(environment: OpenTokEnvironment) {
-    if (environment !== 'standard' && environment !== 'enterprise') {
-      throw new InvalidEnvironmentError();
     }
   }
 

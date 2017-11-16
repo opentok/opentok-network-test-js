@@ -38,12 +38,6 @@ export class InvalidSessionCredentialsError extends NetworkTestError {
   }
 }
 
-export class InvalidEnvironmentError extends NetworkTestError {
-  constructor() {
-    super(`Environment must either be 'standard' or 'enterprise'.`);
-  }
-}
-
 export class InvalidOnUpdateCallback extends NetworkTestError {
   constructor() {
     super('The onUpdate callback must be a function that accepts a single parameter.');
