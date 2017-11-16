@@ -15,7 +15,7 @@ import { OTErrorType } from './errors/types';
 import { mapErrors, FailureType } from './errors/mapping';
 import { get, getOr } from '../../util';
 import {
-  NetworkConnectivityWarning,
+  NetworkTestWarning,
   AudioDeviceNotAvailableWarning,
   VideoDeviceNotAvailableWarning,
   FailedToConnectToLoggingServer,
@@ -173,10 +173,9 @@ function checkLoggingServer(OT: OpenTok, input?: SubscribeToSessionResults): Pro
 /**
  * This method checks to see if the client can connect to TokBox servers required for using OpenTok
  */
-export function connectivityTest(
+export function testConnectivity(
   OT: OpenTok,
   credentials: SessionCredentials,
-  environment: OpenTokEnvironment,
   deviceOptions?: DeviceOptions,
   onComplete?: CompletionCallback<any>): Promise<ConnectivityTestResults> {
   return new Promise((resolve, reject) => {

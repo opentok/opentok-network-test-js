@@ -6,7 +6,7 @@
 * Define Network Connectivy class
 */
 
-import { connectivityTest, ConnectivityTestResults } from './connectivityTest';
+import { testConnectivity, ConnectivityTestResults } from './testConnectivity';
 import testQuality from './testQuality';
 import {
   IncompleteSessionCredentialsError,
@@ -21,7 +21,6 @@ import { encode } from 'punycode';
 export default class NetworkTest {
 
   credentials: SessionCredentials;
-  environment: OpenTokEnvironment;
   OT: OpenTok;
 
   /**
@@ -74,16 +73,16 @@ export default class NetworkTest {
     completionCallback: CompletionCallback<any>): Promise<any> {
     this.validateCallbacks(updateCallback, completionCallback);
     return testQuality(
-      this.OT, this.credentials, this.environment, updateCallback, completionCallback);
+      this.OT, this.credentials, updateCallback, completionCallback);
   }
 
   /**
    * This method checks to see if the client can connect to TokBox servers required for using OpenTok
    */
-  checkConnectivity(
+  testConnectivity(
     deviceOptions?: DeviceOptions,
     onComplete?: CompletionCallback<any>): Promise<ConnectivityTestResults> {
     this.validateCallbacks(null, onComplete);
-    return connectivityTest(this.OT, this.credentials, this.environment, deviceOptions, onComplete);
+    return testConnectivity(this.OT, this.credentials, deviceOptions, onComplete);
   }
 }
