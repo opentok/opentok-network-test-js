@@ -12,7 +12,7 @@ import axios from 'axios';
 import * as Promise from 'promise';
 import * as e from './errors';
 import { OTErrorType } from './errors/types';
-import { mapErrors, FailureType } from './errors/mapping';
+import { mapErrors, FailureCase } from './errors/mapping';
 import { get, getOr } from '../../util';
 import {
   NetworkTestWarning,
@@ -26,7 +26,7 @@ type PublishToSessionResults = { session: OT.Session } & CreateLocalPublisherRes
 type SubscribeToSessionResults = { subscriber: OT.Subscriber } & PublishToSessionResults;
 export type ConnectivityTestResults = {
   success: boolean,
-  failedTests: FailureType[],
+  failedTests: FailureCase[],
 };
 
 const errorHasName = (error: OT.OTError | null = null, name: OTErrorType): Boolean => get('code', error) === name;
