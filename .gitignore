@@ -63,3 +63,7 @@ dist/
 # sample
 sample
 
+# test credentials
+/test/setup/config.*
+/test/sessionCredentials.json
+
