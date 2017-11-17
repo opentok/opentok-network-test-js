@@ -19,11 +19,11 @@ export default class MOSState {
   readonly hasVideoTrack = (): boolean => this.statsLog[0] && !!this.statsLog[0].video;
 
   private audioScore(): number {
-    return this.audioScoresLog.reduce((acc, score) => acc + score, 0);
+    return this.audioScoresLog.reduce((acc, score) => acc + score, 0) / this.audioScoresLog.length;
   }
 
   private videoScore(): number {
-    return this.videoScoresLog.reduce((acc, score) => acc + score, 0);
+    return this.videoScoresLog.reduce((acc, score) => acc + score, 0) / this.videoScoresLog.length;
   }
 
   clearInterval() {
