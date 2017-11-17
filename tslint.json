@@ -8,9 +8,10 @@
       "check-separator",
       "check-typecast"
     ],
-    "max-line-length": [true, 120]
+    "max-line-length": [true, 120],
+    "align": [true, "parameters", "statements", "members", "elements"]
   },
   "linterOptions": {
-    "exclude": ["test"]
+    "exclude": ["test", "**/*.spec.ts"]
   }
 }

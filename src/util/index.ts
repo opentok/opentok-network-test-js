@@ -68,9 +68,30 @@ const pick =
 const pickAll = <T extends { [key: string]: any }, K extends keyof T>(props: K[], obj: T): Partial<T> =>
   pick(props, obj, true);
 
+
+/**
+ * Returns the last element from an array
+ */
+const last = <T>(list: T[]): (T | undefined) => list[list.length - 1];
+
+/**
+ * Returns the nth element of an array. If a negative value is passed, the nth element from the end
+ * of the array will be returned.
+ */
+const nth = <T>(n: number, list: T[]): (T | undefined) => {
+  if (n < 0) {
+    return list[list.length + n];
+  } else {
+    return list[n];
+  }
+};
+
+
 export {
   get,
   getOr,
+  last,
+  nth,
   pick,
   pickAll,
 };

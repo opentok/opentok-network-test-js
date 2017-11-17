@@ -29,8 +29,9 @@
   },
   "homepage": "https://github.com/opentok/network-connectivity-js#readme",
   "dependencies": {
-    "axios": "^0.17.0",
+    "axios": "^0.17.1",
     "jasmine": "^2.8.0",
+    "karma-mocha-reporter": "^2.2.5",
     "promise": "^8.0.1"
   },
   "devDependencies": {
