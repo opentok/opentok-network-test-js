@@ -76,7 +76,7 @@ function calculateAudioScore(subscriber: OT.Subscriber, stats: OT.SubscriberStat
       if (R > 100) {
         return 4.5;
       }
-      return (1 + 0.035) * ((R + (7.10 / 1000000)) * (R * (R - 60) * (100 - R)));
+      return 1 + (0.035 * R) + ((7.10 / 1000000) * R) * (R - 60) * (100 - R);
     };
 
     return calculateMOS(calculateR());
@@ -118,7 +118,6 @@ export default function subscriberMOS(
           return null;
         }
 
-        // mosState.bandwidth = calculateThroughput(mosState);
         mosState.stats = calculateThroughput(mosState);
         const videoScore = calculateVideoScore(subscriber, mosState.statsLog);
         mosState.videoScoresLog.push(videoScore);
