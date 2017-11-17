@@ -76,6 +76,7 @@ function subscribeToTestStream(
   return new Promise((resolve, reject) => {
     connectToSession(session, credentials.token)
       .then(publishAndSubscribe)
+      .then(resolve)
       .catch(reject);
   });
 }
