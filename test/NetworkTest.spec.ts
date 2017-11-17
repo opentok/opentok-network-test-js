@@ -9,7 +9,7 @@ import {
   IncompleteSessionCredentialsError,
   InvalidOnCompleteCallback,
   InvalidOnUpdateCallback,
-} from '../src/networkTest/errors';
+} from '../src/NetworkTest/errors';
 import * as OT from '@opentok/client';
 import NetworkTest from '../src/NetworkTest';
 import { escapeExpression } from 'handlebars';
