@@ -1,6 +1,8 @@
 /* tslint:disable */
 ///<reference path="../src/types/index.d.ts"/>
 
+import * as OT from '@opentok/client';
+import * as credentials from './credentials.json';
 import {
   NetworkTestError,
   InvalidSessionCredentialsError,
@@ -9,21 +11,21 @@ import {
   IncompleteSessionCredentialsError,
   InvalidOnCompleteCallback,
   InvalidOnUpdateCallback,
-} from '../src/networkTest/errors';
+} from '../src/NetworkTest/errors';
+import { ConnectToSessionTokenError } from '../src/NetworkTest/testConnectivity/errors';
 import { pick } from '../src/util';
-import * as OT from '@opentok/client';
 import NetworkTest from '../src/NetworkTest';
-import * as credentials from './credentials.json';
 import { ConnectivityTestResults } from '../src/NetworkTest/testConnectivity/index';
 
 type Util = jasmine.MatchersUtil;
 type CustomMatcher = jasmine.CustomMatcher;
 type EqualityTesters = jasmine.CustomEqualityTester[];
 
-
 const sessionCredentials = credentials.standard;
-const badCredentials = { apiKey: '1234', invalidProp: '1234', token: '1234' };
+const malformedCredentials = { apiKey: '1234', invalidProp: '1234', token: '1234' };
+const badCredentials = { apiKey: '1234', sessionId: '1234', token: '1234' };
 const networkTest = new NetworkTest(OT, sessionCredentials);
+const badNetworkTest = new NetworkTest(OT, badCredentials);
 const validOnUpdateCallback = (stats: OT.SubscriberStats) => stats;
 const validOnCompleteCallback = (error?: Error, results?: any) => results;
 
@@ -58,7 +60,7 @@ describe('Network Test', () => {
     expect(() => new NetworkTest(sessionCredentials)).toThrow(new MissingOpenTokInstanceError());
     expect(() => new NetworkTest({}, sessionCredentials)).toThrow(new MissingOpenTokInstanceError());
     expect(() => new NetworkTest(OT)).toThrow(new MissingSessionCredentialsError());
-    expect(() => new NetworkTest(OT, badCredentials)).toThrow(new IncompleteSessionCredentialsError());
+    expect(() => new NetworkTest(OT, malformedCredentials)).toThrow(new IncompleteSessionCredentialsError());
     expect(new NetworkTest(OT, sessionCredentials)).toBeInstanceOf(NetworkTest);
   });
 
@@ -81,6 +83,22 @@ describe('Network Test', () => {
             });
             done();
           });
+      });
+
+      it('should return an error if invalid session credentials are used', (done) => {
+        badNetworkTest.testConnectivity()
+          .then((results: ConnectivityTestResults) => {
+            it('should contain a boolean success property', (done) => {
+              expect(results.success).toBeABoolean
+            });
+            it('should contain an array of failedTests', (done) => {
+              expect(results.failedTests).toBeInstanceOf(Array);
+            });
+            done();
+          })
+          .catch((error: NetworkTestError) => {
+            expect(error).toBeInstanceOf(ConnectToSessionTokenError);
+          })
       });
     });
 
