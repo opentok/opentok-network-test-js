@@ -61,5 +61,6 @@ typings/
 dist/
 
 # sample
-sample
+sample/bundle.js
+sample/config.js
 
