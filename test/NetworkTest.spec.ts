@@ -2,6 +2,7 @@
 ///<reference path="../src/types/index.d.ts"/>
 
 import * as OT from '@opentok/client';
+import * as Promise from 'promise';
 import * as credentials from './credentials.json';
 import {
   NetworkTestError,
@@ -12,8 +13,8 @@ import {
   InvalidOnCompleteCallback,
   InvalidOnUpdateCallback,
 } from '../src/NetworkTest/errors';
-import { ConnectToSessionTokenError } from '../src/NetworkTest/testConnectivity/errors';
-import { pick } from '../src/util';
+import { ConnectToSessionTokenError, ConnectToSessionSessionIdError, ConnectivityError, ConnectToSessionError } from '../src/NetworkTest/testConnectivity/errors';
+import { pick, head } from '../src/util';
 import NetworkTest from '../src/NetworkTest';
 import { ConnectivityTestResults } from '../src/NetworkTest/testConnectivity/index';
 
@@ -75,30 +76,33 @@ describe('Network Test', () => {
       it('should contain success and failedTests properties', (done) => {
         networkTest.testConnectivity()
           .then((results: ConnectivityTestResults) => {
-            it('should contain a boolean success property', (done) => {
+            it('should contain a boolean success property', () => {
               expect(results.success).toBeABoolean
             });
-            it('should contain an array of failedTests', (done) => {
+            it('should contain an array of failedTests', () => {
               expect(results.failedTests).toBeInstanceOf(Array);
             });
             done();
           });
       });
 
-      it('should return an error if invalid session credentials are used', (done) => {
+      it('should return a failed test case if invalid session credentials are used', (done) => {
+        const validateResults = (results: ConnectivityTestResults) => {
+          expect(results.success).toBe(false);
+          expect(results.failedTests).toBeInstanceOf(Array);
+          const { type, error } = head(results.failedTests);
+          expect(type).toBe('api');
+          expect(error).toBeInstanceOf(ConnectToSessionError);
+        };
+
+        const validateError = (error?: ConnectivityError) => {
+          expect(error).toBeUndefined();
+        };
+
         badNetworkTest.testConnectivity()
-          .then((results: ConnectivityTestResults) => {
-            it('should contain a boolean success property', (done) => {
-              expect(results.success).toBeABoolean
-            });
-            it('should contain an array of failedTests', (done) => {
-              expect(results.failedTests).toBeInstanceOf(Array);
-            });
-            done();
-          })
-          .catch((error: NetworkTestError) => {
-            expect(error).toBeInstanceOf(ConnectToSessionTokenError);
-          })
+          .then(validateResults)
+          .catch(validateError)
+          .finally(done);
       });
     });
 

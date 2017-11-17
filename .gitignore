@@ -61,7 +61,8 @@ typings/
 dist/
 
 # sample
-sample
+sample/bundle.js
+sample/config.js
 
 # test credentials
 /test/setup/config.*

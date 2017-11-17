@@ -26,7 +26,7 @@ export class ConnectivityError extends NetworkTestError {
 export class ConnectToSessionError extends ConnectivityError {
   name: string;
   constructor(message?: string) {
-    const defaultMessage = 'Precall failed to connect to the session due to a network error.';
+    const defaultMessage = 'Failed to connect to the session due to a network error.';
     super(message || defaultMessage);
     Object.setPrototypeOf(this, ConnectToSessionError.prototype);
     this.name = this.constructor.name;
@@ -35,19 +35,19 @@ export class ConnectToSessionError extends ConnectivityError {
 
 export class ConnectToSessionTokenError extends ConnectToSessionError {
   constructor() {
-    super('Precall failed to connect to the session due to an incorrect token.');
+    super('Failed to connect to the session due to an invalid token.');
   }
 }
 
 export class ConnectToSessionSessionIdError extends ConnectToSessionError {
   constructor() {
-    super('Precall failed to connect to the session due to an incorrect session Id.');
+    super('Failed to connect to the session due to an invalid session Id.');
   }
 }
 
 export class ConnectToSessionNetworkError extends ConnectToSessionError {
   constructor() {
-    super('Precall failed to connect to the session due to a network error.');
+    super('Failed to connect to the session due to a network error.');
   }
 }
 

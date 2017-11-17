@@ -30,9 +30,9 @@ function writeCredentials(credentialsArray) {
 function generateCredentials(){
   const { standard, safari } = config;
   Promise.all([standard, safari].map(createSessionAndToken))
-  .then(writeCredentials)
-  .then((results) => console.info('Generated session credentials for test.'))
-  .catch(e => console.error('Failed to generate test credentials', e));
+    .then(writeCredentials)
+    .then((results) => console.info('Generated session credentials for test.'))
+    .catch(e => console.error('Failed to generate test credentials', e));
 }
 
 generateCredentials();
