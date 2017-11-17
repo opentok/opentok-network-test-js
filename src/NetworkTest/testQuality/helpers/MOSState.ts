@@ -5,8 +5,6 @@ export default class MOSState {
   stats: HasAudioVideo<AverageStats>;
   bandwidth: Bandwidth;
   intervalId?: number;
-  maxLogLength: number;
-  scoreInterval: number;
 
   constructor() {
     this.statsLog = [];
@@ -36,16 +34,16 @@ export default class MOSState {
   }
 
   private pruneAudioScores() {
-    const { audioScoresLog, maxLogLength } = this;
-    while (audioScoresLog.length > maxLogLength) {
+    const { audioScoresLog } = this;
+    while (audioScoresLog.length > MOSState.maxLogLength) {
       audioScoresLog.shift();
     }
     this.audioScoresLog = audioScoresLog;
   }
 
   private pruneVideoScores() {
-    const { videoScoresLog, maxLogLength } = this;
-    while (videoScoresLog.length > maxLogLength) {
+    const { videoScoresLog } = this;
+    while (videoScoresLog.length > MOSState.maxLogLength) {
       videoScoresLog.shift();
     }
     this.videoScoresLog = videoScoresLog;
