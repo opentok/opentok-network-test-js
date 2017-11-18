@@ -1,7 +1,10 @@
+require('dotenv').config()
 const OpenTok = require('opentok');
 const Promise = require('promise');
 const fse = require('fs-extra');
-const config = require('./config');
+const apiKey = process.env.TEST_API_KEY
+const apiSecret = process.env.TEST_API_SECRET
+
 
 function createSessionAndToken({ apiKey, apiSecret }) {
   return new Promise((resolve, reject) => {
@@ -18,18 +21,12 @@ function createSessionAndToken({ apiKey, apiSecret }) {
   });
 }
 
-function writeCredentials(credentialsArray) {
-  const [ standardCredentials, safariCredentials] = credentialsArray;
-  const credentials = {
-    standard: standardCredentials,
-    safari: safariCredentials,
-  };
+function writeCredentials(credentials) {
   return fse.outputJson('./test/credentials.json', credentials);
 }
 
 function generateCredentials(){
-  const { standard, safari } = config;
-  Promise.all([standard, safari].map(createSessionAndToken))
+  createSessionAndToken({ apiKey, apiSecret })
     .then(writeCredentials)
     .then((results) => console.info('Generated session credentials for test.'))
     .catch(e => console.error('Failed to generate test credentials', e));

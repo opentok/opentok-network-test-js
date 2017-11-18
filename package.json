@@ -45,6 +45,7 @@
     "babel-core": "^6.26.0",
     "babel-loader": "^7.1.2",
     "babel-preset-env": "^1.6.1",
+    "dotenv": "^4.0.0",
     "fs-extra": "^4.0.2",
     "jasmine-core": "^2.8.0",
     "karma": "^1.7.1",

@@ -3,7 +3,7 @@
 
 import * as OT from '@opentok/client';
 import * as Promise from 'promise';
-import * as credentials from './credentials.json';
+import * as sessionCredentials from './credentials.json';
 import {
   NetworkTestError,
   InvalidSessionCredentialsError,
@@ -22,7 +22,6 @@ type Util = jasmine.MatchersUtil;
 type CustomMatcher = jasmine.CustomMatcher;
 type EqualityTesters = jasmine.CustomEqualityTester[];
 
-const sessionCredentials = credentials.standard;
 const malformedCredentials = { apiKey: '1234', invalidProp: '1234', token: '1234' };
 const badCredentials = { apiKey: '1234', sessionId: '1234', token: '1234' };
 const networkTest = new NetworkTest(OT, sessionCredentials);
