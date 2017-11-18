@@ -32,6 +32,7 @@
     "axios": "^0.17.1",
     "jasmine": "^2.8.0",
     "karma-mocha-reporter": "^2.2.5",
+    "opentok-solutions-logging": "^1.0.10",
     "promise": "^8.0.1"
   },
   "devDependencies": {

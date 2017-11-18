@@ -16,10 +16,13 @@ import {
   MissingSessionCredentialsError,
 } from './errors';
 import { getOr } from '../util';
+const analytics  = require('opentok-solutions-logging');
+
 
 export default class NetworkTest {
   credentials: SessionCredentials;
   OT: OpenTok;
+  otLogging: OTLogging;
 
   /**
    * Returns an instance of NetworkConnectivity
@@ -27,6 +30,7 @@ export default class NetworkTest {
   constructor(OT: OpenTok, credentials: SessionCredentials) {
     this.validateOT(OT);
     this.validateCredentials(credentials);
+    this.startLoggingEngine(credentials.apiKey, credentials.sessionId);
     this.OT = OT;
     this.credentials = credentials;
   }
@@ -45,26 +49,44 @@ export default class NetworkTest {
       throw new IncompleteSessionCredentialsError();
     }
   }
-
-  private validateCallbacks(updateCallback: UpdateCallback<any> | null, onComplete?: CompletionCallback<any>) {
+  private validateCallbacks(
+    action: string,
+    updateCallback: UpdateCallback<any> | null,
+    onComplete?: CompletionCallback<any>) {
     if (updateCallback) {
       if (typeof updateCallback !== 'function' || updateCallback.length !== 1) {
+        this.otLogging.logEvent({ action, variation: 'Failure' });
         throw new InvalidOnUpdateCallback();
       }
     }
     if (onComplete) {
       if (typeof onComplete !== 'function' || onComplete.length !== 2) {
+        this.otLogging.logEvent({ action, variation: 'Failure' });
         throw new InvalidOnCompleteCallback();
       }
     }
   }
 
+  private startLoggingEngine(apiKey: string, sessionId: string): void {
+    this.otLogging = new analytics({
+      sessionId,
+      partnerId: apiKey,
+      source: window.location.href,
+      clientVersion: 'js-network-test-1.0.0',
+      name: 'opentok-network-test',
+      componentId: 'opentok-network-test',
+    });
+  }
+
   /**
    * This method checks to see if the client can connect to TokBox servers required for using OpenTok
    */
-  testConnectivity(onComplete?: CompletionCallback<any>): Promise<ConnectivityTestResults> {
-    this.validateCallbacks(null, onComplete);
-    return testConnectivity(this.OT, this.credentials, onComplete);
+   testConnectivity(
+     deviceOptions?: DeviceOptions,
+     onComplete?: CompletionCallback<any>): Promise<ConnectivityTestResults> {
+     this.otLogging.logEvent({ action: 'checkConnectivity', variation: 'Attempt' });
+     this.validateCallbacks('testConnectivity', null, onComplete);
+     return testConnectivity(this.OT, this.credentials, this.otLogging, onComplete);
   }
 
   /**
@@ -72,8 +94,12 @@ export default class NetworkTest {
    * audio bitrate, and the audio packet loss for the published stream, it returns
    * results indicating the recommended supported publisher settings.
    */
-  testQuality(updateCallback: UpdateCallback<any>, completionCallback: CompletionCallback<any>): Promise<any> {
-    this.validateCallbacks(updateCallback, completionCallback);
-    return testQuality(this.OT, this.credentials, updateCallback, completionCallback);
+   testQuality(
+     updateCallback: UpdateCallback<any>,
+     completionCallback: CompletionCallback<any>): Promise<any> {
+     this.otLogging.logEvent({ action: 'testQuality', variation: 'Attempt' });
+     this.validateCallbacks('testQuality', updateCallback, completionCallback);
+     return testQuality(
+       this.OT, this.credentials, this.otLogging, updateCallback, completionCallback);
   }
 }
