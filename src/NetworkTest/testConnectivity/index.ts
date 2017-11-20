@@ -174,6 +174,7 @@ function checkLoggingServer(OT: OpenTok, input?: SubscribeToSessionResults): Pro
 export function testConnectivity(
   OT: OpenTok,
   credentials: SessionCredentials,
+  otLogging: OTKAnalytics,
   onComplete?: CompletionCallback<any>): Promise<ConnectivityTestResults> {
   return new Promise((resolve, reject) => {
 
@@ -183,6 +184,7 @@ export function testConnectivity(
         failedTests: [],
       };
       onComplete && onComplete(undefined, results);
+      otLogging.logEvent({ action: 'testConnectivity', variation: 'Success' });
       return resolve(results);
     };
 
@@ -194,7 +196,7 @@ export function testConnectivity(
           failedTests: mapErrors(...errors),
         };
         onComplete && onComplete(undefined, results);
-        results.failedTests.forEach(r => console.log(r.error.message))
+        otLogging.logEvent({ action: 'testConnectivity', variation: 'Success' });
         resolve(results);
       };
 
