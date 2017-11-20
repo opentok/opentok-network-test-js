@@ -16,13 +16,13 @@ import {
   MissingSessionCredentialsError,
 } from './errors';
 import { getOr } from '../util';
-const analytics  = require('opentok-solutions-logging');
+import * as OTKAnalytics from 'opentok-solutions-logging';
 
 
 export default class NetworkTest {
   credentials: SessionCredentials;
   OT: OpenTok;
-  otLogging: OTLogging;
+  otLogging: OTKAnalytics;
 
   /**
    * Returns an instance of NetworkConnectivity
@@ -68,7 +68,7 @@ export default class NetworkTest {
   }
 
   private startLoggingEngine(apiKey: string, sessionId: string): void {
-    this.otLogging = new analytics({
+    this.otLogging = new OTKAnalytics({
       sessionId,
       partnerId: apiKey,
       source: window.location.href,
@@ -81,12 +81,12 @@ export default class NetworkTest {
   /**
    * This method checks to see if the client can connect to TokBox servers required for using OpenTok
    */
-   testConnectivity(
-     deviceOptions?: DeviceOptions,
-     onComplete?: CompletionCallback<any>): Promise<ConnectivityTestResults> {
-     this.otLogging.logEvent({ action: 'checkConnectivity', variation: 'Attempt' });
-     this.validateCallbacks('testConnectivity', null, onComplete);
-     return testConnectivity(this.OT, this.credentials, this.otLogging, onComplete);
+  testConnectivity(
+    deviceOptions?: DeviceOptions,
+    onComplete?: CompletionCallback<any>): Promise<ConnectivityTestResults> {
+    this.otLogging.logEvent({ action: 'checkConnectivity', variation: 'Attempt' });
+    this.validateCallbacks('testConnectivity', null, onComplete);
+    return testConnectivity(this.OT, this.credentials, this.otLogging, onComplete);
   }
 
   /**
@@ -94,12 +94,12 @@ export default class NetworkTest {
    * audio bitrate, and the audio packet loss for the published stream, it returns
    * results indicating the recommended supported publisher settings.
    */
-   testQuality(
-     updateCallback: UpdateCallback<any>,
-     completionCallback: CompletionCallback<any>): Promise<any> {
-     this.otLogging.logEvent({ action: 'testQuality', variation: 'Attempt' });
-     this.validateCallbacks('testQuality', updateCallback, completionCallback);
-     return testQuality(
-       this.OT, this.credentials, this.otLogging, updateCallback, completionCallback);
+  testQuality(
+    updateCallback: UpdateCallback<any>,
+    completionCallback: CompletionCallback<any>): Promise<any> {
+    this.otLogging.logEvent({ action: 'testQuality', variation: 'Attempt' });
+    this.validateCallbacks('testQuality', updateCallback, completionCallback);
+    return testQuality(
+      this.OT, this.credentials, this.otLogging, updateCallback, completionCallback);
   }
 }

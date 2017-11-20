@@ -30,7 +30,6 @@ export type ConnectivityTestResults = {
 };
 
 const errorHasName = (error: OT.OTError | null = null, name: OTErrorType): Boolean => get('code', error) === name;
-let otLogging: OTLogging;
 
 /**
  * Attempt to connect to the OpenTok session
@@ -173,7 +172,7 @@ function checkLoggingServer(OT: OpenTok, input?: SubscribeToSessionResults): Pro
 export function testConnectivity(
   OT: OpenTok,
   credentials: SessionCredentials,
-  otLoggingObj: OTLogging,
+  otLogging: OTKAnalytics,
   onComplete?: CompletionCallback<any>): Promise<ConnectivityTestResults> {
   return new Promise((resolve, reject) => {
 
@@ -211,8 +210,6 @@ export function testConnectivity(
           .catch((loggingError: e.LoggingServerConnectionError) => handleResults(error, loggingError));
       }
     };
-
-    otLogging = otLoggingObj;
 
     connectToSession(OT, credentials)
       .then(session => checkPublishToSession(OT, session))

@@ -143,7 +143,7 @@ function checkSubscriberQuality(
 export default function testQuality(
   OT: OpenTok,
   credentials: SessionCredentials,
-  otLogging: OTLogging,
+  otLogging: OTKAnalytics,
   onUpdate?: UpdateCallback<OT.SubscriberStats>,
   onComplete?: CompletionCallback<QualityTestResults>): Promise<QualityTestResults> {
   return new Promise((resolve, reject) => {

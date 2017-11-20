@@ -95,13 +95,13 @@ type QualityStats = {
   frameRate?: number,
 };
 
-type OTLoggingData = {
-  action: string,
-  variation: string
-}
+// type OTLoggingData = {
+//   action: string,
+//   variation: string
+// }
 
-interface OTLogging {
-  logEvent: (data: OTLoggingData) => void;
-}
+// interface OTLogging {
+//   logEvent: (data: OTLoggingData) => void;
+// }
 
 type StreamCreatedEvent = OT.Event<'streamCreated', OT.Publisher> & { stream: OT.Stream };
