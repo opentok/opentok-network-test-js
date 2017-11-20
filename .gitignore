@@ -68,5 +68,5 @@ sample/bundle.js
 sample/config.js
 
 # test credentials
-/test/sessionCredentials.json
+/test/credentials.json
 
