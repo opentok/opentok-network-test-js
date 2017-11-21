@@ -62,16 +62,16 @@ function displayTestQualityResults(error, results) {
   var resultsEl = statusContainerEl.querySelector('.results');
   resultsEl.style.display = 'block';
   resultsEl.querySelector('#audio-supported').textContent = results.audio.supported ? "Yes" : "No";
-  resultsEl.querySelector('#audio-bitrate').textContent = (results.audio.bitrate / 100).toFixed(2);
+  resultsEl.querySelector('#audio-bitrate').textContent = (results.audio.bitrate / 1000).toFixed(2);
   resultsEl.querySelector('#audio-plr').textContent = (results.audio.packetLossRatio / 100)
     .toFixed(2);
   resultsEl.querySelector('#video-supported').textContent = results.video.supported ? "Yes" : "No";
-  resultsEl.querySelector('#video-bitrate').textContent = (results.video.bitrate / 100).toFixed(2);
+  resultsEl.querySelector('#video-bitrate').textContent = (results.video.bitrate / 1000).toFixed(2);
   resultsEl.querySelector('#video-plr').textContent = (results.video.packetLossRatio / 100)
     .toFixed(2);
   resultsEl.querySelector('#video-recommendedResolution').textContent =
     results.video.recommendedResolution
-      .substring(0, results.video.recommendedResolution.indexOf('@') - 2);
+      .substring(0, results.video.recommendedResolution.indexOf('@') - 1);
     resultsEl.querySelector('#video-recommendedFrameRate').textContent =
       results.video.recommendedResolution
         .substring(results.video.recommendedResolution.indexOf('@') + 1);
