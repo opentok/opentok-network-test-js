@@ -5,26 +5,17 @@ var OTNetworkTestOptions = require('./config.js');
 var otNetworkTest = new OTNetworkTest(OT, OTNetworkTestOptions);
 
 showTestStatusElement('connectivity');
-otNetworkTest.testConnectivity(function(error, results) {
-  console.log('testConnectivity callback error', error);
-  console.log('testConnectivity callback results', results);
-}).then(function(results) {
-  console.log('testConnectivity promise results', results);
-  displayConnectivityStatusResults(results.success, results.statusText);
+otNetworkTest.testConnectivity(null, function(error, results) {
+  displayTestConnectivityResults(error, results);
   testQuality();
-}).catch(function(error) {
-  console.log('testConnectivity promise error', error);
 });
 
 function testQuality() {
   showTestStatusElement('quality');
   otNetworkTest.testQuality(function updateCallback(stats) {
     console.log('testQuality updateCallback', stats);
-  }).then(function(results) {
-    console.log('testQuality promise results', results);
-    showTestStatusElement('Quality test done.');
-  }).catch(function(error) {
-    console.log('testQuality promise error', error);
+  }, function resultsCallback(error, results) {
+    displayTestQualityResults(error, results);
   });
 }
 
@@ -34,25 +25,79 @@ function showTestStatusElement(testName) {
   var statusMessageEl = statusContainer.querySelector('p');
 }
 
-function displayConnectivityStatusResults(success, failedTests) {
+function displayTestConnectivityResults(error, results) {
   var statusContainer = document.getElementById('connectivity_status_container');
   var statusMessageEl = statusContainer.querySelector('p');
   var statusIconEl = statusContainer.querySelector('img');
   statusMessageEl.style.display = 'block';
   
+  if (error) {
+    statusMessageEl.textContent = error.message;
+    statusIconEl.src = 'assets/icon_error.svg';
+    return;
+  }
+
   var statusText;
-  success = false;
-  failedTests = ['foo', 'bar']
-  if (success) {
+  if (results.success) {
     statusText = 'Passed';
     statusIconEl.src = 'assets/icon_pass.svg';
   } else {
-    statusText = 'Failed tests: ' + failedTests.join(', ');
+    statusText = 'Failed tests: ' + convertFailedTestsToString(results.failedTests);
     statusIconEl.src = 'assets/icon_error.svg';
   }
-  if (statusMessageEl.textContent) {
-    statusMessageEl.textContent = statusText;
-  } else if (statusMessageEl.innerText) {
-    statusMessageEl.innerText = statusText;
+  statusMessageEl.textContent = statusText;
+}
+
+function displayTestQualityResults(error, results) {
+  var statusContainerEl = document.getElementById('quality_status_container');
+  var statusEl = statusContainerEl.querySelector('p');
+
+  if (error) {
+    statusEl.textContent = error.message;
+    statusIconEl.src = 'assets/icon_error.svg';
+    return;
   }
+
+  statusEl.textContent = 'Test complete. Quality estimate: ' + results.mos.toFixed(2);
+  var resultsEl = statusContainerEl.querySelector('.results');
+  resultsEl.style.display = 'block';
+  resultsEl.querySelector('#audio-supported').textContent = results.audio.supported ? "Yes" : "No";
+  resultsEl.querySelector('#audio-bitrate').textContent = (results.audio.bitrate / 100).toFixed(2);
+  resultsEl.querySelector('#audio-plr').textContent = (results.audio.packetLossRatio / 100)
+    .toFixed(2);
+  resultsEl.querySelector('#video-supported').textContent = results.video.supported ? "Yes" : "No";
+  resultsEl.querySelector('#video-bitrate').textContent = (results.video.bitrate / 100).toFixed(2);
+  resultsEl.querySelector('#video-plr').textContent = (results.video.packetLossRatio / 100)
+    .toFixed(2);
+  resultsEl.querySelector('#video-recommendedResolution').textContent =
+    results.video.recommendedResolution
+      .substring(0, results.video.recommendedResolution.indexOf('@') - 2);
+    resultsEl.querySelector('#video-recommendedFrameRate').textContent =
+      results.video.recommendedResolution
+        .substring(results.video.recommendedResolution.indexOf('@') + 1);
+  var statusIconEl = statusContainerEl.querySelector('img');
+  if (results.audio.supported) {
+    if (results.video.supported) {
+      statusIconEl.src = 'assets/icon_pass.svg';
+    } else {
+      statusIconEl.src = 'assets/icon_warning.svg';
+    }
+  } else if (!results.video.supported) {
+    statusIconEl.src = 'assets/icon_error.svg';
+  }
+  console.log(JSON.stringify(results, null, 2));
+}
+
+function convertFailedTestsToString(failedTests) {
+  var mappedFailures = [];
+  if (failedTests.indexOf('api') > -1) {
+    mappedFailures.push('OpenTok API server');
+  }
+  if (failedTests.indexOf('router') > -1) {
+    mappedFailures.push('OpenTok Media router');
+  }
+  if (failedTests.indexOf('logging') > -1) {
+    mappedFailures.push('OpenTok logging server');
+  }
+  return mappedFailures.join(', ');
 }

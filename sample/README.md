@@ -38,3 +38,20 @@ Make sure you have configured the app (see the previous section). Then:
 2. Run `npm run build` (in the /sample directory). (Run this any time you edit the source code.)
 
 3. Open the /sample/index.html page in a web browser.
+
+## About the test app:
+
+The app instantiates an `OTNetworkTest` object, passing in the API key, session ID and token you
+set in the config.js file. (See "Configuring the app" above.)
+
+Then it calls the `testConnectivity()` method of the `OTNetworkTest` object. The completion handler
+for the method displays the test results. The results indicate whether the test succeeded, and if
+not, which tests failed. Or, if there was an error in calling the method, the results indicate
+that. 
+
+Then the app calls the `testQuality()` method of the `OTNetworkTest` object. The completion handler
+for the method displays the test results. The results display the resulting MOS estimate, the audio
+statistics, and the video statistics. Or, if the test failed, the results indicate that.
+
+At this point, `updateCallback` function passed into the `testQuality()` method simply logs the
+the interim quality statistics to the console. (An upcoming version will graph the data.)
