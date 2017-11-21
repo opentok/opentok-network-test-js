@@ -49,6 +49,7 @@ h1 small {
 div.prettyBox {
   box-sizing: border-box;
   padding: 2rem;
+  display: none;
 
   margin: 0 auto;
   margin-top: 2rem;
