@@ -60,7 +60,13 @@ typings/
 # build files
 dist/
 
+# env
+.env
+
 # sample
 sample/bundle.js
 sample/config.js
+
+# test credentials
+/test/credentials.json
 
