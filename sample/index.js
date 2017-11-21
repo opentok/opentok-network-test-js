@@ -85,7 +85,6 @@ function displayTestQualityResults(error, results) {
   } else if (!results.video.supported) {
     statusIconEl.src = 'assets/icon_error.svg';
   }
-  console.log(JSON.stringify(results, null, 2));
 }
 
 function convertFailedTestsToString(failedTests) {
