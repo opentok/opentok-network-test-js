@@ -16,8 +16,9 @@ import {
   MissingSessionCredentialsError,
 } from './errors';
 import { getOr } from '../util';
-import * as OTKAnalytics from 'opentok-solutions-logging';
-
+/* tslint:disable */
+const OTKAnalytics = require('opentok-solutions-logging');
+/* tslint:enable */
 
 export default class NetworkTest {
   credentials: SessionCredentials;
