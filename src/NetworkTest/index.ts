@@ -80,7 +80,11 @@ export default class NetworkTest {
   }
 
   /**
-   * This method checks to see if the client can connect to TokBox servers required for using OpenTok
+   * This method checks to see if the client can connect to TokBox servers required for
+   * using OpenTok.
+   *
+   * See the "API reference" section of the README.md file in the root of the
+   * opentok-network-test-js project for details.
    */
   testConnectivity(
     deviceOptions?: DeviceOptions,
