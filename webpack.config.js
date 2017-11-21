@@ -4,7 +4,7 @@ const nodeExternals = require('webpack-node-externals');
 const TypedocWebpackPlugin = require('typedoc-webpack-plugin');
 
 module.exports = {
-  entry: './src/networkTest/index.ts',
+  entry: './src/NetworkTest/index.ts',
   devtool: 'source-map',
   module: {
     loaders: [{
@@ -16,7 +16,7 @@ module.exports = {
     extensions: ['.ts', '.js', '.json']
   },
   target: 'node',
-  externals: [nodeExternals( { whitelist: [/^axios/] })],
+  externals: [nodeExternals( { whitelist: [/^axios/, /^promise/] })],
   output: {
     filename: 'index.js',
     path: path.resolve(__dirname, 'dist'),

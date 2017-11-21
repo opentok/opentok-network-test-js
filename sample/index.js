@@ -3,17 +3,18 @@
 import OTNetworkTest from 'opentok-network-test-js';
 var OTNetworkTestOptions = require('./config.js');
 
+console.log('sdfsdfsdf', OTNetworkTestOptions)
 var otNetworkTest = new OTNetworkTest(OT, OTNetworkTestOptions);
 
 setStatus('Testing connectivity');
-otNetworkTest.checkConnectivity(function(error, results) {
-  console.log('checkConnectivity callback error', error);
-  console.log('checkConnectivity callback results', results);
+otNetworkTest.testConnectivity(function(error, results) {
+  console.log('testConnectivity callback error', error);
+  console.log('testConnectivity callback results', results);
 }).then(function(results) {
-  console.log('checkConnectivity promise results', results);
+  console.log('testConnectivity promise results', results);
   testQuality();
 }).catch(function(error) {
-  console.log('checkConnectivity promise error', error);
+  console.log('testConnectivity promise error', error);
 });
 
 function testQuality() {

@@ -26,11 +26,24 @@ export class IncompleteSessionCredentialsError extends NetworkTestError {
   }
 }
 
+export class MissingSessionCredentialsError extends NetworkTestError {
+  constructor() {
+    super('NetworkConnectivity requires OpenTok session credentials.');
+  }
+}
+
+export class InvalidSessionCredentialsError extends NetworkTestError {
+  constructor() {
+    super('NetworkConnectivity session credentials must include an apiKey, sessionId, and token.');
+  }
+}
+
 export class InvalidOnUpdateCallback extends NetworkTestError {
   constructor() {
     super('The onUpdate callback must be a function that accepts a single parameter.');
   }
 }
+
 export class InvalidOnCompleteCallback extends NetworkTestError {
   constructor() {
     super('The onComplete callback must be a function that accepts error and results parameters');
