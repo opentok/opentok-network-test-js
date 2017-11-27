@@ -60,5 +60,6 @@ Then the app calls the `testQuality()` method of the `OTNetworkTest` object. The
 for the method displays the test results. The results display the resulting MOS estimate, the audio
 statistics, and the video statistics. Or, if the test failed, the results indicate that.
 
-At this point, `updateCallback` function passed into the `testQuality()` method simply logs the
-the interim quality statistics to the console. (An upcoming version will graph the data.)
+While the quality test is running, the `updateCallback` function passed into the `testQuality()`
+method is invoked. The intermediate audio and video statistics are passed into that method, and
+the app displays the audio and video bitrate in a graph.
