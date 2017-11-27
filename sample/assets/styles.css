@@ -102,6 +102,19 @@ div.prettyBox img {
   width: 50px;
 }
 
+.split {
+  display: none;
+}
+.split div {
+  width: 50%;
+  height: 200px;  
+}
+
+#videoGraph {
+  float: right;
+  border-left: solid #444 1px;
+}
+
 @media screen and (max-width: 380px) {
   h1 {
     font-size: 24px;

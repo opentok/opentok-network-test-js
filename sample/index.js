@@ -1,28 +1,40 @@
-/* global require */
-
 import OTNetworkTest from 'opentok-network-test-js';
-var OTNetworkTestOptions = require('./config.js');
+import createChart from './chart.js';
+import OTNetworkTestOptions from './config.js';
 var otNetworkTest = new OTNetworkTest(OT, OTNetworkTestOptions);
-
-showTestStatusElement('connectivity');
+document.getElementById('connectivity_status_container').style.display = 'block';
 otNetworkTest.testConnectivity(null, function(error, results) {
   displayTestConnectivityResults(error, results);
   testQuality();
 });
 
 function testQuality() {
-  showTestStatusElement('quality');
+  var audioChart = createChart('audio');
+  var videoChart = createChart('video');
+  var prevAudioBytesReceived = 0;
+  var prevVideoBytesReceived = 0;
+  var resultCount = 0;
+  document.getElementById('quality_status_container').style.display = 'block';
   otNetworkTest.testQuality(function updateCallback(stats) {
-    console.log('testQuality updateCallback', stats);
+    document.getElementById('graph_container').style.display = 'flex';
+    var audioBytesReceived = stats.audio.bytesReceived * 8;
+    resultCount ++;
+    audioChart.series[0].addPoint({
+      x: resultCount,
+      y: audioBytesReceived - prevAudioBytesReceived
+    }, true, false);
+    audioChart.setTitle(null, { text: 'Bitrate over ' + resultCount + 'sec'});
+    prevAudioBytesReceived = audioBytesReceived;
+    var videoBytesReceived = stats.video.bytesReceived * 8;
+    videoChart.series[0].addPoint({
+      x: resultCount,
+      y: videoBytesReceived - prevVideoBytesReceived
+    }, true, false);
+    videoChart.setTitle(null, { text: 'Bitrate over ' + resultCount + 'sec'});
+    prevVideoBytesReceived = videoBytesReceived;
   }, function resultsCallback(error, results) {
     displayTestQualityResults(error, results);
   });
-}
-
-function showTestStatusElement(testName) {
-  var statusContainer = document.getElementById(testName + '_status_container');
-  statusContainer.style.display = 'block';
-  var statusMessageEl = statusContainer.querySelector('p');
 }
 
 function displayTestConnectivityResults(error, results) {
