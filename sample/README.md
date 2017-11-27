@@ -29,14 +29,14 @@ corresponding token) for each client.
 
 Make sure you have configured the app (see the previous section). Then:
 
-1. If you want to test the sample app using the npmjs.org version of the node module, skip
+1. If you want to test the sample app using the npmjs.com version of the node module, skip
    to the next step.
    
    However, if you have locally modified the source code for the opentok-network-test-js package,
    run `npm install; npm run build; npm link` in the root directory of the project.
    Then `cd` to the /sample directory and run `npm link opentok-network-test-js`.
 
-   *Important:* The node module is not currently available on npmjs.org. Be sure to build the
+   *Important:* The node module is not currently available on npmjs.com. Be sure to build the
    node module and install it locally, as described in the previous paragraph.
 
 2. Run `npm install` (in the /sample directory).
