@@ -12,27 +12,10 @@ otNetworkTest.testConnectivity(null, function(error, results) {
 function testQuality() {
   var audioChart = createChart('audio');
   var videoChart = createChart('video');
-  var prevAudioBytesReceived = 0;
-  var prevVideoBytesReceived = 0;
-  var resultCount = 0;
   document.getElementById('quality_status_container').style.display = 'block';
   otNetworkTest.testQuality(function updateCallback(stats) {
-    document.getElementById('graph_container').style.display = 'flex';
-    var audioBytesReceived = stats.audio.bytesReceived * 8;
-    resultCount ++;
-    audioChart.series[0].addPoint({
-      x: resultCount,
-      y: audioBytesReceived - prevAudioBytesReceived
-    }, true, false);
-    audioChart.setTitle(null, { text: 'Bitrate over ' + resultCount + 'sec'});
-    prevAudioBytesReceived = audioBytesReceived;
-    var videoBytesReceived = stats.video.bytesReceived * 8;
-    videoChart.series[0].addPoint({
-      x: resultCount,
-      y: videoBytesReceived - prevVideoBytesReceived
-    }, true, false);
-    videoChart.setTitle(null, { text: 'Bitrate over ' + resultCount + 'sec'});
-    prevVideoBytesReceived = videoBytesReceived;
+    ConnectivityUI.graphIntermediateStats('audio', stats.audio);
+    ConnectivityUI.graphIntermediateStats('video', stats.video);
   }, function resultsCallback(error, results) {
     ConnectivityUI.displayTestQualityResults(error, results);
   });
