@@ -6,14 +6,14 @@
 /**
  * Returns a copy of an object, setting or overriding the property with the provided value
  */
-const assoc = (key: string, value: any, obj: Object): Object => ({ ...obj, [key]: value });
+export const assoc = (key: string, value: any, obj: Object): Object => ({ ...obj, [key]: value });
 
 
 /**
  * Returns a copy of an object, setting or overriding the property at the specified path
  * with the provided value.  The path should be provided as a period-delimited string.
  */
-const assocPath = (path: string, value: any, obj: Object): Object => {
+export const assocPath = (path: string, value: any, obj: Object): Object => {
   const keys: string[] = path.split('.');
   const key = keys[0];
   if (!keys.length) {
@@ -31,7 +31,7 @@ const assocPath = (path: string, value: any, obj: Object): Object => {
 /**
  * Returns a (nested) property from the provided object or undefined
  */
-const get = <T>(props: string, obj: any): T => {
+export const get = <T>(props: string, obj: any): T => {
   let result = Object.assign({}, obj);
   const properties = typeof props === 'string' ? props.split('.') : props;
   properties.some((p) => {
@@ -45,13 +45,13 @@ const get = <T>(props: string, obj: any): T => {
  * Returns a (nested) property from the provided object or the default
  * value if undefined
  */
-const getOr = <T>(defaultValue: any, props: string, obj: any): T => get(props, obj) || defaultValue;
+export const getOr = <T>(defaultValue: any, props: string, obj: any): T => get(props, obj) || defaultValue;
 
 /**
  * Returns a subset of the provided object with the specified properties. Keys whose corresponding
  * values are undefined are not included.
  */
-const pick =
+export const pick =
   <T extends { [key: string]: any }, K extends keyof T>(
     props: K[],
     obj: T,
@@ -65,20 +65,20 @@ const pick =
  * Returns a subset of the provided object with the specified properties. Keys whose corresponding
  * values are undefined are included.
  */
-const pickAll = <T extends { [key: string]: any }, K extends keyof T>(props: K[], obj: T): Partial<T> =>
+export const pickAll = <T extends { [key: string]: any }, K extends keyof T>(props: K[], obj: T): Partial<T> =>
   pick(props, obj, true);
 
 
 /**
  * Returns the last element from an array
  */
-const last = <T>(list: T[]): (T | undefined) => list[list.length - 1];
+export const last = <T>(list: T[]): (T | undefined) => list[list.length - 1];
 
 /**
  * Returns the nth element of an array. If a negative value is passed, the nth element from the end
  * of the array will be returned.
  */
-const nth = <T>(n: number, list: T[]): (T | undefined) => {
+export const nth = <T>(n: number, list: T[]): (T | undefined) => {
   if (n < 0) {
     return list[list.length + n];
   } else {
@@ -86,12 +86,9 @@ const nth = <T>(n: number, list: T[]): (T | undefined) => {
   }
 };
 
+/**
+ * Returns the first element from a list, or undefined if it doesn't exist
+ */
+export const head = <T>(list: T[]): (T | undefined) => nth(0, list);
 
-export {
-  get,
-  getOr,
-  last,
-  nth,
-  pick,
-  pickAll,
-};
+

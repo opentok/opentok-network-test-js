@@ -1,6 +1,5 @@
 const path = require('path');
 const webpack = require('webpack');
-const nodeExternals = require('webpack-node-externals');
 const TypedocWebpackPlugin = require('typedoc-webpack-plugin');
 
 module.exports = {
@@ -16,7 +15,6 @@ module.exports = {
     extensions: ['.ts', '.js', '.json']
   },
   target: 'node',
-  externals: [nodeExternals( { whitelist: [/^axios/, /^promise/] })],
   output: {
     filename: 'index.js',
     path: path.resolve(__dirname, 'dist'),
