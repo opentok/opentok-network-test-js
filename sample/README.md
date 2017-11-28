@@ -6,8 +6,8 @@ OpenTok servers and test session quality.
 
 ## Configuring the app:
 
-Make a copy of the /sample/configSample.js file, saving it to sample/config.js. Edit the
-properties in that file:
+Make a copy of the /sample/src/js/configSample.js file, saving it to sample/src/js/config.js.
+Edit the properties in that file:
 
 * `apiKey` -- The API key corresponding to the OpenTok project the app uses.
 

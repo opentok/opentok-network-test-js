@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "description": "OpenTok Network Test Sample App",
   "scripts": {
-    "build": "./node_modules/webpack/bin/webpack.js index.js bundle.js"
+    "build": "webpack --config webpack.config.js"
   },
   "repository": {
     "type": "git",
