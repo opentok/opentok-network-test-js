@@ -1,8 +1,8 @@
 import OTNetworkTest from 'opentok-network-test-js';
 import createChart from './chart.js';
 import * as ConnectivityUI from './connectivity-ui.js';
-import OTNetworkTestOptions from './config.js';
-var otNetworkTest = new OTNetworkTest(OT, OTNetworkTestOptions);
+import otNetworkTestOptions from './config.js';
+var otNetworkTest = new OTNetworkTest(OT, otNetworkTestOptions);
 document.getElementById('connectivity_status_container').style.display = 'block';
 otNetworkTest.testConnectivity(null, function(error, results) {
   ConnectivityUI.displayTestConnectivityResults(error, results);
