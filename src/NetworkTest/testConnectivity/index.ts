@@ -107,7 +107,8 @@ function checkCreateLocalPublisher(OT: OpenTok): Promise<CreateLocalPublisherRes
             reject(new e.FailedToCreateLocalPublisher());
           }
         });
-      });
+      })
+      .catch(reject);
   });
 }
 
