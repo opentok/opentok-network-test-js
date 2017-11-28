@@ -21,6 +21,9 @@ First, install the package:
 
 npm install opentok-network-test-js
 
+*Important:* The node module is not currently available on npmjs.com. For now, see
+the instructions on building the module below.
+
 Now load the OpenTok Network Test in your project:
 
 ```javascript
@@ -90,7 +93,7 @@ handler functions into each of these methods.
 
 See the following section for details on using the test results.
 
-See the /sample subdirectory (and the README.md file) for a sample app.
+See the /sample subdirectory (and the /sample/README.md file) for a sample app.
 
 ## API reference
 
@@ -297,3 +300,7 @@ To build the module:
 $ npm install
 $ npm run build
 ```
+
+## Sample app
+
+See the /sample subdirectory (and the /sample/README.md file) for a sample app.

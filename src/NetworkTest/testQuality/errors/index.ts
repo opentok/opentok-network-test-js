@@ -28,13 +28,13 @@ export class SessionConnectionError extends QualityTestError {
 
 export class InitPublisherError extends QualityTestError {
   constructor() {
-    super('Failed to initialize publisher');
+    super('Failed to initialize publisher.');
   }
 }
 
 export class PublishToSessionError extends QualityTestError {
   constructor() {
-    super('Failed to publisher to the OpenTok session.');
+    super('Failed to publish to the OpenTok session.');
   }
 }
 

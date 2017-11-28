@@ -1,40 +1,22 @@
-/* global require */
-
 import OTNetworkTest from 'opentok-network-test-js';
-var OTNetworkTestOptions = require('./config.js');
-
-console.log('sdfsdfsdf', OTNetworkTestOptions)
+import createChart from './chart.js';
+import * as ConnectivityUI from './connectivity-ui.js';
+import OTNetworkTestOptions from './config.js';
 var otNetworkTest = new OTNetworkTest(OT, OTNetworkTestOptions);
-
-setStatus('Testing connectivity');
-otNetworkTest.testConnectivity(function(error, results) {
-  console.log('testConnectivity callback error', error);
-  console.log('testConnectivity callback results', results);
-}).then(function(results) {
-  console.log('testConnectivity promise results', results);
+document.getElementById('connectivity_status_container').style.display = 'block';
+otNetworkTest.testConnectivity(null, function(error, results) {
+  ConnectivityUI.displayTestConnectivityResults(error, results);
   testQuality();
-}).catch(function(error) {
-  console.log('testConnectivity promise error', error);
 });
 
 function testQuality() {
-  setStatus('Testing quality.');
+  var audioChart = createChart('audio');
+  var videoChart = createChart('video');
+  document.getElementById('quality_status_container').style.display = 'block';
   otNetworkTest.testQuality(function updateCallback(stats) {
-    console.log('testQuality updateCallback', stats);
-  }).then(function(results) {
-    console.log('testQuality promise results', results);
-    setStatus('Quality test done.');
-  }).catch(function(error) {
-    console.log('testQuality promise error', error);
+    ConnectivityUI.graphIntermediateStats('audio', stats.audio);
+    ConnectivityUI.graphIntermediateStats('video', stats.video);
+  }, function resultsCallback(error, results) {
+    ConnectivityUI.displayTestQualityResults(error, results);
   });
-}
-
-function setStatus(statusText) {
-  var statusMessageEl = document.getElementById('status_container').querySelector('p');
-
-  if (statusMessageEl.textContent) {
-    statusMessageEl.textContent = statusText;
-  } else if (statusMessageEl.innerText) {
-    statusMessageEl.innerText = statusText;
-  }
 }

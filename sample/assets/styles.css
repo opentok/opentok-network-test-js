@@ -48,13 +48,14 @@ h1 small {
 
 div.prettyBox {
   box-sizing: border-box;
-  padding: 2rem;
+  padding: 1rem;
+  display: none;
 
   margin: 0 auto;
-  margin-top: 2rem;
+  margin-top: 1rem;
   max-width: 90%;
   min-width: 60%;
-  width: 500px;
+  width: 600px;
   background: -moz-linear-gradient(top, rgba(237,237,237,1) 0%, rgba(246,246,246,1) 53%, rgba(255,255,255,1) 100%);
   background: -webkit-gradient(left top, left bottom, color-stop(0%, rgba(237,237,237,1)), color-stop(53%, rgba(246,246,246,1)), color-stop(100%, rgba(255,255,255,1)));
   background: -webkit-linear-gradient(top, rgba(237,237,237,1) 0%, rgba(246,246,246,1) 53%, rgba(255,255,255,1) 100%);
@@ -68,21 +69,56 @@ div.prettyBox {
 
 div.prettyBox h2 {
   margin-top: 0;
+  font-size: 18px;
 }
 
 div.prettyBox p {
   color: #999;
   font-weight: 200;
-  font-size: 26px;
+  font-size: 16px;
+  margin: 0;
+  margin-bottom: 8px;
 }
 
-div.prettyBox p {
+div.prettyBox .results {
+  display: none;
+}
+
+h3 {
+  font-size: 16px;
+  margin-bottom: 6px;
+}
+
+div.prettyBox .results p {
+  color: #333;
+  font-weight: 200;
+  font-size: 14px;
   margin: 0;
+}
+
+div.prettyBox .results :last-child {
   margin-bottom: 1rem;
 }
 
 div.prettyBox img {
   width: 50px;
+}
+
+#quality_status_container > div {
+  display: flex;
+}
+
+#quality_status_container #audio, #quality_status_container #video {
+  width: 50%;
+}
+
+.graph {
+  height: 240px;
+}
+
+#quality_status_container .results {
+  display: none;
+  min-height: 80px
 }
 
 @media screen and (max-width: 380px) {
