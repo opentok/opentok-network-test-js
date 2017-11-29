@@ -90,7 +90,7 @@ export default class NetworkTest {
   testConnectivity(
     deviceOptions?: DeviceOptions,
     onComplete?: CompletionCallback<any>): Promise<ConnectivityTestResults> {
-    this.otLogging.logEvent({ action: 'checkConnectivity', variation: 'Attempt' });
+    this.otLogging.logEvent({ action: 'testConnectivity', variation: 'Attempt' });
     this.validateCallbacks('testConnectivity', null, onComplete);
     return testConnectivity(this.OT, this.credentials, this.otLogging, onComplete);
   }

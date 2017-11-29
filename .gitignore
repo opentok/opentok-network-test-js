@@ -65,7 +65,7 @@ dist/
 
 # sample
 sample/bundle.js
-sample/config.js
+sample/src/js/config.js
 
 # test credentials
 /test/credentials.json

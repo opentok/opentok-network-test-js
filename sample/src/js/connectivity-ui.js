@@ -95,7 +95,6 @@ export function graphIntermediateStats(mediaType, stats) {
   }
   var bitsReceived = stats.bytesReceived * 8;
   resultCount[mediaType]++;
-  console.log(mediaType, resultCount[mediaType], bitsReceived, prevBitsReceived[mediaType])
   charts[mediaType].series[0].addPoint({
     x: resultCount[mediaType],
     y: bitsReceived - prevBitsReceived[mediaType]
