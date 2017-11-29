@@ -16,9 +16,12 @@ Edit the properties in that file:
    In a real (not test) app, this session ID must be for a different session than
    the one that the app will use for communication. And you will generate a unique test
    session ID for each client. This session ID is used for the network test, and it
-   must be different than the session ID used for communication in the app.
+   must be different than the session ID used for communication in the app. The test
+   session must be a routed session -- one that uses the [OpenTok Media
+   Router](https://tokbox.com/developer/guides/create-session/#media-mode).
 
-* `token` -- A token corresponding to the test session.
+* `token` -- A token corresponding to the test session. Generate a test
+  token that has its role set to `publisher` or `moderator`. 
 
 For test purposes, you can obtain a test session ID an token from the [TokBox account
 page](https://tokbox.com/account). However, in a real application, use the [OpenTok server
@@ -33,7 +36,7 @@ Make sure you have configured the app (see the previous section). Then:
    to the next step.
    
    However, if you have locally modified the source code for the opentok-network-test-js package,
-   run `npm install; npm run build; npm link` in the root directory of the project.
+   `cd` to the root directory of the project and run `npm install; npm run build; npm link`.
    Then `cd` to the /sample directory and run `npm link opentok-network-test-js`.
 
    *Important:* The node module is not currently available on npmjs.com. Be sure to build the

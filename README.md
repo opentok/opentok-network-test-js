@@ -46,12 +46,15 @@ const otNetworkConnectivity = new NetworkConnectivity(OT, {
 
 Use the [OpenTok server SDKs](https://tokbox.com/developer/sdks/server/) to generate a
 unique session ID for each client. This session ID is used for the network test, and it must
-be different than the session ID used for communication in the app. Also generate a token.
+be different than the session ID used for communication in the app. The test session must be
+a routed session -- one that uses the [OpenTok Media
+Router](https://tokbox.com/developer/guides/create-session/#media-mode). Also generate a test
+token that has publish privileges. 
 
 Then run the test methods:
 
 ```javascript
-otNetworkTest.checkConnectivity().then((results) => {
+otNetworkTest.testConnectivity().then((results) => {
   console.log('OpenTok connectivity test results', results);
   otNetworkTest.testQuality(updateCallback(stats) {
     // This function is called repeatedly as the quality test runs.
@@ -87,7 +90,7 @@ otNetworkTest.checkConnectivity().then((results) => {
 });
 ```
 
-This code uses Promises returned by the `OTNetworkTest.checkConnectivity()`
+This code uses Promises returned by the `OTNetworkTest.testConnectivity()`
 and `OTNetworkTest.testQuality()` methods. Alternatively, you can pass completion
 handler functions into each of these methods. 
 
@@ -101,7 +104,7 @@ The OTNetworkTest NPM module includes three public methods:
 
 * The OTNetworkTest() constructor method
 
-* The `OTNetworkTest.checkConnectivity()` method
+* The `OTNetworkTest.testConnectivity()` method
 
 * The `OTNetworkTest.testQuality()` method
 
@@ -130,14 +133,18 @@ The `OTNetworkTest()` constructor includes the following parameters (both requir
      the one that your application will be used for communication. Generate a unique
      session ID for each client. This session ID is used for the network test, and it
      must be different than the session ID used for communication in the app.
+     The test session must be a routed session -- one that uses the [OpenTok Media
+     Router](https://tokbox.com/developer/guides/create-session/#media-mode).
+
 
      To test connectivity
      in a specific region, specify a location hint when [creating the test
      session](https://tokbox.com/developer/guides/create-session/).
 
-  * `token` -- A token corresponding to the test session.
+  * `token` -- A token corresponding to the test session. The role of the token must be
+    either `publisher` or `moderator`.
 
-### OTNetworkTest.checkConnectivity(callback)
+### OTNetworkTest.testConnectivity(callback)
 
 This method checks to see if the client can connect to OpenTok servers.
 It includes one parameter: `callback`.
@@ -178,7 +185,7 @@ This callback function takes two parameters:
   `results` is undefined if there was an error in running the tests (and the `error` parameter
   is unset).
 
-The callback function is optional. The `checkConnectivity()` method returns a JavaScript promise.
+The callback function is optional. The `testConnectivity()` method returns a JavaScript promise.
 The promise is resolved on success, and the `results` object is passed into the `success`
 callback method of the promise's `then()` function, or the `error` object is passed into the
 promise's `catch()` function.
@@ -283,7 +290,7 @@ is invoked when the connectivity check completes. This callback function takes t
   `results` is undefined if there was an error in running the tests (and the `error` parameter
   is unset).
 
-The `completionCallback` function is optional. The `checkConnectivity()` method returns a JavaScript
+The `completionCallback` function is optional. The `testConnectivity()` method returns a JavaScript
 promise. The promise is resolved on success, and the `results` object is passed into the `success`
 callback method of the promise's `then()` function, or the `error` object is passed into the
 promise's `catch()` function.
