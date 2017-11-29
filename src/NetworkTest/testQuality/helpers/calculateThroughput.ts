@@ -22,9 +22,14 @@ function getAverageBitrateAndPlr(type: AV, statsList: QualityStats[]): AverageSt
     bitrate: sumBps / statsList.length,
     packetLossRatio: sumPlr / statsList.length,
   };
-  const { supported, reason, recommendedResolution } = getQualityEvaluation(averageStats, type);
+  const { supported, reason, recommendedResolution, recommendedFrameRate } =
+    getQualityEvaluation(averageStats, type);
   const videoStats =
-    type === 'video' ? { recommendedResolution, frameRate: sumFrameRate / statsList.length } : {};
+    type === 'video' ? {
+      recommendedResolution,
+      recommendedFrameRate,
+      frameRate: sumFrameRate / statsList.length,
+    } : {};
 
   return { ...averageStats, supported, reason, ...videoStats };
 }

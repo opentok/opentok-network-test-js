@@ -33,6 +33,7 @@ type TestQualityResults = {
     bitrate: number,
     packetLoss: number,
     frameRate: number,
+    recommendedFrameRate?: string,
     recommendedResolution?: string,
     supported: boolean,
     reason?: string,
@@ -80,12 +81,14 @@ interface AverageStats {
   supported?: boolean;
   reason?: string;
   frameRate?: number;
+  recommendedFrameRate?: number;
   recommendedResolution?: string;
 }
 
 type QualityEvaluationResults = {
   supported: boolean,
-  recommendedResolution: string,
+  recommendedFrameRate?: number,
+  recommendedResolution?: string,
   reason?: string,
 };
 

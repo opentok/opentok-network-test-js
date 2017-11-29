@@ -72,11 +72,9 @@ export function displayTestQualityResults(error, results) {
   resultsEl.querySelector('#video-plr').textContent = (results.video.packetLossRatio / 100)
     .toFixed(2);
   resultsEl.querySelector('#video-recommendedResolution').textContent =
-    results.video.recommendedResolution
-      .substring(0, results.video.recommendedResolution.indexOf('@') - 1);
-    resultsEl.querySelector('#video-recommendedFrameRate').textContent =
-      results.video.recommendedResolution
-        .substring(results.video.recommendedResolution.indexOf('@') + 1);
+    results.video.recommendedResolution;
+  resultsEl.querySelector('#video-recommendedFrameRate').textContent =
+    results.video.recommendedFrameRate + ' fps';
   var statusIconEl = statusContainerEl.querySelector('img');
   if (results.audio.supported) {
     if (results.video.supported) {
