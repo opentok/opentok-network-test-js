@@ -86,7 +86,8 @@ function buildResults(builder: QualityTestResultsBuilder): QualityTestResults {
   return {
     mos: builder.state.qualityScore(),
     audio: pick(baseProps, builder.state.stats.audio),
-    video: pick(baseProps.concat(['frameRate', 'recommendedResolution']), builder.state.stats.video),
+    video: pick(baseProps.concat(['frameRate', 'recommendedResolution', 'recommendedFrameRate']),
+      builder.state.stats.video),
   };
 }
 
