@@ -57,3 +57,16 @@ typings/
 # dotenv environment variables file
 .env
 
+# build files
+dist/
+
+# env
+.env
+
+# sample
+sample/bundle.js
+sample/src/js/config.js
+
+# test credentials
+/test/credentials.json
+

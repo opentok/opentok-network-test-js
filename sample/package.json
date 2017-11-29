@@ -1,0 +1,22 @@
+{
+  "name": "opentok-network-test-sample",
+  "version": "1.0.0",
+  "description": "OpenTok Network Test Sample App",
+  "scripts": {
+    "build": "webpack --config webpack.config.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/opentok/opentok-network-connectivity.git"
+  },
+  "author": "swartz@tokbox.com",
+  "license": "MIT",
+  "homepage": "https://github.com/opentok/opentok-network-connectivity",
+  "devDependencies": {
+    "webpack": "^3.8.1"
+  },
+  "dependencies": {
+    "highcharts": "^6.0.3",
+    "opentok-network-test-js": "^1.0.0"
+  }
+}
