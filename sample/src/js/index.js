@@ -4,7 +4,7 @@ import * as ConnectivityUI from './connectivity-ui.js';
 import otNetworkTestOptions from './config.js';
 var otNetworkTest = new OTNetworkTest(OT, otNetworkTestOptions);
 document.getElementById('connectivity_status_container').style.display = 'block';
-otNetworkTest.testConnectivity(null, function(error, results) {
+otNetworkTest.testConnectivity(function(error, results) {
   ConnectivityUI.displayTestConnectivityResults(error, results);
   testQuality();
 });

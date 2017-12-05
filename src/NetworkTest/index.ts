@@ -88,7 +88,6 @@ export default class NetworkTest {
    * opentok-network-test-js project for details.
    */
   testConnectivity(
-    deviceOptions?: DeviceOptions,
     onComplete?: CompletionCallback<any>): Promise<ConnectivityTestResults> {
     this.otLogging.logEvent({ action: 'testConnectivity', variation: 'Attempt' });
     this.validateCallbacks('testConnectivity', null, onComplete);

@@ -40,14 +40,7 @@ type TestQualityResults = {
   },
 }
 
-
-type DeviceId = string;
 type InputDeviceType = 'audioInput' | 'videoInput';
-type DeviceOptions = {
-  audioDevice?: DeviceId,
-  videoDevice?: DeviceId
-}
-
 
 /**
  * Quality Test
