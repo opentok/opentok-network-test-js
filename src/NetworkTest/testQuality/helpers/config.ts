@@ -30,7 +30,7 @@ const config: QualityTestConfig = {
   },
   minimumVideoAndAudioTestSampleSize: 5,
   steadyStateSampleWindow: 5000, // this is also used to calculate bandwidth
-  steadyStateAllowedDelta: 0.10, // 1 = 100%, from point to point
+  steadyStateAllowedDelta: 0.05, // 1 = 100%, from point to point
   qualityThresholds: {
     video: [
       {
@@ -42,11 +42,6 @@ const config: QualityTestConfig = {
         bps: 600000,
         plr: 0.005,
         recommendedSetting: '640x480 @ 30FPS',
-      },
-      {
-        bps: 300000,
-        plr: 0.005,
-        recommendedSetting: '352x288 @ 30FPS',
       },
       {
         bps: 300000,
@@ -66,12 +61,7 @@ const config: QualityTestConfig = {
       {
         bps: 150000,
         plr: 0.03,
-        recommendedSetting: '352x288 @ 30FPS',
-      },
-      {
-        bps: 150000,
-        plr: 0.03,
-        recommendedSetting: '320x240 @ 30',
+        recommendedSetting: '320x240 @ 30FPS',
       },
     ],
     audio: [
