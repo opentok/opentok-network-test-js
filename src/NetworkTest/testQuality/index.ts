@@ -46,7 +46,7 @@ function publishAndSubscribe(session: OT.Session): Promise<OT.Subscriber> {
   return new Promise((resolve, reject) => {
     type StreamCreatedEvent = OT.Event<'streamCreated', OT.Publisher> & { stream: OT.Stream };
     const testContainerDiv = document.createElement('div');
-    const publisher = OT.initPublisher(testContainerDiv, {}, (error?: OT.OTError) => {
+    const publisher = OT.initPublisher(testContainerDiv, { resolution: '1280x720' }, (error?: OT.OTError) => {
       if (error) {
         reject(new e.InitPublisherError());
       } else {
