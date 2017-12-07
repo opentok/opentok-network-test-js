@@ -34,37 +34,82 @@ function connectToSession(session: OT.Session, token: string): Promise<OT.Sessio
     if (session.connection) {
       resolve(session);
     } else {
-      session.connect(token, (error?: OT.OTError) => error ? reject(new e.SessionConnectionError()) : resolve(session));
+      session.connect(token, (error?: OT.OTError) => {
+        return error ? reject(new e.ConnectToSessionError(error.message)) : resolve(session);
+      });
     }
+  });
+}
+
+/**
+ * Ensure that audio and video devices are available and validate any
+ * specified device preferences. Return warnings for any devices preferences
+ * that are not available.
+ */
+function validateDevices(OT: OpenTok): Promise<void> {
+  return new Promise((resolve, reject) => {
+
+    type DeviceMap = { [deviceId: string]: OT.Device };
+    type AvailableDevices = { audio: DeviceMap, video: DeviceMap };
+
+    OT.getDevices((error?: OT.OTError, devices: OT.Device[] = []) => {
+
+      if (error) {
+        reject(new e.FailedToObtainMediaDevices());
+      } else {
+
+        const availableDevices: AvailableDevices = devices.reduce(
+          (acc: AvailableDevices, device: OT.Device) => {
+            const type: AV = device.kind === 'audioInput' ? 'audio' : 'video';
+            return { ...acc, [type]: { ...acc[type], [device.deviceId]: device } };
+          },
+          { audio: {}, video: {} },
+        );
+
+        if (!Object.keys(availableDevices.audio).length) {
+          reject(new e.NoAudioCaptureDevicesError());
+        } else if (!Object.keys(availableDevices.video).length) {
+          reject(new e.NoVideoCaptureDevicesError());
+        } else {
+          resolve();
+        }
+      }
+    });
   });
 }
 
 /**
  * Create a test publisher and subscribe to the publihser's stream
  */
-function publishAndSubscribe(session: OT.Session): Promise<OT.Subscriber> {
-  return new Promise((resolve, reject) => {
-    type StreamCreatedEvent = OT.Event<'streamCreated', OT.Publisher> & { stream: OT.Stream };
-    const testContainerDiv = document.createElement('div');
-    const publisher = OT.initPublisher(testContainerDiv, { resolution: '1280x720' }, (error?: OT.OTError) => {
-      if (error) {
-        reject(new e.InitPublisherError());
-      } else {
-        session.publish(publisher, (publishError?: OT.OTError) => {
-          if (publishError) {
-            return reject(new e.PublishToSessionError());
-          }
-        });
-      }
+function publishAndSubscribe(OT: OpenTok) {
+  return (session: OT.Session): Promise<OT.Subscriber> =>
+    new Promise((resolve, reject) => {
+      type StreamCreatedEvent = OT.Event<'streamCreated', OT.Publisher> & { stream: OT.Stream };
+      validateDevices(OT)
+        .then(() => {
+          const containerDiv = document.createElement('div');
+          const publisher = OT.initPublisher(containerDiv, { resolution: '1280x720' }, (error?: OT.OTError) => {
+            if (error) {
+              reject(new e.InitPublisherError(error.message));
+            } else {
+              session.publish(publisher, (publishError?: OT.OTError) => {
+                if (publishError) {
+                  return reject(new e.PublishToSessionError(publishError.message));
+                }
+              });
+            }
+          });
+          publisher.on('streamCreated', (event: StreamCreatedEvent) => {
+            const subscriber =
+              session.subscribe(event.stream, containerDiv, { testNetwork: true }, (subscribeError?: OT.OTError) => {
+                return subscribeError ?
+                  reject(new e.SubscribeToSessionError(subscribeError.message)) :
+                  resolve(subscriber);
+              });
+          });
+        })
+        .catch(reject);
     });
-
-    publisher.on('streamCreated', (event: StreamCreatedEvent) => {
-      const subscriber =
-        session.subscribe(event.stream, testContainerDiv, { testNetwork: true }, (subscribeError?: OT.OTError) => {
-          return subscribeError ? reject(new e.SubscribeError()) : resolve(subscriber);
-        });
-    });
-  });
 }
 /**
  *  Connect to the OpenTok session, create a publisher, and subsribe to the publisher's stream
@@ -75,7 +120,7 @@ function subscribeToTestStream(
   credentials: SessionCredentials): Promise<OT.Subscriber> {
   return new Promise((resolve, reject) => {
     connectToSession(session, credentials.token)
-      .then(publishAndSubscribe)
+      .then(publishAndSubscribe(OT))
       .then(resolve)
       .catch(reject);
   });
