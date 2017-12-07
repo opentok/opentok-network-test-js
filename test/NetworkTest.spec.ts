@@ -14,9 +14,12 @@ import {
   InvalidOnUpdateCallback,
 } from '../src/NetworkTest/errors';
 import { ConnectToSessionTokenError, ConnectToSessionSessionIdError, ConnectivityError, ConnectToSessionError } from '../src/NetworkTest/testConnectivity/errors';
+import { ConnectToSessionError as QualityTestSessionError } from '../src/NetworkTest/testQuality/errors';
 import { pick, head } from '../src/util';
 import NetworkTest from '../src/NetworkTest';
 import { ConnectivityTestResults } from '../src/NetworkTest/testConnectivity/index';
+import { QualityTestError } from '../src/NetworkTest/testQuality/errors/index';
+import { Stats } from 'fs-extra';
 
 type Util = jasmine.MatchersUtil;
 type CustomMatcher = jasmine.CustomMatcher;
@@ -110,7 +113,55 @@ describe('Network Test', () => {
         expect(() => networkTest.testQuality('callback').toThrow(new InvalidOnUpdateCallback()))
         expect(() => networkTest.testQuality(validOnUpdateCallback, 'callback').toThrow(new InvalidOnCompleteCallback()))
         expect(() => networkTest.testConnectivity(validOnUpdateCallback, validOnCompleteCallback).not.toThrowError(NetworkTestError))
-      })
+      });
+
+      it('should return an error if invalid session credentials are used', (done) => {
+        const validateResults = (results: QualityTestResults) => {
+          expect(results).toBe(undefined);
+        };
+
+        const validateError = (error?: QualityTestError) => {
+          expect(error).toBeInstanceOf(QualityTestSessionError);
+        };
+
+        badNetworkTest.testQuality()
+          .then(validateResults)
+          .catch(validateError)
+          .finally(done);
+      });
+
+      it('should return valid results or an error', (done) => {
+        const validateResults = (results: QualityTestResults) => {
+          const { mos, audio, video } = results;
+
+          expect(mos).toEqual(jasmine.any(Number));
+
+          const audioKeys = Object.keys(audio);
+          expect(audioKeys).toContain('bitrate');
+          expect(audioKeys).toContain('supported');
+          expect(audioKeys).toContain('packetLossRatio');
+
+          const videoKeys = Object.keys(video);
+          expect(videoKeys).toContain('bitrate');
+          expect(videoKeys).toContain('supported');
+          expect(videoKeys).toContain('packetLossRatio');
+          expect(videoKeys).toContain('frameRate');
+          expect(videoKeys).toContain('recommendedResolution');
+          expect(videoKeys).toContain('recommendedFrameRate');
+
+        };
+
+        const validateError = (error?: QualityTestError) => {
+          expect(error).toBe(QualityTestError);
+        };
+
+        const onUpdate = (stats: Stats) => console.info('Subscriber stats:', stats);
+
+        networkTest.testQuality(onUpdate)
+          .then(validateResults)
+          .catch(validateError)
+          .finally(done);
+      }, 25000);
     });
   });
 });
