@@ -32,9 +32,9 @@ var OTNetworkTest = require('opentok-network-test-js');
 
 Load the OpenTok.js library.
 
-// Instantiate an instance of the test object, passing in the OpenTok.js OT object and
-// a configuration object. The configuration object contains an API key for your app's
-// OpenTok project, a session ID for a test session, and a token for that session:
+Instantiate an instance of the test object, passing in the OpenTok.js OT object and
+a configuration object. The configuration object contains an API key for your app's
+OpenTok project, a session ID for a test session, and a token for that session:
 
 ```javascript
 const otNetworkConnectivity = new NetworkConnectivity(OT, {
