@@ -160,7 +160,7 @@ describe('Network Test', () => {
           .then(validateResults)
           .catch(validateError)
           .finally(done);
-      }, 35000);
+      }, 40000);
     });
   });
 });

@@ -1,5 +1,3 @@
-import { get } from '../../../util';
-
 type Browser =
   'chrome' |
   'firefox' |
@@ -24,7 +22,7 @@ function detectBrowser(): Browser {
   }
   if (navigator.webkitGetUserMedia) {
     // Chrome, Chromium, Webview, Opera, all use the chrome shim for now
-    if (get('webkitRTCPeerConnection', window)) {
+    if (window.hasOwnProperty('webkitRTCPeerConnection')) {
       return 'chrome';
     }
     if (navigator.userAgent.match(/Version\/(\d+).(\d+)/)) {
