@@ -130,25 +130,24 @@ describe('Network Test', () => {
           .finally(done);
       });
 
-      it('should return valid results or an error', (done) => {
+      it('should return valid test results or an error', (done) => {
         const validateResults = (results: QualityTestResults) => {
           const { mos, audio, video } = results;
 
           expect(mos).toEqual(jasmine.any(Number));
 
-          const audioKeys = Object.keys(audio);
-          expect(audioKeys).toContain('bitrate');
-          expect(audioKeys).toContain('supported');
-          expect(audioKeys).toContain('packetLossRatio');
+          expect(audio.bitrate).toEqual(jasmine.any(Number));
+          expect(audio.supported).toEqual(jasmine.any(Boolean));
+          expect(audio.reason || '').toEqual(jasmine.any(String));
+          expect(audio.packetLossRatio).toEqual(jasmine.any(Number));
 
-          const videoKeys = Object.keys(video);
-          expect(videoKeys).toContain('bitrate');
-          expect(videoKeys).toContain('supported');
-          expect(videoKeys).toContain('packetLossRatio');
-          expect(videoKeys).toContain('frameRate');
-          expect(videoKeys).toContain('recommendedResolution');
-          expect(videoKeys).toContain('recommendedFrameRate');
-
+          expect(video.bitrate).toEqual(jasmine.any(Number));
+          expect(video.supported).toEqual(jasmine.any(Boolean));
+          expect(video.reason || '').toEqual(jasmine.any(String));
+          expect(video.packetLossRatio).toEqual(jasmine.any(Number));
+          expect(video.frameRate).toEqual(jasmine.any(Number));
+          expect(video.recommendedResolution).toEqual(jasmine.any(String));
+          expect(video.recommendedFrameRate).toEqual(jasmine.any(Number));
         };
 
         const validateError = (error?: QualityTestError) => {
