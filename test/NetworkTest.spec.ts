@@ -86,7 +86,7 @@ describe('Network Test', () => {
             });
             done();
           });
-      });
+      }, 10000);
 
       it('should return a failed test case if invalid session credentials are used', (done) => {
         const validateResults = (results: ConnectivityTestResults) => {
@@ -161,7 +161,7 @@ describe('Network Test', () => {
           .then(validateResults)
           .catch(validateError)
           .finally(done);
-      }, 25000);
+      }, 35000);
     });
   });
 });
