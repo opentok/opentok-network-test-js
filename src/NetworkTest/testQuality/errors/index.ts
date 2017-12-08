@@ -21,6 +21,20 @@ export class QualityTestError extends NetworkTestError {
 }
 
 /**
+ * Browser Error
+ */
+export class UnsupportedBrowserError extends QualityTestError {
+  name: string;
+  constructor(browser: string) {
+    const message =
+      `Your current browser (${browser}) is not supported. Please run the test in Chrome or Firefox`;
+    super(message);
+    Object.setPrototypeOf(this, UnsupportedBrowserError.prototype);
+    this.name = this.constructor.name;
+  }
+}
+
+/**
  * Session Errors
  */
 export class ConnectToSessionError extends QualityTestError {

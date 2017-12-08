@@ -16,6 +16,7 @@ import * as e from './errors/';
 import subscriberMOS from './helpers/subscriberMOS';
 import MOSState from './helpers/MOSState';
 import config from './helpers/config';
+import isSupportedBrowser from './helpers/isSupportedBrowser';
 
 type QualityTestResultsBuilder = {
   state: MOSState,
@@ -228,6 +229,16 @@ function checkSubscriberQuality(
 }
 
 /**
+ * Ensure that the test is being run in a supported browser.
+ */
+function validateBrowser(): Promise<void> {
+  return new Promise((resolve, reject) => {
+    const { supported, browser } = isSupportedBrowser();
+    return supported ?  resolve() : reject(new e.UnsupportedBrowserError(browser));
+  });
+}
+
+/**
  * This method checks to see if the client can publish to an OpenTok session.
  */
 export default function testQuality(
@@ -237,17 +248,21 @@ export default function testQuality(
   onUpdate?: UpdateCallback<UpdateCallbackStats>,
   onComplete?: CompletionCallback<QualityTestResults>): Promise<QualityTestResults> {
   return new Promise((resolve, reject) => {
-    const session = OT.initSession(credentials.apiKey, credentials.sessionId);
-    checkSubscriberQuality(OT, session, credentials, onUpdate)
-      .then((results: QualityTestResults) => {
-        onComplete && onComplete(undefined, results);
-        otLogging.logEvent({ action: 'testQuality', variation: 'Success' });
-        resolve(results);
-      })
-      .catch((error: Error) => {
-        otLogging.logEvent({ action: 'testQuality', variation: 'Failure' });
-        onComplete && onComplete(error, null);
-        reject(error);
-      });
+    validateBrowser()
+    .then(() => {
+      const session = OT.initSession(credentials.apiKey, credentials.sessionId);
+      checkSubscriberQuality(OT, session, credentials, onUpdate)
+        .then((results: QualityTestResults) => {
+          onComplete && onComplete(undefined, results);
+          otLogging.logEvent({ action: 'testQuality', variation: 'Success' });
+          resolve(results);
+        })
+        .catch((error: Error) => {
+          otLogging.logEvent({ action: 'testQuality', variation: 'Failure' });
+          onComplete && onComplete(error, null);
+          reject(error);
+        });
+    })
+    .catch(reject);
   });
 }
