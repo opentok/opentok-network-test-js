@@ -11,7 +11,8 @@ const calculateTotalPackets = (type: AV, current: OT.SubscriberStats, last: OT.S
   getTotalPackets(current[type]) - getTotalPackets(last[type]);
 const calculateBitRate = (type: AV, current: OT.SubscriberStats, last: OT.SubscriberStats): number => {
   const interval = current.timestamp - last.timestamp;
-  return (8 * (current[type].bytesReceived - last[type].bytesReceived)) / (interval / 1000);
+  return current[type] && current[type].bytesReceived ?
+    (8 * (current[type].bytesReceived - last[type].bytesReceived)) / (interval / 1000) : 0;
 };
 
 function calculateVideoScore(subscriber: OT.Subscriber, stats: OT.SubscriberStats[]): number {

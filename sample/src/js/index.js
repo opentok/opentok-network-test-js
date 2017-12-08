@@ -14,8 +14,8 @@ function testQuality() {
   var videoChart = createChart('video');
   document.getElementById('quality_status_container').style.display = 'block';
   otNetworkTest.testQuality(function updateCallback(stats) {
-    ConnectivityUI.graphIntermediateStats('audio', stats.audio);
-    ConnectivityUI.graphIntermediateStats('video', stats.video);
+    ConnectivityUI.graphIntermediateStats('audio', stats);
+    ConnectivityUI.graphIntermediateStats('video', stats);
   }, function resultsCallback(error, results) {
     ConnectivityUI.displayTestQualityResults(error, results);
   });

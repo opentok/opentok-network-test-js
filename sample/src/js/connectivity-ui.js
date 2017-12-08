@@ -63,18 +63,20 @@ export function displayTestQualityResults(error, results) {
   var resultsEl = statusContainerEl.querySelector('#audio .results');
   resultsEl.style.display = 'block';
   resultsEl.querySelector('#audio-supported').textContent = results.audio.supported ? 'Yes' : 'No';
-  resultsEl.querySelector('#audio-bitrate').textContent = (results.audio.bitrate / 1000).toFixed(2);
-  resultsEl.querySelector('#audio-plr').textContent = (results.audio.packetLossRatio / 100)
-    .toFixed(2);
+  resultsEl.querySelector('#audio-bitrate').textContent = results.audio.bitrate ?
+    (results.audio.bitrate / 1000).toFixed(2) + ' kbps' : '--';
+  resultsEl.querySelector('#audio-plr').textContent = results.audio.supported ?
+    (results.audio.packetLossRatio / 100).toFixed(2) + '%' : '--';
   resultsEl = statusContainerEl.querySelector('#video .results');
   resultsEl.querySelector('#video-supported').textContent = results.video.supported ? 'Yes' : 'No';
-  resultsEl.querySelector('#video-bitrate').textContent = (results.video.bitrate / 1000).toFixed(2);
-  resultsEl.querySelector('#video-plr').textContent = (results.video.packetLossRatio / 100)
-    .toFixed(2);
+  resultsEl.querySelector('#video-bitrate').textContent = results.video.bitrate ?
+    (results.video.bitrate / 1000).toFixed(2) + ' kbps' : '--';
+  resultsEl.querySelector('#video-plr').textContent = results.video.supported ?
+    (results.video.packetLossRatio / 100).toFixed(2) + '%' : '--';
   resultsEl.querySelector('#video-recommendedResolution').textContent =
-    results.video.recommendedResolution;
+    results.video.recommendedResolution || '--';
   resultsEl.querySelector('#video-recommendedFrameRate').textContent =
-    results.video.recommendedFrameRate + ' fps';
+    results.video.recommendedFrameRate ? results.video.recommendedFrameRate + ' fps' : '--';
   var statusIconEl = statusContainerEl.querySelector('img');
   if (results.audio.supported) {
     if (results.video.supported) {
@@ -88,15 +90,19 @@ export function displayTestQualityResults(error, results) {
 }
 
 export function graphIntermediateStats(mediaType, stats) {
+  var mediaStats = stats[mediaType];
   if (!charts[mediaType]) {
     charts[mediaType] = createChart(mediaType);
   }
-  var bitsReceived = stats.bytesReceived * 8;
+  var bitsReceived = mediaStats && mediaStats.bytesReceived ? mediaStats.bytesReceived * 8 : 0;
   resultCount[mediaType]++;
   charts[mediaType].series[0].addPoint({
     x: resultCount[mediaType],
     y: bitsReceived - prevBitsReceived[mediaType]
   }, true, false);
-  charts[mediaType].setTitle(null, { text: 'Bitrate over ' + resultCount[mediaType] + 'sec'});
+  var chartTitle = (stats.phase === 'audio-only') && (mediaType === 'video') ?
+   'Testing audio-only stream' :
+   'Bitrate over ' + resultCount[mediaType] + 'sec';
+  charts[mediaType].setTitle(null, { text: chartTitle});
   prevBitsReceived[mediaType] = bitsReceived;
 }

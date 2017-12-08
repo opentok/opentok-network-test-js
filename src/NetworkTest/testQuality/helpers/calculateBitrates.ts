@@ -4,7 +4,8 @@ function calculateDeltas(type: AV, samples: OT.SubscriberStats[]): Kbps[] {
     const currStat = samples[i];
     const prevStat = samples[i - 1];
     if (currStat[type] && prevStat[type]) {
-      const bytesIncreased = currStat[type].bytesReceived - prevStat[type].bytesReceived;
+      const bytesIncreased = currStat[type].bytesReceived ?
+        (currStat[type].bytesReceived - prevStat[type].bytesReceived) : 0;
       const bitsIncreased = bytesIncreased * 8;
       const kilobitsIncreased = bitsIncreased / 1000;
       const msIncreased = currStat.timestamp - prevStat.timestamp;
