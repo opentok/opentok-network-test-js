@@ -24,7 +24,13 @@ type QualityTestResultsBuilder = {
   mosScore?: number,
   bandwidth?: Bandwidth,
 };
+
+type UpdateCallbackStats = OT.SubscriberStats & { phase: string; };
+
 type MOSResultsCallback = (state: MOSState) => void;
+
+let publisher: OT.Publisher;
+let audioOnly = false; // The initial test is audio-video
 
 /**
  * If not already connected, connect to the OpenTok Session
@@ -32,9 +38,17 @@ type MOSResultsCallback = (state: MOSState) => void;
 function connectToSession(session: OT.Session, token: string): Promise<OT.Session> {
   return new Promise((resolve, reject) => {
     if (session.connection) {
+      if (publisher) {
+        session.unpublish(publisher);
+      }
       resolve(session);
     } else {
-      session.connect(token, (error?: OT.OTError) => error ? reject(new e.SessionConnectionError()) : resolve(session));
+      session.connect(token, (error?: OT.OTError) => {
+        if (publisher) {
+          session.unpublish(publisher);
+        }
+        error ? reject(new e.SessionConnectionError()) : resolve(session);
+      });
     }
   });
 }
@@ -46,7 +60,13 @@ function publishAndSubscribe(session: OT.Session): Promise<OT.Subscriber> {
   return new Promise((resolve, reject) => {
     type StreamCreatedEvent = OT.Event<'streamCreated', OT.Publisher> & { stream: OT.Stream };
     const testContainerDiv = document.createElement('div');
-    const publisher = OT.initPublisher(testContainerDiv, { resolution: '1280x720' }, (error?: OT.OTError) => {
+    const publisherOptions: OT.PublisherProperties = {
+      resolution: '1280x720',
+    };
+    if (audioOnly) {
+      publisherOptions.videoSource = null;
+    }
+    publisher = OT.initPublisher(testContainerDiv, publisherOptions, (error?: OT.OTError) => {
       if (error) {
         reject(new e.InitPublisherError());
       } else {
@@ -91,6 +111,13 @@ function buildResults(builder: QualityTestResultsBuilder): QualityTestResults {
   };
 }
 
+function isAudioQualityAcceptable(results: QualityTestResults): boolean {
+  return !!results.audio.bitrate && (results.audio.bitrate > config.qualityThresholds.audio[0].bps)
+    && (!!results.audio.packetLossRatio &&
+    (results.audio.packetLossRatio < config.qualityThresholds.audio[0].plr)
+    || results.audio.packetLossRatio === 0);
+}
+
 function checkSubscriberQuality(
   OT: OpenTok,
   session: OT.Session,
@@ -113,21 +140,44 @@ function checkSubscriberQuality(
             };
 
             const getStatsListener = (error?: OT.OTError, stats?: OT.SubscriberStats) => {
-              stats && onUpdate && onUpdate(stats);
+              const updateStats = (subscriberStats: OT.SubscriberStats): UpdateCallbackStats => ({ 
+                ...subscriberStats,
+                phase: audioOnly ? 'audio-only' : 'audio-video',
+              });
+              stats && onUpdate && onUpdate(updateStats(stats));
             };
 
             const resultsCallback: MOSResultsCallback = (state: MOSState) => {
               clearTimeout(mosEstimatorTimeoutId);
-              session.disconnect();
-              resolve(buildResults(builder));
+              const audioVideoResults: QualityTestResults = buildResults(builder);
+              if (!audioOnly && !isAudioQualityAcceptable(audioVideoResults)) {
+                audioOnly = true;
+                checkSubscriberQuality(OT, session, credentials, onUpdate)
+                  .then((results: QualityTestResults) => {
+                    resolve(results);
+                  });
+              } else {
+                session.disconnect();
+                resolve(audioVideoResults);
+              }
             };
 
             subscriberMOS(builder.state, subscriber, getStatsListener, resultsCallback);
 
             mosEstimatorTimeoutId = window.setTimeout(() => {
-              session.disconnect();
-              resolve(buildResults(builder));
-            }, config.getStatsVideoAndAudioTestDuration);
+              const audioVideoResults: QualityTestResults = buildResults(builder);
+              if (!isAudioQualityAcceptable(audioVideoResults)) {
+                audioOnly = true;
+                checkSubscriberQuality(OT, session, credentials, onUpdate)
+                  .then((results: QualityTestResults) => {
+                    resolve(results);
+                  });
+              } else {
+                session.disconnect();
+                resolve(audioVideoResults);
+              }
+            }, audioOnly ? config.getStatsAudioOnlyDuration 
+              : config.getStatsVideoAndAudioTestDuration);
 
           } catch (exception) {
             reject(new e.SubscriberGetStatsError());
@@ -145,7 +195,7 @@ export default function testQuality(
   OT: OpenTok,
   credentials: SessionCredentials,
   otLogging: OTKAnalytics,
-  onUpdate?: UpdateCallback<OT.SubscriberStats>,
+  onUpdate?: UpdateCallback<UpdateCallbackStats>,
   onComplete?: CompletionCallback<QualityTestResults>): Promise<QualityTestResults> {
   return new Promise((resolve, reject) => {
     const session = OT.initSession(credentials.apiKey, credentials.sessionId);

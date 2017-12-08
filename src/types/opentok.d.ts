@@ -85,7 +85,7 @@ declare module OT {
   type PublisherProperties = WidgetProperties & {
     audioBitrate?: number;
     audioFallbackEnabled?: boolean;
-    audioSource?: string;
+    audioSource?: string | null;
     disableAudioProcessing?: boolean;
     frameRate?: 30 | 15 | 7 | 1;
     maxResolution?: Dimensions;
@@ -103,7 +103,7 @@ declare module OT {
     );
     style?: Partial<PublisherStyle>;
     usePreviousDeviceSelection?: boolean;
-    videoSource?: string;
+    videoSource?: string | null;
   };
 
   type SubscriberStyle = WidgetStyle & {
