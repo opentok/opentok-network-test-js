@@ -248,21 +248,26 @@ export default function testQuality(
   onUpdate?: UpdateCallback<UpdateCallbackStats>,
   onComplete?: CompletionCallback<QualityTestResults>): Promise<QualityTestResults> {
   return new Promise((resolve, reject) => {
+
+    const onSuccess = (results: QualityTestResults) => {
+      onComplete && onComplete(undefined, results);
+      otLogging.logEvent({ action: 'testQuality', variation: 'Success' });
+      resolve(results);
+    };
+
+    const onError = (error: Error) => {
+      otLogging.logEvent({ action: 'testQuality', variation: 'Failure' });
+      onComplete && onComplete(error, null);
+      reject(error);
+    };
+
     validateBrowser()
     .then(() => {
       const session = OT.initSession(credentials.apiKey, credentials.sessionId);
       checkSubscriberQuality(OT, session, credentials, onUpdate)
-        .then((results: QualityTestResults) => {
-          onComplete && onComplete(undefined, results);
-          otLogging.logEvent({ action: 'testQuality', variation: 'Success' });
-          resolve(results);
-        })
-        .catch((error: Error) => {
-          otLogging.logEvent({ action: 'testQuality', variation: 'Failure' });
-          onComplete && onComplete(error, null);
-          reject(error);
-        });
+        .then(onSuccess)
+        .catch(onError);
     })
-    .catch(reject);
+    .catch(onError);
   });
 }
