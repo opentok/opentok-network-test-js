@@ -28,7 +28,6 @@ type QualityTestResultsBuilder = {
 
 type MOSResultsCallback = (state: MOSState) => void;
 
-let publisher: OT.Publisher;
 let audioOnly = false; // The initial test is audio-video
 
 /**
@@ -37,15 +36,9 @@ let audioOnly = false; // The initial test is audio-video
 function connectToSession(session: OT.Session, token: string): Promise<OT.Session> {
   return new Promise((resolve, reject) => {
     if (session.connection) {
-      if (publisher) {
-        session.unpublish(publisher);
-      }
       resolve(session);
     } else {
       session.connect(token, (error?: OT.OTError) => {
-        if (publisher) {
-          session.unpublish(publisher);
-        }
         error ? reject(new e.ConnectToSessionError(error.message)) : resolve(session);
       });
     }
