@@ -46,9 +46,7 @@ function connectToSession(session: OT.Session, token: string): Promise<OT.Sessio
 }
 
 /**
- * Ensure that audio and video devices are available and validate any
- * specified device preferences. Return warnings for any devices preferences
- * that are not available.
+ * Ensure that audio and video devices are available
  */
 function validateDevices(OT: OpenTok): Promise<void> {
   return new Promise((resolve, reject) => {
