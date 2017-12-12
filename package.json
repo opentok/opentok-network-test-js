@@ -1,6 +1,6 @@
 {
   "name": "opentok-network-test-js",
-  "version": "1.0.0",
+  "version": "0.0.1",
   "description": "",
   "main": "dist/index.js",
   "scripts": {
@@ -13,7 +13,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/opentok/network-connectivity-js.git"
+    "url": "git+https://github.com/opentok/opentok-network-test-js.git"
   },
   "keywords": [
     "tokbox",
