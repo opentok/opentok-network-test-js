@@ -53,7 +53,7 @@ export default class NetworkTest {
   }
   private validateCallbacks(
     action: string,
-    updateCallback: UpdateCallback<any> | null,
+    updateCallback?: UpdateCallback<any>,
     onComplete?: CompletionCallback<any>) {
     if (updateCallback) {
       if (typeof updateCallback !== 'function' || updateCallback.length !== 1) {
@@ -88,9 +88,9 @@ export default class NetworkTest {
    * opentok-network-test-js project for details.
    */
   testConnectivity(
-    onComplete?: CompletionCallback<any>): Promise<ConnectivityTestResults> {
+    onComplete?: CompletionCallback<ConnectivityTestResults>): Promise<ConnectivityTestResults> {
     this.otLogging.logEvent({ action: 'testConnectivity', variation: 'Attempt' });
-    this.validateCallbacks('testConnectivity', null, onComplete);
+    this.validateCallbacks('testConnectivity', undefined, onComplete);
     return testConnectivity(this.OT, this.credentials, this.otLogging, onComplete);
   }
 
@@ -103,8 +103,8 @@ export default class NetworkTest {
    * opentok-network-test-js project for details.
    */
   testQuality(
-    updateCallback: UpdateCallback<any>,
-    completionCallback: CompletionCallback<any>): Promise<any> {
+    updateCallback?: UpdateCallback<UpdateCallbackStats>,
+    completionCallback?: CompletionCallback<QualityTestResults>): Promise<any> {
     this.otLogging.logEvent({ action: 'testQuality', variation: 'Attempt' });
     this.validateCallbacks('testQuality', updateCallback, completionCallback);
     return testQuality(

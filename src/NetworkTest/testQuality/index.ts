@@ -16,6 +16,7 @@ import * as e from './errors/';
 import subscriberMOS from './helpers/subscriberMOS';
 import MOSState from './helpers/MOSState';
 import config from './helpers/config';
+import isSupportedBrowser from './helpers/isSupportedBrowser';
 
 type QualityTestResultsBuilder = {
   state: MOSState,
@@ -25,11 +26,8 @@ type QualityTestResultsBuilder = {
   bandwidth?: Bandwidth,
 };
 
-type UpdateCallbackStats = OT.SubscriberStats & { phase: string; };
-
 type MOSResultsCallback = (state: MOSState) => void;
 
-let publisher: OT.Publisher;
 let audioOnly = false; // The initial test is audio-video
 
 /**
@@ -38,53 +36,88 @@ let audioOnly = false; // The initial test is audio-video
 function connectToSession(session: OT.Session, token: string): Promise<OT.Session> {
   return new Promise((resolve, reject) => {
     if (session.connection) {
-      if (publisher) {
-        session.unpublish(publisher);
-      }
       resolve(session);
     } else {
       session.connect(token, (error?: OT.OTError) => {
-        if (publisher) {
-          session.unpublish(publisher);
-        }
-        error ? reject(new e.SessionConnectionError()) : resolve(session);
+        error ? reject(new e.ConnectToSessionError(error.message)) : resolve(session);
       });
     }
   });
 }
 
 /**
- * Create a test publisher and subscribe to the publihser's stream
+ * Ensure that audio and video devices are available and validate any
+ * specified device preferences. Return warnings for any devices preferences
+ * that are not available.
  */
-function publishAndSubscribe(session: OT.Session): Promise<OT.Subscriber> {
+function validateDevices(OT: OpenTok): Promise<void> {
   return new Promise((resolve, reject) => {
-    type StreamCreatedEvent = OT.Event<'streamCreated', OT.Publisher> & { stream: OT.Stream };
-    const testContainerDiv = document.createElement('div');
-    const publisherOptions: OT.PublisherProperties = {
-      resolution: '1280x720',
-    };
-    if (audioOnly) {
-      publisherOptions.videoSource = null;
-    }
-    publisher = OT.initPublisher(testContainerDiv, publisherOptions, (error?: OT.OTError) => {
+
+    type DeviceMap = { [deviceId: string]: OT.Device };
+    type AvailableDevices = { audio: DeviceMap, video: DeviceMap };
+
+    OT.getDevices((error?: OT.OTError, devices: OT.Device[] = []) => {
+
       if (error) {
-        reject(new e.InitPublisherError());
+        reject(new e.FailedToObtainMediaDevices());
       } else {
-        session.publish(publisher, (publishError?: OT.OTError) => {
-          if (publishError) {
-            return reject(new e.PublishToSessionError());
-          }
-        });
+
+        const availableDevices: AvailableDevices = devices.reduce(
+          (acc: AvailableDevices, device: OT.Device) => {
+            const type: AV = device.kind === 'audioInput' ? 'audio' : 'video';
+            return { ...acc, [type]: { ...acc[type], [device.deviceId]: device } };
+          },
+          { audio: {}, video: {} },
+        );
+
+        if (!Object.keys(availableDevices.audio).length) {
+          reject(new e.NoAudioCaptureDevicesError());
+        } else if (!Object.keys(availableDevices.video).length) {
+          reject(new e.NoVideoCaptureDevicesError());
+        } else {
+          resolve();
+        }
       }
     });
-
-    publisher.on('streamCreated', (event: StreamCreatedEvent) => {
-      const subscriber =
-        session.subscribe(event.stream, testContainerDiv, { testNetwork: true }, (subscribeError?: OT.OTError) => {
-          return subscribeError ? reject(new e.SubscribeError()) : resolve(subscriber);
-        });
-    });
   });
+}
+
+/**
+ * Create a test publisher and subscribe to the publihser's stream
+ */
+function publishAndSubscribe(OT: OpenTok) {
+  return (session: OT.Session): Promise<OT.Subscriber> =>
+    new Promise((resolve, reject) => {
+      type StreamCreatedEvent = OT.Event<'streamCreated', OT.Publisher> & { stream: OT.Stream };
+      const containerDiv = document.createElement('div');
+      const publisherOptions: OT.PublisherProperties = { resolution: '1280x720' };
+      const resolution  = '1280x720';
+      const publiserOptions = Object.assign({}, { resolution }, audioOnly ? { videoSource: null } : {});
+      validateDevices(OT)
+        .then(() => {
+          const containerDiv = document.createElement('div');
+          const publisher = OT.initPublisher(containerDiv, publisherOptions, (error?: OT.OTError) => {
+            if (error) {
+              reject(new e.InitPublisherError(error.message));
+            } else {
+              session.publish(publisher, (publishError?: OT.OTError) => {
+                if (publishError) {
+                  return reject(new e.PublishToSessionError(publishError.message));
+                }
+              });
+            }
+          });
+          publisher.on('streamCreated', (event: StreamCreatedEvent) => {
+            const subscriber =
+              session.subscribe(event.stream, containerDiv, { testNetwork: true }, (subscribeError?: OT.OTError) => {
+                return subscribeError ?
+                  reject(new e.SubscribeToSessionError(subscribeError.message)) :
+                  resolve(subscriber);
+              });
+          });
+        })
+        .catch(reject);
+    });
 }
 /**
  *  Connect to the OpenTok session, create a publisher, and subsribe to the publisher's stream
@@ -95,7 +128,7 @@ function subscribeToTestStream(
   credentials: SessionCredentials): Promise<OT.Subscriber> {
   return new Promise((resolve, reject) => {
     connectToSession(session, credentials.token)
-      .then(publishAndSubscribe)
+      .then(publishAndSubscribe(OT))
       .then(resolve)
       .catch(reject);
   });
@@ -140,7 +173,7 @@ function checkSubscriberQuality(
             };
 
             const getStatsListener = (error?: OT.OTError, stats?: OT.SubscriberStats) => {
-              const updateStats = (subscriberStats: OT.SubscriberStats): UpdateCallbackStats => ({ 
+              const updateStats = (subscriberStats: OT.SubscriberStats): UpdateCallbackStats => ({
                 ...subscriberStats,
                 phase: audioOnly ? 'audio-only' : 'audio-video',
               });
@@ -176,7 +209,7 @@ function checkSubscriberQuality(
                 session.disconnect();
                 resolve(audioVideoResults);
               }
-            }, audioOnly ? config.getStatsAudioOnlyDuration 
+            }, audioOnly ? config.getStatsAudioOnlyDuration
               : config.getStatsVideoAndAudioTestDuration);
 
           } catch (exception) {
@@ -185,6 +218,16 @@ function checkSubscriberQuality(
         }
       })
       .catch(reject);
+  });
+}
+
+/**
+ * Ensure that the test is being run in a supported browser.
+ */
+function validateBrowser(): Promise<void> {
+  return new Promise((resolve, reject) => {
+    const { supported, browser } = isSupportedBrowser();
+    return supported ?  resolve() : reject(new e.UnsupportedBrowserError(browser));
   });
 }
 
@@ -198,17 +241,26 @@ export default function testQuality(
   onUpdate?: UpdateCallback<UpdateCallbackStats>,
   onComplete?: CompletionCallback<QualityTestResults>): Promise<QualityTestResults> {
   return new Promise((resolve, reject) => {
-    const session = OT.initSession(credentials.apiKey, credentials.sessionId);
-    checkSubscriberQuality(OT, session, credentials, onUpdate)
-      .then((results: QualityTestResults) => {
-        onComplete && onComplete(undefined, results);
-        otLogging.logEvent({ action: 'testQuality', variation: 'Success' });
-        resolve(results);
-      })
-      .catch((error: Error) => {
-        otLogging.logEvent({ action: 'testQuality', variation: 'Failure' });
-        onComplete && onComplete(error, null);
-        reject(error);
-      });
+
+    const onSuccess = (results: QualityTestResults) => {
+      onComplete && onComplete(undefined, results);
+      otLogging.logEvent({ action: 'testQuality', variation: 'Success' });
+      resolve(results);
+    };
+
+    const onError = (error: Error) => {
+      otLogging.logEvent({ action: 'testQuality', variation: 'Failure' });
+      onComplete && onComplete(error, null);
+      reject(error);
+    };
+
+    validateBrowser()
+    .then(() => {
+      const session = OT.initSession(credentials.apiKey, credentials.sessionId);
+      checkSubscriberQuality(OT, session, credentials, onUpdate)
+        .then(onSuccess)
+        .catch(onError);
+    })
+    .catch(onError);
   });
 }
