@@ -14,13 +14,6 @@ import * as e from './errors';
 import { OTErrorType } from './errors/types';
 import { mapErrors, FailureCase } from './errors/mapping';
 import { get, getOr } from '../../util';
-import {
-  NetworkTestWarning,
-  AudioDeviceNotAvailableWarning,
-  VideoDeviceNotAvailableWarning,
-  FailedToConnectToLoggingServer,
-} from '../../warnings';
-
 type CreateLocalPublisherResults = { publisher: OT.Publisher };
 type PublishToSessionResults = { session: OT.Session } & CreateLocalPublisherResults;
 type SubscribeToSessionResults = { subscriber: OT.Subscriber } & PublishToSessionResults;
@@ -56,9 +49,7 @@ function connectToSession(OT: OpenTok, { apiKey, sessionId, token }: SessionCred
 }
 
 /**
- * Ensure that audio and video devices are available and validate any
- * specified device preferences. Return warnings for any devices preferences
- * that are not available.
+ * Ensure that audio and video devices are available
  */
 function validateDevices(OT: OpenTok): Promise<void> {
   return new Promise((resolve, reject) => {

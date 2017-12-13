@@ -32,9 +32,9 @@ var OTNetworkTest = require('opentok-network-test-js');
 
 Load the OpenTok.js library.
 
-// Instantiate an instance of the test object, passing in the OpenTok.js OT object and
-// a configuration object. The configuration object contains an API key for your app's
-// OpenTok project, a session ID for a test session, and a token for that session:
+Instantiate an instance of the test object, passing in the OpenTok.js OT object and
+a configuration object. The configuration object contains an API key for your app's
+OpenTok project, a session ID for a test session, and a token for that session:
 
 ```javascript
 const otNetworkConnectivity = new NetworkConnectivity(OT, {
@@ -207,28 +207,33 @@ This method includes two parameters: `updateCallback` and `completionCallback`.
 #### updateCallback
 
 The `updateCallback` function is called periodically during the test (at a 1-second test interval).
-Each element in the array is an object with the following data:
+
+The object passed into the `updateCallback` function includes statistics about the audio and
+video in the test stream. The object has the following data:
 
   ```
   {
-  audio: {
-    timestamp: 1509747314,
-    bytesReceived: 434349, // The total number of audio bytes received, cumulative
-    packetsReceived: 24234,  // The total number of audio packets received, cumulative
-    packetsLost: 0   // The total number of audio packets lost, cumulative
-  }
+    audio: {
+      timestamp: 1509747314,
+      bytesReceived: 434349, // The total number of audio bytes received, cumulative
+      packetsReceived: 24234,  // The total number of audio packets received, cumulative
+      packetsLost: 0   // The total number of audio packets lost, cumulative
+    },
     video: {
       timestamp: 1509747314,
       bytesReceived: 434349, // The total number of video bytes received, cumulative
       frameRate: 15,   // The video frame rate
       packetsReceived: 24234,  // The total number of video packets received, cumulative
       packetsLost: 0   // The total number of video packets lost, cumulative
-    }
+    },
+    timestamp: 1512679143897, // The timestamp of the sample
+    phase: 'audio-video' // Either 'audio-video' or 'audio-only'
   }
   ```
 
-  The elements in the array are in order with the timestamps. To get the most
-  recent stats, check the last entry of the array.
+The `phase` property is set to 'audio-video' during the initial audio-video test. If a
+secondary audio-only test is required (because audio quality was not acceptable during the
+audio-video test), the property is set to 'audio-only'.
 
 Pass in a `null` value if you do not want to register an `updateCallback` function.
 

@@ -14,9 +14,12 @@ import {
   InvalidOnUpdateCallback,
 } from '../src/NetworkTest/errors';
 import { ConnectToSessionTokenError, ConnectToSessionSessionIdError, ConnectivityError, ConnectToSessionError } from '../src/NetworkTest/testConnectivity/errors';
+import { ConnectToSessionError as QualityTestSessionError } from '../src/NetworkTest/testQuality/errors';
 import { pick, head } from '../src/util';
 import NetworkTest from '../src/NetworkTest';
 import { ConnectivityTestResults } from '../src/NetworkTest/testConnectivity/index';
+import { QualityTestError } from '../src/NetworkTest/testQuality/errors/index';
+import { Stats } from 'fs-extra';
 
 type Util = jasmine.MatchersUtil;
 type CustomMatcher = jasmine.CustomMatcher;
@@ -83,7 +86,7 @@ describe('Network Test', () => {
             });
             done();
           });
-      });
+      }, 10000);
 
       it('should return a failed test case if invalid session credentials are used', (done) => {
         const validateResults = (results: ConnectivityTestResults) => {
@@ -110,7 +113,54 @@ describe('Network Test', () => {
         expect(() => networkTest.testQuality('callback').toThrow(new InvalidOnUpdateCallback()))
         expect(() => networkTest.testQuality(validOnUpdateCallback, 'callback').toThrow(new InvalidOnCompleteCallback()))
         expect(() => networkTest.testConnectivity(validOnUpdateCallback, validOnCompleteCallback).not.toThrowError(NetworkTestError))
-      })
+      });
+
+      it('should return an error if invalid session credentials are used', (done) => {
+        const validateResults = (results: QualityTestResults) => {
+          expect(results).toBe(undefined);
+        };
+
+        const validateError = (error?: QualityTestError) => {
+          expect(error).toBeInstanceOf(QualityTestSessionError);
+        };
+
+        badNetworkTest.testQuality()
+          .then(validateResults)
+          .catch(validateError)
+          .finally(done);
+      });
+
+      it('should return valid test results or an error', (done) => {
+        const validateResults = (results: QualityTestResults) => {
+          const { mos, audio, video } = results;
+
+          expect(mos).toEqual(jasmine.any(Number));
+
+          expect(audio.bitrate).toEqual(jasmine.any(Number));
+          expect(audio.supported).toEqual(jasmine.any(Boolean));
+          expect(audio.reason || '').toEqual(jasmine.any(String));
+          expect(audio.packetLossRatio).toEqual(jasmine.any(Number));
+
+          expect(video.bitrate).toEqual(jasmine.any(Number));
+          expect(video.supported).toEqual(jasmine.any(Boolean));
+          expect(video.reason || '').toEqual(jasmine.any(String));
+          expect(video.packetLossRatio).toEqual(jasmine.any(Number));
+          expect(video.frameRate).toEqual(jasmine.any(Number));
+          expect(video.recommendedResolution).toEqual(jasmine.any(String));
+          expect(video.recommendedFrameRate).toEqual(jasmine.any(Number));
+        };
+
+        const validateError = (error?: QualityTestError) => {
+          expect(error).toBe(QualityTestError);
+        };
+
+        const onUpdate = (stats: Stats) => console.info('Subscriber stats:', stats);
+
+        networkTest.testQuality(onUpdate)
+          .then(validateResults)
+          .catch(validateError)
+          .finally(done);
+      }, 40000);
     });
   });
 });

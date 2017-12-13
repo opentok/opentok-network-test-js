@@ -40,18 +40,13 @@ type TestQualityResults = {
   },
 }
 
-
-type DeviceId = string;
 type InputDeviceType = 'audioInput' | 'videoInput';
-type DeviceOptions = {
-  audioDevice?: DeviceId,
-  videoDevice?: DeviceId
-}
-
 
 /**
  * Quality Test
  */
+
+type UpdateCallbackStats = OT.SubscriberStats & { phase: string; };
 
  interface HasAudioVideo<A> {
    audio: A;
@@ -97,14 +92,5 @@ type QualityStats = {
   packetLossRatio: number,
   frameRate?: number,
 };
-
-// type OTLoggingData = {
-//   action: string,
-//   variation: string
-// }
-
-// interface OTLogging {
-//   logEvent: (data: OTLoggingData) => void;
-// }
 
 type StreamCreatedEvent = OT.Event<'streamCreated', OT.Publisher> & { stream: OT.Stream };
