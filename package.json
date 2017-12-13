@@ -1,7 +1,7 @@
 {
   "name": "opentok-network-test-js",
-  "version": "0.0.1",
-  "description": "",
+  "version": "1.0.0-beta.2",
+  "description": "Precall network test for applications using the OpenTok platform.",
   "main": "dist/index.js",
   "scripts": {
     "build": "webpack --config webpack.config.js",
