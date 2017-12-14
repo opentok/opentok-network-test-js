@@ -3,7 +3,7 @@
 
 # OpenTok Network Test
 
-[![Build Status](https://travis-ci.org/opentok/opentok-network-test-js.svg?branch=master)](https://travis-ci.org/opentok/opentok-network-test-js)
+[![Build Status](https://goo.gl/17JDLY)](https://travis-ci.org/opentok/opentok-network-test-js)
 [![license](https://img.shields.io/github/license/opentok/opentok-network-test-js.svg)](./.github/CONTRIBUTING.md)
 [![npm](https://img.shields.io/npm/v/opentok-network-test-js.svg)](https://www.npmjs.com/package/opentok-accelerator-core)
 
