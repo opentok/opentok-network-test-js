@@ -41,7 +41,7 @@ a configuration object. The configuration object contains an API key for your ap
 OpenTok project, a session ID for a test session, and a token for that session:
 
 ```javascript
-const otNetworkConnectivity = new NetworkConnectivity(OT, {
+const otNetworkTest = new NetworkTest(OT, {
   apiKey: '123456', // Add the API key for your OpenTok project here.
   sessionId: '1_MX40NzIwMzJ-fjE1MDElGQkJJfn4', // Add a test session ID for that project
   token: 'T1==cGFydG5lcXN0PQ==' // Add a token for that session here
