@@ -102,6 +102,10 @@ See the following section for details on using the test results.
 
 See the /sample subdirectory (and the /sample/README.md file) for a sample app.
 
+## Supported browsers
+
+The OpenTok Network Test is supported in Chrome and Firefox.
+
 ## API reference
 
 The OTNetworkTest NPM module includes three public methods:
