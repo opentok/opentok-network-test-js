@@ -23,7 +23,7 @@ module.exports = {
     umdNamedDefine: true
   },
   plugins: [
-    new webpack.optimize.UglifyJsPlugin({ minimize: true }),
+    // new webpack.optimize.UglifyJsPlugin({ minimize: true }),
     new TypedocWebpackPlugin({
       name: 'OpenTok Network Connectivity Test',
       readme: './README.md',
