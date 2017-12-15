@@ -17,6 +17,6 @@
   },
   "dependencies": {
     "highcharts": "^6.0.3",
-    "opentok-network-test-js": "^1.0.0"
+    "opentok-network-test-js": "*"
   }
 }
