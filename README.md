@@ -104,7 +104,11 @@ See the /sample subdirectory (and the /sample/README.md file) for a sample app.
 
 ## Supported browsers
 
-The OpenTok Network Test is supported in Chrome and Firefox.
+The `OTNetworkTest.testConnectivity()` method is supported in Chrome, Firefox, and Safari.
+It is not supported in Internet Explorer.
+
+The `OTNetworkTest.testQuality()` method is supported in Chrome and Firefox.
+It is not supported in Safari or Internet Explorer.
 
 ## API reference
 
