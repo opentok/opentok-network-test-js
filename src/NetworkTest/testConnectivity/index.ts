@@ -11,7 +11,7 @@
 import axios from 'axios';
 import * as Promise from 'promise';
 import * as e from './errors';
-import { OTErrorType } from './errors/types';
+import { OTErrorType, errorHasName } from '../errors/types';
 import { mapErrors, FailureCase } from './errors/mapping';
 import { get, getOr } from '../../util';
 type CreateLocalPublisherResults = { publisher: OT.Publisher };
@@ -22,8 +22,6 @@ export type ConnectivityTestResults = {
   failedTests: FailureCase[],
 };
 
-const errorHasName = (error: OT.OTError | null = null, name: OTErrorType): Boolean => get('name', error) === name;
-
 /**
  * Attempt to connect to the OpenTok session
  */
@@ -32,8 +30,6 @@ function connectToSession(OT: OpenTok, { apiKey, sessionId, token }: SessionCred
     const session = OT.initSession(apiKey, sessionId);
     session.connect(token, (error?: OT.OTError) => {
       if (errorHasName(error, OTErrorType.AUTHENTICATION_ERROR)) {
-        reject(new e.ConnectToSessionTokenError());
-      } else if (errorHasName(error, OTErrorType.OT_AUTHENTICATION_ERROR)) {
         reject(new e.ConnectToSessionTokenError());
       } else if (errorHasName(error, OTErrorType.INVALID_SESSION_ID)) {
         reject(new e.ConnectToSessionSessionIdError());

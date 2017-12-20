@@ -13,6 +13,7 @@
 import * as Promise from 'promise';
 import { get, getOr, pick } from '../../util';
 import * as e from './errors/';
+import { OTErrorType, errorHasName } from '../errors/types';
 import subscriberMOS from './helpers/subscriberMOS';
 import MOSState from './helpers/MOSState';
 import config from './helpers/config';
@@ -39,7 +40,18 @@ function connectToSession(session: OT.Session, token: string): Promise<OT.Sessio
       resolve(session);
     } else {
       session.connect(token, (error?: OT.OTError) => {
-        error ? reject(new e.ConnectToSessionError(error.message)) : resolve(session);
+        if (error) {
+          if (errorHasName(error, OTErrorType.AUTHENTICATION_ERROR)) {
+            reject(new e.ConnectToSessionTokenError());
+          } else if (errorHasName(error, OTErrorType.INVALID_SESSION_ID)) {
+            reject(new e.ConnectToSessionSessionIdError());
+          } else if (errorHasName(error, OTErrorType.CONNECT_FAILED)) {
+            reject(new e.ConnectToSessionNetworkError());
+          } else {
+            reject(new e.ConnectToSessionError());
+          }
+        }
+        resolve(session);
       });
     }
   });
@@ -100,7 +112,14 @@ function publishAndSubscribe(OT: OpenTok) {
             } else {
               session.publish(publisher, (publishError?: OT.OTError) => {
                 if (publishError) {
-                  return reject(new e.PublishToSessionError(publishError.message));
+                  if (errorHasName(publishError, OTErrorType.NOT_CONNECTED)) {
+                    return reject(new e.PublishToSessionNotConnectedError());
+                  }
+                  if (errorHasName(publishError, OTErrorType.UNABLE_TO_PUBLISH)) {
+                    return reject(new e.PublishToSessionPermissionOrTimeoutError());
+                  }
+                  return reject(new e.PublishToSessionError());
+                  // return reject(new e.PublishToSessionError(publishError.message));
                 }
               });
             }

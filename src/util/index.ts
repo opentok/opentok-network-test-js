@@ -79,11 +79,7 @@ export const last = <T>(list: T[]): (T | undefined) => list[list.length - 1];
  * of the array will be returned.
  */
 export const nth = <T>(n: number, list: T[]): (T | undefined) => {
-  if (n < 0) {
-    return list[list.length + n];
-  } else {
-    return list[n];
-  }
+  return n < 0 ? list[list.length + n] : list[n];
 };
 
 /**
@@ -91,4 +87,8 @@ export const nth = <T>(n: number, list: T[]): (T | undefined) => {
  */
 export const head = <T>(list: T[]): (T | undefined) => nth(0, list);
 
+/**
+ * Returns a string with an uppercase first character
+ */
+export const properCase = (s: string) => !!s.length ? `${s[0].toUpperCase()}${s.slice(1)}` : '';
 

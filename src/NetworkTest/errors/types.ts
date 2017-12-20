@@ -6,6 +6,7 @@
  * Define errors returned by OpenTok.js
  */
 
+import { get } from '../../util';
 
 export enum OTErrorType {
   JS_EXCEPTION = 'JS_EXCEPTION',
@@ -40,4 +41,5 @@ export enum OTErrorType {
   ANVIL_CONNECT_FAILED = 'ANVIL_CONNECT_FAILED',
 }
 
-
+export const errorHasName =
+  (error: OT.OTError | null = null, name: OTErrorType): Boolean => get('name', error) === name;
