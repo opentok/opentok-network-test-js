@@ -42,4 +42,4 @@ export enum OTErrorType {
 }
 
 export const errorHasName =
-  (error: OT.OTError | null = null, name: OTErrorType): Boolean => get('name', error) === name;
+  (error: OT.OTError | null = null, name: OTErrorType): boolean => get('name', error) === name;
