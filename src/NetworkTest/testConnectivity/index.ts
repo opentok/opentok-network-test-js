@@ -192,7 +192,7 @@ export function testConnectivity(
        * If we encounter an error before testing the connection to the logging server, let's perform
        * that test as well before returning results.
        */
-      if (error.name === 'LoggingServerError') {
+      if (error.name === 'LoggingServerConnectionError') {
         handleResults(error);
       } else {
         checkLoggingServer(OT)
