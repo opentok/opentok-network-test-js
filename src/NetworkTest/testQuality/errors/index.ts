@@ -28,7 +28,7 @@ export class UnsupportedBrowserError extends QualityTestError {
   name: string;
   constructor(browser: string) {
     const message =
-      `Your current browser (${properCase(browser)}) is not supported. Please run the test in Chrome or Firefox`;
+      `Your current browser (${properCase(browser)}) does not support the audio-video quality test. Please run the test in Chrome or Firefox.`;
     super(message);
     Object.setPrototypeOf(this, UnsupportedBrowserError.prototype);
     this.name = this.constructor.name;
@@ -56,7 +56,7 @@ export class ConnectToSessionTokenError extends ConnectToSessionError {
 
 export class ConnectToSessionSessionIdError extends ConnectToSessionError {
   constructor() {
-    super('Failed to connect to the session due to an invalid session Id.');
+    super('Failed to connect to the session due to an invalid session ID.');
   }
 }
 
@@ -82,7 +82,7 @@ export class MediaDeviceError extends QualityTestError {
 
 export class FailedToObtainMediaDevices extends QualityTestError {
   constructor() {
-    super('Failed to obtain media devices from OT.getDevices()');
+    super('Failed to obtain media devices.');
   }
 }
 
