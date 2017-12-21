@@ -1,6 +1,6 @@
 {
   "name": "opentok-network-test-js",
-  "version": "1.0.0-beta.7",
+  "version": "1.0.0-beta.8",
   "description": "Precall network test for applications using the OpenTok platform.",
   "main": "dist/index.js",
   "scripts": {
