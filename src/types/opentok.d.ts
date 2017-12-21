@@ -331,6 +331,10 @@ declare module OT {
     timestamp: number;
   }
 
+  export class SessionInfo {
+    get: (sessionId: string, token: string, connectionId: string) => Promise<void>
+  }
+
   export class Subscriber extends OTEventEmitter<{
     audioLevelUpdated: Event<'audioLevelUpdated', Subscriber> & {
       audioLevel: number

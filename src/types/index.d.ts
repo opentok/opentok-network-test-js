@@ -11,6 +11,7 @@ interface OpenTok {
   initPublisher: (targetElement?: HTMLElement | string, properties?: OT.PublisherProperties, callback?: (error?: OT.OTError) => void) => OT.Publisher;
   getDevices(callback: (error: OT.OTError | undefined, devices?: OT.Device[]) => void): void;
   properties: OT.Properties
+  SessionInfo: OT.SessionInfo
 }
 
 type SessionCredentials = {

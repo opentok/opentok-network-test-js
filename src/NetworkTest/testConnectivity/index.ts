@@ -14,6 +14,7 @@ import * as e from './errors';
 import { OTErrorType, errorHasName } from '../errors/types';
 import { mapErrors, FailureCase } from './errors/mapping';
 import { get, getOr } from '../../util';
+type ConnectToAPIServerResults = { session: OT.Session, token: string };
 type CreateLocalPublisherResults = { publisher: OT.Publisher };
 type PublishToSessionResults = { session: OT.Session } & CreateLocalPublisherResults;
 type SubscribeToSessionResults = { subscriber: OT.Subscriber } & PublishToSessionResults;
@@ -23,11 +24,31 @@ export type ConnectivityTestResults = {
 };
 
 /**
+ * Ensure that we're able to connect to the OpenTok API Server
+ */
+function connectToAPIServer(
+  OT: OpenTok,
+  { apiKey, sessionId, token }: SessionCredentials,
+): Promise<ConnectToAPIServerResults> {
+  const session = OT.initSession(apiKey, sessionId);
+  const fauxToken = 'T1==xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx==';
+  const fauxConnectionId = 'xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx';
+  return new Promise((resolve, reject) => {
+    const handleSuccess = () => resolve({ session, token });
+    OT.SessionInfo.get(session.sessionId, fauxToken, fauxConnectionId)
+      .then(handleSuccess)
+      .catch((error: Error) => {
+        const expectedError = error.message.split(' ')[0].toLowerCase() === 'invalid';
+        expectedError ? handleSuccess() : reject(new e.APIConnectivityError);
+      });
+  });
+}
+
+/**
  * Attempt to connect to the OpenTok session
  */
-function connectToSession(OT: OpenTok, { apiKey, sessionId, token }: SessionCredentials): Promise<OT.Session> {
+function connectToSession({ session, token }: ConnectToAPIServerResults): Promise<OT.Session> {
   return new Promise((resolve, reject) => {
-    const session = OT.initSession(apiKey, sessionId);
     session.connect(token, (error?: OT.OTError) => {
       if (errorHasName(error, OTErrorType.AUTHENTICATION_ERROR)) {
         reject(new e.ConnectToSessionTokenError());
@@ -201,10 +222,11 @@ export function testConnectivity(
       }
     };
 
-    connectToSession(OT, credentials)
-      .then(session => checkPublishToSession(OT, session))
+    connectToAPIServer(OT, credentials)
+      .then(connectToSession)
+      .then((session: OT.Session) => checkPublishToSession(OT, session))
       .then(checkSubscribeToSession)
-      .then(results => checkLoggingServer(OT, results))
+      .then((results: SubscribeToSessionResults) => checkLoggingServer(OT, results))
       .then(onSuccess)
       .catch(onFailure);
 

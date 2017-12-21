@@ -21,6 +21,19 @@ export class ConnectivityError extends NetworkTestError {
 }
 
 /**
+ * API Connectivity Error
+ */
+export class APIConnectivityError extends ConnectivityError {
+  name: string;
+  constructor() {
+    const message = 'Failed to connect to OpenTOK API Server';
+    super(message);
+    Object.setPrototypeOf(this, APIConnectivityError.prototype);
+    this.name = this.constructor.name;
+  }
+}
+
+/**
  * Session Errors
  */
 export class ConnectToSessionError extends ConnectivityError {
@@ -65,19 +78,19 @@ export class MediaDeviceError extends ConnectivityError {
   }
 }
 
-export class FailedToObtainMediaDevices extends ConnectivityError {
+export class FailedToObtainMediaDevices extends MediaDeviceError {
   constructor() {
     super('Failed to obtain media devices from OT.getDevices()');
   }
 }
 
-export class NoVideoCaptureDevicesError extends ConnectivityError {
+export class NoVideoCaptureDevicesError extends MediaDeviceError {
   constructor() {
     super('This browser has no video capture devices');
   }
 }
 
-export class NoAudioCaptureDevicesError extends ConnectivityError {
+export class NoAudioCaptureDevicesError extends MediaDeviceError {
   constructor() {
     super('This browser has no audio capture devices.');
   }
