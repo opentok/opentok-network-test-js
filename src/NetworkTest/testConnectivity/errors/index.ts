@@ -54,7 +54,7 @@ export class ConnectToSessionTokenError extends ConnectToSessionError {
 
 export class ConnectToSessionSessionIdError extends ConnectToSessionError {
   constructor() {
-    super('Failed to connect to the session due to an invalid session Id.');
+    super('Failed to connect to the session due to an invalid session ID.');
   }
 }
 
@@ -80,7 +80,7 @@ export class MediaDeviceError extends ConnectivityError {
 
 export class FailedToObtainMediaDevices extends MediaDeviceError {
   constructor() {
-    super('Failed to obtain media devices from OT.getDevices()');
+    super('Failed to obtain media devices.');
   }
 }
 
