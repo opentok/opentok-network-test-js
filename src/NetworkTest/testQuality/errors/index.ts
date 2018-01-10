@@ -7,6 +7,7 @@
  */
 
 import { NetworkTestError } from '../../errors';
+import { properCase } from '../../../util';
 
  /**
   * Base class for errors used throughout Network Quality test.
@@ -27,7 +28,7 @@ export class UnsupportedBrowserError extends QualityTestError {
   name: string;
   constructor(browser: string) {
     const message =
-      `Your current browser (${browser}) is not supported. Please run the test in Chrome or Firefox`;
+      `Your current browser (${properCase(browser)}) does not support the audio-video quality test. Please run the test in Chrome or Firefox.`;
     super(message);
     Object.setPrototypeOf(this, UnsupportedBrowserError.prototype);
     this.name = this.constructor.name;
@@ -47,6 +48,24 @@ export class ConnectToSessionError extends QualityTestError {
   }
 }
 
+export class ConnectToSessionTokenError extends ConnectToSessionError {
+  constructor() {
+    super('Failed to connect to the session due to an invalid token.');
+  }
+}
+
+export class ConnectToSessionSessionIdError extends ConnectToSessionError {
+  constructor() {
+    super('Failed to connect to the session due to an invalid session ID.');
+  }
+}
+
+export class ConnectToSessionNetworkError extends ConnectToSessionError {
+  constructor() {
+    super('Failed to connect to the session due to a network error.');
+  }
+}
+
 /**
  * Missing Device Errors
  */
@@ -63,7 +82,7 @@ export class MediaDeviceError extends QualityTestError {
 
 export class FailedToObtainMediaDevices extends QualityTestError {
   constructor() {
-    super('Failed to obtain media devices from OT.getDevices()');
+    super('Failed to obtain media devices.');
   }
 }
 
@@ -96,6 +115,18 @@ export class PublishToSessionError extends QualityTestError {
 export class InitPublisherError extends PublishToSessionError {
   constructor(message?: string) {
     super(message || 'Failed to initialize publisher.');
+  }
+}
+
+export class PublishToSessionNotConnectedError extends PublishToSessionError {
+  constructor() {
+    super('Precall failed to publish to the session because it was not connected.');
+  }
+}
+
+export class PublishToSessionPermissionOrTimeoutError extends PublishToSessionError {
+  constructor() {
+    super('Precall failed to publish to the session due a permissions error or timeout.');
   }
 }
 

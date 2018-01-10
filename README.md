@@ -1,6 +1,11 @@
+
+![logo](https://raw.githubusercontent.com/opentok/opentok-network-test-js/master/media/tokbox-logo.png)
+
 # OpenTok Network Test
 
-![logo](./media/tokbox-logo.png)
+[![Build Status](https://goo.gl/17JDLY)](https://travis-ci.com/opentok/opentok-network-test-js)
+[![license](https://img.shields.io/github/license/opentok/opentok-network-test-js.svg)](https://github.com/opentok/opentok-network-test-js/blob/master/CONTRIBUTING.md)
+[![npm](https://img.shields.io/npm/v/opentok-network-test-js.svg)](https://www.npmjs.com/package/opentok-network-test-js)
 
 This Node module lets you check network connectivity to resources and services required
 to use [OpenTok](https://tokbox.com). Run this on a web client to get the following information:
@@ -19,15 +24,14 @@ tool](https://tokbox.com/developer/tools/precall/).
 
 First, install the package:
 
-npm install opentok-network-test-js
-
-*Important:* The node module is not currently available on npmjs.com. For now, see
-the instructions on building the module below.
+```
+$ npm install opentok-network-test-js
+```
 
 Now load the OpenTok Network Test in your project:
 
 ```javascript
-var OTNetworkTest = require('opentok-network-test-js');
+const OTNetworkTest = require('opentok-network-test-js');
 ```
 
 Load the OpenTok.js library.
@@ -49,7 +53,7 @@ unique session ID for each client. This session ID is used for the network test,
 be different than the session ID used for communication in the app. The test session must be
 a routed session -- one that uses the [OpenTok Media
 Router](https://tokbox.com/developer/guides/create-session/#media-mode). Also generate a test
-token that has publish privileges. 
+token that has publish privileges.
 
 Then run the test methods:
 
@@ -92,11 +96,19 @@ otNetworkTest.testConnectivity().then((results) => {
 
 This code uses Promises returned by the `OTNetworkTest.testConnectivity()`
 and `OTNetworkTest.testQuality()` methods. Alternatively, you can pass completion
-handler functions into each of these methods. 
+handler functions into each of these methods.
 
 See the following section for details on using the test results.
 
 See the /sample subdirectory (and the /sample/README.md file) for a sample app.
+
+## Supported browsers
+
+The `OTNetworkTest.testConnectivity()` method is supported in Chrome, Firefox, and Safari.
+It is not supported in Internet Explorer.
+
+The `OTNetworkTest.testQuality()` method is supported in Chrome and Firefox.
+It is not supported in Safari or Internet Explorer.
 
 ## API reference
 
@@ -154,7 +166,7 @@ This callback function takes two parameters:
 
 * `error` -- An Error object. The `name` Property of this object is set to `ConnectivityError`.
   The `message` property describes the reason for the error. This will usually result from an
-  invalid API key, session ID, or token passed into the `OTNetworkTest()` constructor. This 
+  invalid API key, session ID, or token passed into the `OTNetworkTest()` constructor. This
   is only set when the test could not run because of an error. If the connectivity can run
   (even if it results in failed tests), this property is undefined.
 
@@ -269,7 +281,7 @@ is invoked when the connectivity check completes. This callback function takes t
         For example, `'No microphone was found.'`
 
       * `bitrate` (Number) -- The average number of video bits per second during the last
-        five seconds of the test. 
+        five seconds of the test.
 
       * `frameRate` (Number) -- The average number of frames per second during the last five seconds
         of the test. Note that this is different than the `recommendedFrameRate`. The `frameRate`
@@ -277,7 +289,7 @@ is invoked when the connectivity check completes. This callback function takes t
         is the recommended frame rate.
 
       * `packetLossRatio` (Number) -- The audio packet loss ratio during the last five seconds
-        of the test. 
+        of the test.
 
   * `audio` (Object) -- Contains the following properties:
 
@@ -287,10 +299,10 @@ is invoked when the connectivity check completes. This callback function takes t
       For example, `'No microphone was found.'`
 
     * `bitrate` (Number) -- The average number of audio bits per second during the last five seconds
-      of the test. 
+      of the test.
 
     * `packetLossRatio` (Number) -- The video packet loss ratio during the last five seconds
-      of the test. 
+      of the test.
 
   `results` is undefined if there was an error in running the tests (and the `error` parameter
   is unset).
