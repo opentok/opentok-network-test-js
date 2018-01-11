@@ -24,7 +24,8 @@ export type ConnectivityTestResults = {
 };
 
 /**
- * Ensure that we're able to connect to the OpenTok API Server
+ * Ensure that we're able to connect to the OpenTok API Server by attempting
+ * to connect with a bad token and checking for the appropriate error response.
  */
 function connectToAPIServer(
   OT: OpenTok,
@@ -32,15 +33,15 @@ function connectToAPIServer(
 ): Promise<ConnectToAPIServerResults> {
   const session = OT.initSession(apiKey, sessionId);
   const fauxToken = 'T1==xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx==';
-  const fauxConnectionId = 'xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx';
   return new Promise((resolve, reject) => {
     const handleSuccess = () => resolve({ session, token });
-    OT.SessionInfo.get(session.sessionId, fauxToken, fauxConnectionId)
-      .then(handleSuccess)
-      .catch((error: Error) => {
-        const expectedError = error.message.split(' ')[0].toLowerCase() === 'invalid';
-        expectedError ? handleSuccess() : reject(new e.APIConnectivityError);
-      });
+    session.connect(fauxToken, (error?: OT.OTError) => {
+      if (errorHasName(error, OTErrorType.OT_AUTHENTICATION_ERROR)) {
+        handleSuccess();
+      } else {
+        reject(new e.APIConnectivityError);
+      }
+    });
   });
 }
 
