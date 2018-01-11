@@ -51,7 +51,7 @@ function connectToAPIServer(
 function connectToSession({ session, token }: ConnectToAPIServerResults): Promise<OT.Session> {
   return new Promise((resolve, reject) => {
     session.connect(token, (error?: OT.OTError) => {
-      if (errorHasName(error, OTErrorType.AUTHENTICATION_ERROR)) {
+      if (errorHasName(error, OTErrorType.OT_AUTHENTICATION_ERROR)) {
         reject(new e.ConnectToSessionTokenError());
       } else if (errorHasName(error, OTErrorType.INVALID_SESSION_ID)) {
         reject(new e.ConnectToSessionSessionIdError());
