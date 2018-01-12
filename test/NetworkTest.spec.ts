@@ -106,6 +106,23 @@ describe('Network Test', () => {
           .catch(validateError)
           .finally(done);
       });
+
+      it('should result in a failed test if the logging server cannot be reached', (done) => {
+        const correctLoggingUrl = OT.properties.loggingURL;
+        OT.properties.loggingURL = OT.properties.loggingURL.replace('tokbox', 'bad-tokbox');
+        networkTest.testConnectivity()
+          .then((results: ConnectivityTestResults) => {
+            expect(results.failedTests).toBeInstanceOf(Array);
+            for (var i = 0; i < results.failedTests.length; i++) {
+              if (results.failedTests[i].type === 'logging') {
+                OT.properties.loggingURL = correctLoggingUrl;
+                done();
+                break;
+              }
+            }
+          });
+      }, 10000);
+
     });
 
     describe('Quality Test', () => {
