@@ -93,7 +93,7 @@ describe('Network Test', () => {
           expect(results.success).toBe(false);
           expect(results.failedTests).toBeInstanceOf(Array);
           const { type, error } = head(results.failedTests);
-          expect(type).toBe('api');
+          expect(type).toBe('media');
           expect(error).toBeInstanceOf(ConnectToSessionError);
         };
 

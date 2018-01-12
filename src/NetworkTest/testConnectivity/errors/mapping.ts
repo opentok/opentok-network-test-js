@@ -10,7 +10,8 @@
 import { ConnectivityError } from './index';
 
 export enum FailureType {
-  ConnectToSessionError = 'api',
+  APIConnectivityError = 'api',
+  ConnectToSessionError = 'media',
   MediaDeviceError = 'OpenTok.js',
   PublishToSessionError = 'media',
   SubscribeToSessionError = 'media',
@@ -27,6 +28,8 @@ const mapErrorToCase = (error: ConnectivityError): FailureCase => {
 
   const getType = (): FailureType => {
     switch (error.name) {
+      case 'APIConnectivityError':
+        return FailureType[error.name];
       case 'ConnectToSessionError':
         return FailureType[error.name];
       case 'MediaDeviceError':
