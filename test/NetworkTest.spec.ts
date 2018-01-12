@@ -120,6 +120,24 @@ describe('Network Test', () => {
                 break;
               }
             }
+            OT.properties.loggingURL = correctLoggingUrl;
+          });
+      }, 10000);
+
+      it('should result in a failed test if the API server cannot be reached', (done) => {
+        const correctApiURL = OT.properties.apiURL;
+        OT.properties.apiURL = OT.properties.apiURL.replace('opentok', 'bad-opentok');
+        networkTest.testConnectivity()
+          .then((results: ConnectivityTestResults) => {
+            expect(results.failedTests).toBeInstanceOf(Array);
+            for (var i = 0; i < results.failedTests.length; i++) {
+              if (results.failedTests[i].type === 'api') {
+                OT.properties.apiURL = correctApiURL;
+                done();
+                break;
+              }
+            }
+            OT.properties.apiURL = correctApiURL;
           });
       }, 10000);
 
