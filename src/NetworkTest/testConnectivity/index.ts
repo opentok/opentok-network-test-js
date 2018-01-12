@@ -129,6 +129,9 @@ function checkPublishToSession(OT: OpenTok, session: OT.Session): Promise<Publis
     checkCreateLocalPublisher(OT)
       .then(({ publisher }: CreateLocalPublisherResults) => {
         session.publish(publisher, (error?: OT.OTError) => {
+          if (error) {
+            session.disconnect();
+          }
           if (errorHasName(error, OTErrorType.NOT_CONNECTED)) {
             reject(new e.PublishToSessionNotConnectedError());
           } else if (errorHasName(error, OTErrorType.UNABLE_TO_PUBLISH)) {
