@@ -108,39 +108,48 @@ describe('Network Test', () => {
       });
 
       it('should result in a failed test if the logging server cannot be reached', (done) => {
-        const correctLoggingUrl = OT.properties.loggingURL;
-        OT.properties.loggingURL = OT.properties.loggingURL.replace('tokbox', 'bad-tokbox');
-        networkTest.testConnectivity()
+        const badLoggingOT = {
+          ...OT,
+          ...{
+            properties: {
+              ...OT.properties,
+              loggingURL: OT.properties.loggingURL.replace('tokbox', 'bad-tokbox')
+            }
+          }
+        };
+        const badLoggingNetworkTest = new NetworkTest(badLoggingOT, sessionCredentials)
+        badLoggingNetworkTest.testConnectivity()
           .then((results: ConnectivityTestResults) => {
             expect(results.failedTests).toBeInstanceOf(Array);
-            for (var i = 0; i < results.failedTests.length; i++) {
-              if (results.failedTests[i].type === 'logging') {
-                OT.properties.loggingURL = correctLoggingUrl;
-                done();
-                break;
-              }
+            if (results.failedTests.find(f => f.type === 'logging')) {
+              done();
             }
-            OT.properties.loggingURL = correctLoggingUrl;
           });
       }, 10000);
 
       it('should result in a failed test if the API server cannot be reached', (done) => {
-        const correctApiURL = OT.properties.apiURL;
+        const badApiOT = {
+          ...OT,
+          ...{
+            properties: {
+              ...OT.properties,
+              apiURL: OT.properties.apiURL.replace('opentok', 'bad-opentok')
+            }
+          }
+        };
+        // Why is this necessary? (Is an old session still connected?)
         OT.properties.apiURL = OT.properties.apiURL.replace('opentok', 'bad-opentok');
-        networkTest.testConnectivity()
+        const badApiNetworkTest = new NetworkTest(badApiOT, sessionCredentials)
+        badApiNetworkTest.testConnectivity()
           .then((results: ConnectivityTestResults) => {
             expect(results.failedTests).toBeInstanceOf(Array);
-            for (var i = 0; i < results.failedTests.length; i++) {
-              if (results.failedTests[i].type === 'api') {
-                OT.properties.apiURL = correctApiURL;
-                done();
-                break;
-              }
+            if (results.failedTests.find(f => f.type === 'api')) {
+              done();
+              OT.properties.apiURL = OT.properties.apiURL.replace('bad-opentok', 'opentok');
             }
-            OT.properties.apiURL = correctApiURL;
+            OT.properties.apiURL = OT.properties.apiURL.replace('bad-opentok', 'opentok');
           });
       }, 10000);
-
     });
 
     describe('Quality Test', () => {
