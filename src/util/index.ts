@@ -86,9 +86,3 @@ export const nth = <T>(n: number, list: T[]): (T | undefined) => {
  * Returns the first element from a list, or undefined if it doesn't exist
  */
 export const head = <T>(list: T[]): (T | undefined) => nth(0, list);
-
-/**
- * Returns a string with an uppercase first character
- */
-export const properCase = (s: string) => !!s.length ? `${s[0].toUpperCase()}${s.slice(1)}` : '';
-

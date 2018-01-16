@@ -7,7 +7,6 @@
  */
 
 import { NetworkTestError } from '../../errors';
-import { properCase } from '../../../util';
 
  /**
   * Base class for errors used throughout Network Quality test.
@@ -28,7 +27,7 @@ export class UnsupportedBrowserError extends QualityTestError {
   name: string;
   constructor(browser: string) {
     const message =
-      `Your current browser (${properCase(browser)}) does not support the audio-video quality test. Please run the test in Chrome or Firefox.`;
+      `Your current browser (${browser}) does not support the audio-video quality test. Please run the test in Chrome or Firefox.`;
     super(message);
     Object.setPrototypeOf(this, UnsupportedBrowserError.prototype);
     this.name = this.constructor.name;
