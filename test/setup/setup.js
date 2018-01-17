@@ -21,12 +21,16 @@ function createSessionAndToken({ apiKey, apiSecret }) {
   });
 }
 
-function writeCredentials(credentials) {
+function writeCredentials(credentialsArray) {
+  const [primary, faultyLogging, faultyApi] = credentialsArray;
+  const credentials = { primary, faultyLogging, faultyApi };
   return fse.outputJson('./test/credentials.json', credentials);
 }
 
 function generateCredentials(){
-  createSessionAndToken({ apiKey, apiSecret })
+  const create = () => createSessionAndToken({ apiKey, apiSecret })
+
+  Promise.all([create(), create(), create()])
     .then(writeCredentials)
     .then((results) => console.info('Generated session credentials for test.'))
     .catch(e => console.error('Failed to generate test credentials', e));

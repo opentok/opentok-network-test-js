@@ -3,7 +3,11 @@
 
 import * as OT from '@opentok/client';
 import * as Promise from 'promise';
-import * as sessionCredentials from './credentials.json';
+import {
+  primary as sessionCredentials,
+  faultyLogging as badLoggingCredentials,
+  faultyApi as badApiCredentials,
+} from './credentials.json';
 import {
   NetworkTestError,
   InvalidSessionCredentialsError,
@@ -28,7 +32,7 @@ type EqualityTesters = jasmine.CustomEqualityTester[];
 const malformedCredentials = { apiKey: '1234', invalidProp: '1234', token: '1234' };
 const badCredentials = { apiKey: '1234', sessionId: '1234', token: '1234' };
 const networkTest = new NetworkTest(OT, sessionCredentials);
-const badNetworkTest = new NetworkTest(OT, badCredentials);
+const badCredentialsNetworkTest = new NetworkTest(OT, badCredentials);
 const validOnUpdateCallback = (stats: OT.SubscriberStats) => stats;
 const validOnCompleteCallback = (error?: Error, results?: any) => results;
 
@@ -101,7 +105,7 @@ describe('Network Test', () => {
           expect(error).toBeUndefined();
         };
 
-        badNetworkTest.testConnectivity()
+        badCredentialsNetworkTest.testConnectivity()
           .then(validateResults)
           .catch(validateError)
           .finally(done);
@@ -117,7 +121,7 @@ describe('Network Test', () => {
             }
           }
         };
-        const badLoggingNetworkTest = new NetworkTest(badLoggingOT, sessionCredentials)
+        const badLoggingNetworkTest = new NetworkTest(badLoggingOT, badLoggingCredentials)
         badLoggingNetworkTest.testConnectivity()
           .then((results: ConnectivityTestResults) => {
             expect(results.failedTests).toBeInstanceOf(Array);
@@ -139,7 +143,7 @@ describe('Network Test', () => {
         };
         // Why is this necessary? (Is an old session still connected?)
         OT.properties.apiURL = OT.properties.apiURL.replace('opentok', 'bad-opentok');
-        const badApiNetworkTest = new NetworkTest(badApiOT, sessionCredentials)
+        const badApiNetworkTest = new NetworkTest(badApiOT, badApiCredentials)
         badApiNetworkTest.testConnectivity()
           .then((results: ConnectivityTestResults) => {
             expect(results.failedTests).toBeInstanceOf(Array);
@@ -168,7 +172,7 @@ describe('Network Test', () => {
           expect(error).toBeInstanceOf(QualityTestSessionError);
         };
 
-        badNetworkTest.testQuality()
+        badCredentialsNetworkTest.testQuality()
           .then(validateResults)
           .catch(validateError)
           .finally(done);
