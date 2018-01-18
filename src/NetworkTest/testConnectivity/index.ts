@@ -14,7 +14,6 @@ import * as e from './errors';
 import { OTErrorType, errorHasName } from '../errors/types';
 import { mapErrors, FailureCase } from './errors/mapping';
 import { get, getOr } from '../../util';
-type ConnectToAPIServerResults = { session: OT.Session, token: string };
 type CreateLocalPublisherResults = { publisher: OT.Publisher };
 type PublishToSessionResults = { session: OT.Session } & CreateLocalPublisherResults;
 type SubscribeToSessionResults = { subscriber: OT.Subscriber } & PublishToSessionResults;
@@ -24,39 +23,23 @@ export type ConnectivityTestResults = {
 };
 
 /**
- * Ensure that we're able to connect to the OpenTok API Server by attempting
- * to connect with a bad token and checking for the appropriate error response.
- */
-function connectToAPIServer(
-  OT: OpenTok,
-  { apiKey, sessionId, token }: SessionCredentials,
-): Promise<ConnectToAPIServerResults> {
-  const session = OT.initSession(apiKey, sessionId);
-  const fauxToken = 'T1==xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx==';
-  return new Promise((resolve, reject) => {
-    const handleSuccess = () => resolve({ session, token });
-    session.connect(fauxToken, (error?: OT.OTError) => {
-      if (errorHasName(error, OTErrorType.OT_AUTHENTICATION_ERROR)) {
-        handleSuccess();
-      } else {
-        reject(new e.APIConnectivityError);
-      }
-    });
-  });
-}
-
-/**
  * Attempt to connect to the OpenTok session
  */
-function connectToSession({ session, token }: ConnectToAPIServerResults): Promise<OT.Session> {
+function connectToSession(
+  OT: OpenTok,
+  { apiKey, sessionId, token }: SessionCredentials,
+): Promise<OT.Session> {
   return new Promise((resolve, reject) => {
+    const session = OT.initSession(apiKey, sessionId);
     session.connect(token, (error?: OT.OTError) => {
       if (errorHasName(error, OTErrorType.OT_AUTHENTICATION_ERROR)) {
         reject(new e.ConnectToSessionTokenError());
       } else if (errorHasName(error, OTErrorType.INVALID_SESSION_ID)) {
         reject(new e.ConnectToSessionSessionIdError());
-      } else if (errorHasName(error, OTErrorType.CONNECT_FAILED)) {
+      } else if (errorHasName(error, OTErrorType.OT_CONNECT_FAILED)) {
         reject(new e.ConnectToSessionNetworkError());
+      } else if (errorHasName(error, OTErrorType.OT_INVALID_HTTP_STATUS)) {
+        reject(new e.APIConnectivityError());
       } else if (error) {
         reject(new e.ConnectToSessionError());
       } else {
@@ -235,8 +218,7 @@ export function testConnectivity(
       }
     };
 
-    connectToAPIServer(OT, credentials)
-      .then(connectToSession)
+    connectToSession(OT, credentials)
       .then((session: OT.Session) => checkPublishToSession(OT, session))
       .then(checkSubscribeToSession)
       .then((results: SubscribeToSessionResults) => checkLoggingServer(OT, results))
