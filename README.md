@@ -176,12 +176,17 @@ This callback function takes two parameters:
     any connectivity test failed.
 
   * `failedTests` (Array) -- If connectivity failed, this array contains a list of strings
-    defining the failure types: `'api'`, `'media'`, `'logging'`.
+    defining the failure types: `'api'`, `'messaging'`, `'media'`, `'logging'`.
 
     * `'api'` -- The test could not connect to the OpenTok API server. Connection to this
       server is required to connect to an OpenTok session.
 
-    * `'media'` -- The test could not connect to the OpenTok media server. If your app uses
+    * `'messaging'` -- The test could not establish a connection to the OpenTok messaging WebSocket.
+      This connection is required to connect to an OpenTok session. In addition to other causes
+      for WebSocket connectivity failures, this failure type will occur if you pass an invalid
+      OpenTok API key, session ID, or token into the `OTNetworkTest()` constructor.
+
+    * `'media'` -- The test could not connect to the OpenTok Media Router. If your app uses
       a routed session, it will not succeed in using OpenTok. However, if your app uses
       a relayed session, the client *may* still succeed in using the OpenTok session, although
       it may fail if the relayed session requires use of a TURN server.

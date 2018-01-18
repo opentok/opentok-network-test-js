@@ -33,25 +33,32 @@ export function displayTestConnectivityResults(error, results) {
   statusMessageEl.textContent = statusText;
 }
 
+function convertFailedTestsToString(failedTests) {
+  var failureTypes = [];
+  for (var i = 0; i < failedTests.length; i++) {
+    failureTypes.push(failedTests[i].type);
+  }
+  var mappedFailures = [];
+  if (failureTypes.indexOf('api') > -1) {
+    mappedFailures.push('OpenTok API server');
+  }
+  if (failureTypes.indexOf('messaging') > -1) {
+    mappedFailures.push('OpenTok messaging WebSocket');
+  }
+  if (failureTypes.indexOf('media') > -1) {
+    mappedFailures.push('OpenTok Media Router');
+  }
+  if (failureTypes.indexOf('logging') > -1) {
+    mappedFailures.push('OpenTok logging server');
+  }
+  return mappedFailures.join(', ');
+}
+
 export function displayTestQualityResults(error, results) {
   var statusContainerEl = document.getElementById('quality_status_container');
   var statusEl = statusContainerEl.querySelector('p');
   statusContainerEl.querySelector('#audio .results').style.display = 'block';
   statusContainerEl.querySelector('#video .results').style.display = 'block';
-
-  function convertFailedTestsToString(failedTests) {
-    var mappedFailures = [];
-    if (failedTests.indexOf('api') > -1) {
-      mappedFailures.push('OpenTok API server');
-    }
-    if (failedTests.indexOf('router') > -1) {
-      mappedFailures.push('OpenTok Media router');
-    }
-    if (failedTests.indexOf('logging') > -1) {
-      mappedFailures.push('OpenTok logging server');
-    }
-    return mappedFailures.join(', ');
-  }
 
   if (error) {
     statusEl.textContent = error.message;

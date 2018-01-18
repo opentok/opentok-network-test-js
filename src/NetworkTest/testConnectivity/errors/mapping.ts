@@ -11,8 +11,8 @@ import { ConnectivityError } from './index';
 
 export enum FailureType {
   APIConnectivityError = 'api',
-  ConnectToSessionError = 'media',
   ConnectToSessionNetworkError =  'api',
+  ConnectToSessionError = 'messaging',
   MediaDeviceError = 'OpenTok.js',
   PublishToSessionError = 'media',
   SubscribeToSessionError = 'media',
