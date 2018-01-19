@@ -1,11 +1,12 @@
 type Browser =
-  'chrome' |
-  'firefox' |
+  'Chrome' |
+  'Firefox' |
   'not a browser' |
   'unsupported browser' |
-  'webkit browser without WebRTC support' |
-  'safari' |
-  'edge';
+  'WebKit browser without WebRTC support' |
+  'Safari' |
+  'Internet Explorer' |
+  'Edge';
 
 function detectBrowser(): Browser {
 
@@ -18,33 +19,38 @@ function detectBrowser(): Browser {
 
   // Firefox.
   if (navigator.mozGetUserMedia) {
-    return 'firefox';
+    return 'Firefox';
   }
   if (navigator.webkitGetUserMedia) {
     // Chrome, Chromium, Webview, Opera, all use the chrome shim for now
     if (window.hasOwnProperty('webkitRTCPeerConnection')) {
-      return 'chrome';
+      return 'Chrome';
     }
     if (navigator.userAgent.match(/Version\/(\d+).(\d+)/)) {
-      return 'safari';
+      return 'Safari';
     }
-    return 'webkit browser without WebRTC support';
+    return 'WebKit browser without WebRTC support';
   }
 
   if (navigator.mediaDevices && navigator.userAgent.match(/Edge\/(\d+).(\d+)$/)) { // Edge.
-    return 'edge';
+    return 'Edge';
+  }
+
+  if (navigator.userAgent.indexOf('MSIE ') > 0 ||
+    !!navigator.userAgent.match(/Trident.*rv\:11\./)) {
+    return 'Internet Explorer';
   }
 
   if (navigator.mediaDevices && navigator.userAgent.match(/AppleWebKit\/(\d+)\./)) {
     // Safari, with webkitGetUserMedia removed.
-    return 'safari';
+    return 'Safari';
   }
   // Default fallthrough: not supported.
   return 'unsupported browser';
 }
 
 export default function isSupportedBrowser(): { supported: boolean, browser: Browser } {
-  const supportedBrowsers = ['chrome', 'firefox'];
+  const supportedBrowsers = ['Chrome', 'Firefox'];
   const browser = detectBrowser();
   const supported = supportedBrowsers.includes(browser);
   return { browser, supported };
