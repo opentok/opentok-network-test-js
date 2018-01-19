@@ -198,9 +198,20 @@ export function testConnectivity(
     const onFailure = (error: Error) => {
 
       const handleResults = (...errors: e.ConnectivityError[]) => {
+        /**
+         * If we have a messaging server failure, we will also fail the media
+         * server test by default.
+         */
+        const baseFailures: FailureCase[] = mapErrors(...errors);
+        const messagingFailure = baseFailures.find(c => c.type === 'messaging');
+        const failedTests = [
+          ...baseFailures,
+          ... messagingFailure ? mapErrors(new e.FailedMessagingServerTestError()) : [],
+        ];
+
         const results = {
+          failedTests,
           success: false,
-          failedTests: mapErrors(...errors),
         };
         onComplete && onComplete(undefined, results);
         otLogging.logEvent({ action: 'testConnectivity', variation: 'Success' });
