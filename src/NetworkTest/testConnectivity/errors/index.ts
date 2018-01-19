@@ -61,6 +61,8 @@ export class ConnectToSessionSessionIdError extends ConnectToSessionError {
 export class ConnectToSessionNetworkError extends ConnectToSessionError {
   constructor() {
     super('Failed to connect to the session due to a network error.');
+    Object.setPrototypeOf(this, ConnectToSessionNetworkError.prototype);
+    this.name = this.constructor.name;
   }
 }
 

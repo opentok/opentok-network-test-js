@@ -11,7 +11,8 @@ import { ConnectivityError } from './index';
 
 export enum FailureType {
   APIConnectivityError = 'api',
-  ConnectToSessionError = 'media',
+  ConnectToSessionNetworkError =  'api',
+  ConnectToSessionError = 'messaging',
   MediaDeviceError = 'OpenTok.js',
   PublishToSessionError = 'media',
   SubscribeToSessionError = 'media',
@@ -32,6 +33,8 @@ const mapErrorToCase = (error: ConnectivityError): FailureCase => {
         return FailureType[error.name];
       case 'ConnectToSessionError':
         return FailureType[error.name];
+      case 'ConnectToSessionNetworkError':
+        return FailureType[error.name];
       case 'MediaDeviceError':
         return FailureType[error.name];
       case 'PublishToSessionError':
@@ -44,7 +47,6 @@ const mapErrorToCase = (error: ConnectivityError): FailureCase => {
         return FailureType['ConnectivityError'];
     }
   };
-
   return { error, type: getType() };
 };
 
