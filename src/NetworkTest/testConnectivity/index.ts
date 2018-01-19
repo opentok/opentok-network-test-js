@@ -92,6 +92,7 @@ function checkCreateLocalPublisher(OT: OpenTok): Promise<CreateLocalPublisherRes
     validateDevices(OT)
       .then(() => {
         const publisherDiv = document.createElement('div');
+        publisherDiv.style.opacity = '0';
         document.body.appendChild(publisherDiv);
         const publisher = OT.initPublisher(publisherDiv, undefined, (error?: OT.OTError) => {
           if (!error) {

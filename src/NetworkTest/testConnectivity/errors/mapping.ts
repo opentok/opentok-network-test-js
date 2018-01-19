@@ -47,7 +47,6 @@ const mapErrorToCase = (error: ConnectivityError): FailureCase => {
         return FailureType['ConnectivityError'];
     }
   };
-  console.log('getType', error.name, getType());
   return { error, type: getType() };
 };
 
