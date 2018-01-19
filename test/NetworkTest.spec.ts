@@ -93,8 +93,6 @@ describe('Network Test', () => {
           expect(results.success).toBe(false);
           expect(results.failedTests).toBeInstanceOf(Array);
           const [initialFailure, secondaryFailure] = results.failedTests;
-          console.log(initialFailure)
-          console.log(secondaryFailure)
           expect(initialFailure.type).toBe('messaging');
           expect(initialFailure.error).toBeInstanceOf(ConnectToSessionError);
           expect(secondaryFailure.type).toBe('media');
