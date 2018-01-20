@@ -13,9 +13,9 @@ import {
   InvalidOnCompleteCallback,
   InvalidOnUpdateCallback,
 } from '../src/NetworkTest/errors';
-import { ConnectToSessionTokenError, ConnectToSessionSessionIdError, ConnectivityError, ConnectToSessionError } from '../src/NetworkTest/testConnectivity/errors';
+import { ConnectToSessionTokenError, ConnectToSessionSessionIdError, ConnectivityError, ConnectToSessionError, PublishToSessionError } from '../src/NetworkTest/testConnectivity/errors';
 import { ConnectToSessionError as QualityTestSessionError } from '../src/NetworkTest/testQuality/errors';
-import { pick, head } from '../src/util';
+import { pick, head, nth } from '../src/util';
 import NetworkTest from '../src/NetworkTest';
 import { ConnectivityTestResults } from '../src/NetworkTest/testConnectivity/index';
 import { QualityTestError } from '../src/NetworkTest/testQuality/errors/index';
@@ -92,9 +92,12 @@ describe('Network Test', () => {
         const validateResults = (results: ConnectivityTestResults) => {
           expect(results.success).toBe(false);
           expect(results.failedTests).toBeInstanceOf(Array);
-          const { type, error } = head(results.failedTests);
-          expect(type).toBe('media');
-          expect(error).toBeInstanceOf(ConnectToSessionError);
+          const [initialFailure, secondaryFailure] = results.failedTests;
+          expect(initialFailure.type).toBe('messaging');
+          expect(initialFailure.error).toBeInstanceOf(ConnectToSessionError);
+          expect(secondaryFailure.type).toBe('media');
+          expect(secondaryFailure.error).toBeInstanceOf(PublishToSessionError);
+
         };
 
         const validateError = (error?: ConnectivityError) => {

@@ -112,6 +112,14 @@ export class PublishToSessionError extends ConnectivityError {
   }
 }
 
+export class FailedMessagingServerTestError extends PublishToSessionError {
+  name: string;
+  constructor() {
+    const message = 'Failed to connect to media server due to messaging server connection failure';
+    super(message);
+  }
+}
+
 export class FailedToCreateLocalPublisher extends PublishToSessionError {
   constructor() {
     super('Failed to create a local publisher object.');
