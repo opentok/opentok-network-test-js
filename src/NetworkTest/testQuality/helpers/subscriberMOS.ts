@@ -109,6 +109,21 @@ export default function subscriberMOS(
         if (!stats) {
           return null;
         }
+
+        /**
+         * We occaisionally start to receive faulty stat during long-running
+         * tests. If this occurs, let's end the test early and report the
+         * results as they are, as we should have sufficient data to
+         * calculate a score at this point.
+         *
+         * We know that we're receiving "faulty" stats when we see a negative
+         * value for bytesReceived.
+         */
+        if (stats.audio.bytesReceived < 0 || stats.video.bytesReceived < 0) {
+          mosState.clearInterval();
+          return callback(mosState);
+        }
+
         stats && mosState.statsLog.push(stats);
 
         if (getStatsListener && typeof getStatsListener === 'function') {
