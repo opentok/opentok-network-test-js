@@ -36,23 +36,34 @@ let audioOnly = false; // The initial test is audio-video
  */
 function connectToSession(session: OT.Session, token: string): Promise<OT.Session> {
   return new Promise((resolve, reject) => {
-    if (session.connection) {
-      resolve(session);
-    } else {
+
+    function rejectError(error: OT.OTError) {
+      if (errorHasName(error, OTErrorType.AUTHENTICATION_ERROR)) {
+        reject(new e.ConnectToSessionTokenError());
+      } else if (errorHasName(error, OTErrorType.INVALID_SESSION_ID)) {
+        reject(new e.ConnectToSessionSessionIdError());
+      } else if (errorHasName(error, OTErrorType.CONNECT_FAILED)) {
+        reject(new e.ConnectToSessionNetworkError());
+      } else {
+        reject(new e.ConnectToSessionError());
+      }
+    }
+    
+    function connectNow() {
       session.connect(token, (error?: OT.OTError) => {
         if (error) {
-          if (errorHasName(error, OTErrorType.AUTHENTICATION_ERROR)) {
-            reject(new e.ConnectToSessionTokenError());
-          } else if (errorHasName(error, OTErrorType.INVALID_SESSION_ID)) {
-            reject(new e.ConnectToSessionSessionIdError());
-          } else if (errorHasName(error, OTErrorType.CONNECT_FAILED)) {
-            reject(new e.ConnectToSessionNetworkError());
-          } else {
-            reject(new e.ConnectToSessionError());
-          }
+          rejectError(error);
         }
         resolve(session);
       });
+    }
+
+    if (session.connection) {
+      // The session is still disconnecting from a previous call to an OTNetworkTest method.
+      // This delay provides enough time for the disconnect to complete.
+      setTimeout(connectNow, 1000);
+    } else {
+      connectNow();
     }
   });
 }
