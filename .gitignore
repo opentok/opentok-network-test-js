@@ -66,6 +66,7 @@ dist/
 # sample
 sample/bundle.js
 sample/src/js/config.js
+sample/package-lock.json
 
 # test credentials
 /test/credentials.json
