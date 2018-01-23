@@ -3,7 +3,11 @@
 
 import * as OT from '@opentok/client';
 import * as Promise from 'promise';
-import * as sessionCredentials from './credentials.json';
+import {
+  primary as sessionCredentials,
+  faultyLogging as badLoggingCredentials,
+  faultyApi as badApiCredentials,
+} from './credentials.json';
 import {
   NetworkTestError,
   InvalidSessionCredentialsError,
@@ -28,7 +32,7 @@ type EqualityTesters = jasmine.CustomEqualityTester[];
 const malformedCredentials = { apiKey: '1234', invalidProp: '1234', token: '1234' };
 const badCredentials = { apiKey: '1234', sessionId: '1234', token: '1234' };
 const networkTest = new NetworkTest(OT, sessionCredentials);
-const badNetworkTest = new NetworkTest(OT, badCredentials);
+const badCredentialsNetworkTest = new NetworkTest(OT, badCredentials);
 const validOnUpdateCallback = (stats: OT.SubscriberStats) => stats;
 const validOnCompleteCallback = (error?: Error, results?: any) => results;
 
@@ -104,11 +108,55 @@ describe('Network Test', () => {
           expect(error).toBeUndefined();
         };
 
-        badNetworkTest.testConnectivity()
+        badCredentialsNetworkTest.testConnectivity()
           .then(validateResults)
           .catch(validateError)
           .finally(done);
       });
+
+      it('should result in a failed test if the logging server cannot be reached', (done) => {
+        const badLoggingOT = {
+          ...OT,
+          ...{
+            properties: {
+              ...OT.properties,
+              loggingURL: OT.properties.loggingURL.replace('tokbox', 'bad-tokbox')
+            }
+          }
+        };
+        const badLoggingNetworkTest = new NetworkTest(badLoggingOT, badLoggingCredentials)
+        badLoggingNetworkTest.testConnectivity()
+          .then((results: ConnectivityTestResults) => {
+            expect(results.failedTests).toBeInstanceOf(Array);
+            if (results.failedTests.find(f => f.type === 'logging')) {
+              done();
+            }
+          });
+      }, 10000);
+
+      it('should result in a failed test if the API server cannot be reached', (done) => {
+        const badApiOT = {
+          ...OT,
+          ...{
+            properties: {
+              ...OT.properties,
+              apiURL: OT.properties.apiURL.replace('opentok', 'bad-opentok')
+            }
+          }
+        };
+        // Why is this necessary? (Is an old session still connected?)
+        OT.properties.apiURL = OT.properties.apiURL.replace('opentok', 'bad-opentok');
+        const badApiNetworkTest = new NetworkTest(badApiOT, badApiCredentials)
+        badApiNetworkTest.testConnectivity()
+          .then((results: ConnectivityTestResults) => {
+            expect(results.failedTests).toBeInstanceOf(Array);
+            if (results.failedTests.find(f => f.type === 'api')) {
+              done();
+              OT.properties.apiURL = OT.properties.apiURL.replace('bad-opentok', 'opentok');
+            }
+            OT.properties.apiURL = OT.properties.apiURL.replace('bad-opentok', 'opentok');
+          });
+      }, 10000);
     });
 
     describe('Quality Test', () => {
@@ -127,7 +175,7 @@ describe('Network Test', () => {
           expect(error).toBeInstanceOf(QualityTestSessionError);
         };
 
-        badNetworkTest.testQuality()
+        badCredentialsNetworkTest.testQuality()
           .then(validateResults)
           .catch(validateError)
           .finally(done);
