@@ -173,20 +173,11 @@ function checkLoggingServer(OT: OpenTok, input?: SubscribeToSessionResults): Pro
   return new Promise((resolve, reject) => {
     const url = `${OT.properties.loggingURL}/logging/ClientEvent`;
     const handleError = () => reject(new e.LoggingServerConnectionError());
-    const testPostToLogging = () => {
-      axios.post(url)
-        .then(response => response.status === 200 ? resolve(input) : handleError())
-        .catch(handleError);
-    };
 
-    if (input) {
-      input.session.on('sessionDisconnected', () => {
-        testPostToLogging();
-      });
-      input.session.disconnect();
-    } else {
-      testPostToLogging();
-    }
+    axios.post(url)
+      .then(response => response.status === 200 ? resolve(input) : handleError())
+      .catch(handleError);
+
   });
 }
 
@@ -224,7 +215,7 @@ export function testConnectivity(
         const messagingFailure = baseFailures.find(c => c.type === 'messaging');
         const failedTests = [
           ...baseFailures,
-          ... messagingFailure ? mapErrors(new e.FailedMessagingServerTestError()) : [],
+          ...messagingFailure ? mapErrors(new e.FailedMessagingServerTestError()) : [],
         ];
 
         const results = {
