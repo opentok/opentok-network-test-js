@@ -207,8 +207,10 @@ function checkSubscriberQuality(
                     resolve(results);
                   });
               } else {
+                session.on('sessionDisconnected', () => {
+                  resolve(audioVideoResults);
+                });
                 session.disconnect();
-                resolve(audioVideoResults);
               }
             };
 
@@ -223,8 +225,10 @@ function checkSubscriberQuality(
                     resolve(results);
                   });
               } else {
+                session.on('sessionDisconnected', () => {
+                  resolve(audioVideoResults);
+                });
                 session.disconnect();
-                resolve(audioVideoResults);
               }
             }, audioOnly ? config.getStatsAudioOnlyDuration
               : config.getStatsVideoAndAudioTestDuration);
