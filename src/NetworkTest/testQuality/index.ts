@@ -209,6 +209,7 @@ function checkSubscriberQuality(
               } else {
                 session.on('sessionDisconnected', () => {
                   resolve(audioVideoResults);
+                  session.off();
                 });
                 session.disconnect();
               }
@@ -227,6 +228,7 @@ function checkSubscriberQuality(
               } else {
                 session.on('sessionDisconnected', () => {
                   resolve(audioVideoResults);
+                  session.off();
                 });
                 session.disconnect();
               }

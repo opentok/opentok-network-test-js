@@ -168,8 +168,8 @@ declare module OT {
     ): void;
 
     off<EventName extends keyof EventMap>(
-      eventName: EventName,
-      callback: (event: EventMap[EventName]) => void
+      eventName?: EventName,
+      callback?: (event: EventMap[EventName]) => void
     ): void;
   }
 
