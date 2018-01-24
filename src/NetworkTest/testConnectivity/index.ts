@@ -28,13 +28,13 @@ export type ConnectivityTestResults = {
  * event listeners and invoke the provided callback function.
  */
 function disconnectFromSession(session: OT.Session) {
-  return (fn: () => void): void => {
+  return new Promise((resolve, reject) => {
     session.on('sessionDisconnected', () => {
       session.off();
-      return fn();
+      resolve();
     });
     session.disconnect();
-  };
+  });
 }
 
 /**
@@ -126,24 +126,29 @@ function checkCreateLocalPublisher(OT: OpenTok): Promise<CreateLocalPublisherRes
  */
 function checkPublishToSession(OT: OpenTok, session: OT.Session): Promise<PublishToSessionResults> {
   return new Promise((resolve, reject) => {
-    const disconnectAndReject= disconnectFromSession(session);
+    const disconnectAndReject = (rejectError: Error) => {
+      disconnectFromSession(session).then(() => {
+        reject(rejectError);
+      });
+    };
     checkCreateLocalPublisher(OT)
       .then(({ publisher }: CreateLocalPublisherResults) => {
         session.publish(publisher, (error?: OT.OTError) => {
           if (error) {
             if (errorHasName(error, OTErrorType.NOT_CONNECTED)) {
-              disconnectAndReject(() => reject(new e.PublishToSessionNotConnectedError()));
+              disconnectAndReject(new e.PublishToSessionNotConnectedError());
             } else if (errorHasName(error, OTErrorType.UNABLE_TO_PUBLISH)) {
-              disconnectAndReject(() => reject(new e.PublishToSessionPermissionOrTimeoutError()));
+              disconnectAndReject(
+                new e.PublishToSessionPermissionOrTimeoutError());
             } else if (error) {
-              disconnectAndReject(() => reject(new e.PublishToSessionError()));
+              disconnectAndReject(new e.PublishToSessionError());
             }
           } else {
             resolve({ ...{ session }, ...{ publisher } });
           }
         });
       }).catch((error: e.ConnectivityError) => {
-        disconnectAndReject(() => reject(error));
+        disconnectAndReject(error);
       });
   });
 }
@@ -154,14 +159,18 @@ function checkPublishToSession(OT: OpenTok, session: OT.Session): Promise<Publis
 function checkSubscribeToSession({ session, publisher }: PublishToSessionResults): Promise<SubscribeToSessionResults> {
   return new Promise((resolve, reject) => {
     const config = { testNetwork: true, audioVolume: 0 };
-    const disconnectAndReject = disconnectFromSession(session);
+    const disconnectAndReject = (rejectError: Error) => {
+      disconnectFromSession(session).then(() => {
+        reject(rejectError);
+      });
+    };
     if (!publisher.stream) {
-      disconnectAndReject(() => reject(new e.SubscribeToSessionError()));
+      disconnectAndReject(new e.SubscribeToSessionError());
     } else {
       const subscriberDiv = document.createElement('div');
       const subscriber = session.subscribe(publisher.stream, subscriberDiv, config, (error?: OT.OTError) => {
         if (error) {
-          disconnectAndReject(() => reject(new e.SubscribeToSessionError()));
+          disconnectAndReject(new e.SubscribeToSessionError());
         } else {
           resolve({ ...{ session }, ...{ publisher }, ...{ subscriber } });
         }
@@ -202,7 +211,7 @@ export function testConnectivity(
         failedTests: [],
       };
       otLogging.logEvent({ action: 'testConnectivity', variation: 'Success' });
-      return disconnectFromSession(flowResults.session)(() => {
+      return disconnectFromSession(flowResults.session).then(() => {
         onComplete && onComplete(undefined, results);
         return resolve(results);
       });
