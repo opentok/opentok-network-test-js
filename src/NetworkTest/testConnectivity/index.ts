@@ -115,21 +115,25 @@ function checkPublishToSession(OT: OpenTok, session: OT.Session): Promise<Publis
       .then(({ publisher }: CreateLocalPublisherResults) => {
         session.publish(publisher, (error?: OT.OTError) => {
           if (error) {
+            session.on('sessionDisconnected', () => {
+              if (errorHasName(error, OTErrorType.NOT_CONNECTED)) {
+                reject(new e.PublishToSessionNotConnectedError());
+              } else if (errorHasName(error, OTErrorType.UNABLE_TO_PUBLISH)) {
+                reject(new e.PublishToSessionPermissionOrTimeoutError());
+              } else if (error) {
+                reject(new e.PublishToSessionError());
+              }
+            });
             session.disconnect();
-          }
-          if (errorHasName(error, OTErrorType.NOT_CONNECTED)) {
-            reject(new e.PublishToSessionNotConnectedError());
-          } else if (errorHasName(error, OTErrorType.UNABLE_TO_PUBLISH)) {
-            reject(new e.PublishToSessionPermissionOrTimeoutError());
-          } else if (error) {
-            reject(new e.PublishToSessionError());
           } else {
             resolve({ ...{ session }, ...{ publisher } });
           }
         });
       }).catch((error: e.ConnectivityError) => {
+        session.on('sessionDisconnected', () => {
+          reject(error);
+        });
         session.disconnect();
-        reject(error);
       });
   });
 }
@@ -141,14 +145,18 @@ function checkSubscribeToSession({ session, publisher }: PublishToSessionResults
   return new Promise((resolve, reject) => {
     const config = { testNetwork: true, audioVolume: 0 };
     if (!publisher.stream) {
+      session.on('sessionDisconnected', () => {
+        reject(new e.SubscribeToSessionError()); // TODO: Specific error for this
+      });
       session.disconnect();
-      reject(new e.SubscribeToSessionError()); // TODO: Specific error for this
     } else {
       const subscriberDiv = document.createElement('div');
       const subscriber = session.subscribe(publisher.stream, subscriberDiv, config, (error?: OT.OTError) => {
         if (error) {
+          session.on('sessionDisconnected', () => {
+            reject(new e.SubscribeToSessionError());
+          });
           session.disconnect();
-          reject(new e.SubscribeToSessionError());
         } else {
           resolve({ ...{ session }, ...{ publisher }, ...{ subscriber } });
         }
@@ -165,12 +173,11 @@ function checkLoggingServer(OT: OpenTok, input?: SubscribeToSessionResults): Pro
   return new Promise((resolve, reject) => {
     const url = `${OT.properties.loggingURL}/logging/ClientEvent`;
     const handleError = () => reject(new e.LoggingServerConnectionError());
-    if (input) {
-      input.session.disconnect();
-    }
+
     axios.post(url)
       .then(response => response.status === 200 ? resolve(input) : handleError())
       .catch(handleError);
+
   });
 }
 
@@ -190,9 +197,11 @@ export function testConnectivity(
         failedTests: [],
       };
       otLogging.logEvent({ action: 'testConnectivity', variation: 'Success' });
+      flowResults.session.on('sessionDisconnected', () => {
+        onComplete && onComplete(undefined, results);
+        return resolve(results);
+      });
       flowResults.session.disconnect();
-      onComplete && onComplete(undefined, results);
-      return resolve(results);
     };
 
     const onFailure = (error: Error) => {
@@ -206,7 +215,7 @@ export function testConnectivity(
         const messagingFailure = baseFailures.find(c => c.type === 'messaging');
         const failedTests = [
           ...baseFailures,
-          ... messagingFailure ? mapErrors(new e.FailedMessagingServerTestError()) : [],
+          ...messagingFailure ? mapErrors(new e.FailedMessagingServerTestError()) : [],
         ];
 
         const results = {
