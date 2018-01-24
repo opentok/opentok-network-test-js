@@ -116,6 +116,7 @@ function checkPublishToSession(OT: OpenTok, session: OT.Session): Promise<Publis
         session.publish(publisher, (error?: OT.OTError) => {
           if (error) {
             session.on('sessionDisconnected', () => {
+              session.off();
               if (errorHasName(error, OTErrorType.NOT_CONNECTED)) {
                 reject(new e.PublishToSessionNotConnectedError());
               } else if (errorHasName(error, OTErrorType.UNABLE_TO_PUBLISH)) {
@@ -131,6 +132,7 @@ function checkPublishToSession(OT: OpenTok, session: OT.Session): Promise<Publis
         });
       }).catch((error: e.ConnectivityError) => {
         session.on('sessionDisconnected', () => {
+          session.off();
           reject(error);
         });
         session.disconnect();
@@ -146,6 +148,7 @@ function checkSubscribeToSession({ session, publisher }: PublishToSessionResults
     const config = { testNetwork: true, audioVolume: 0 };
     if (!publisher.stream) {
       session.on('sessionDisconnected', () => {
+        session.off();
         reject(new e.SubscribeToSessionError()); // TODO: Specific error for this
       });
       session.disconnect();
@@ -154,6 +157,7 @@ function checkSubscribeToSession({ session, publisher }: PublishToSessionResults
       const subscriber = session.subscribe(publisher.stream, subscriberDiv, config, (error?: OT.OTError) => {
         if (error) {
           session.on('sessionDisconnected', () => {
+            session.off();
             reject(new e.SubscribeToSessionError());
           });
           session.disconnect();
@@ -198,6 +202,7 @@ export function testConnectivity(
       };
       otLogging.logEvent({ action: 'testConnectivity', variation: 'Success' });
       flowResults.session.on('sessionDisconnected', () => {
+        flowResults.session.off();
         onComplete && onComplete(undefined, results);
         return resolve(results);
       });
