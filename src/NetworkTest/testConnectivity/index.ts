@@ -22,6 +22,21 @@ export type ConnectivityTestResults = {
   failedTests: FailureCase[],
 };
 
+
+/**
+ * Disconnect from a session. Once disconnected, remove all session
+ * event listeners and invoke the provided callback function.
+ */
+function disconnectFromSession(session: OT.Session) {
+  return (fn: () => void): void => {
+    session.on('sessionDisconnected', () => {
+      session.off();
+      return fn();
+    });
+    session.disconnect();
+  };
+}
+
 /**
  * Attempt to connect to the OpenTok session
  */
@@ -111,31 +126,24 @@ function checkCreateLocalPublisher(OT: OpenTok): Promise<CreateLocalPublisherRes
  */
 function checkPublishToSession(OT: OpenTok, session: OT.Session): Promise<PublishToSessionResults> {
   return new Promise((resolve, reject) => {
+    const disconnectAndReject= disconnectFromSession(session);
     checkCreateLocalPublisher(OT)
       .then(({ publisher }: CreateLocalPublisherResults) => {
         session.publish(publisher, (error?: OT.OTError) => {
           if (error) {
-            session.on('sessionDisconnected', () => {
-              session.off();
-              if (errorHasName(error, OTErrorType.NOT_CONNECTED)) {
-                reject(new e.PublishToSessionNotConnectedError());
-              } else if (errorHasName(error, OTErrorType.UNABLE_TO_PUBLISH)) {
-                reject(new e.PublishToSessionPermissionOrTimeoutError());
-              } else if (error) {
-                reject(new e.PublishToSessionError());
-              }
-            });
-            session.disconnect();
+            if (errorHasName(error, OTErrorType.NOT_CONNECTED)) {
+              disconnectAndReject(() => reject(new e.PublishToSessionNotConnectedError()));
+            } else if (errorHasName(error, OTErrorType.UNABLE_TO_PUBLISH)) {
+              disconnectAndReject(() => reject(new e.PublishToSessionPermissionOrTimeoutError()));
+            } else if (error) {
+              disconnectAndReject(() => reject(new e.PublishToSessionError()));
+            }
           } else {
             resolve({ ...{ session }, ...{ publisher } });
           }
         });
       }).catch((error: e.ConnectivityError) => {
-        session.on('sessionDisconnected', () => {
-          session.off();
-          reject(error);
-        });
-        session.disconnect();
+        disconnectAndReject(() => reject(error));
       });
   });
 }
@@ -146,21 +154,14 @@ function checkPublishToSession(OT: OpenTok, session: OT.Session): Promise<Publis
 function checkSubscribeToSession({ session, publisher }: PublishToSessionResults): Promise<SubscribeToSessionResults> {
   return new Promise((resolve, reject) => {
     const config = { testNetwork: true, audioVolume: 0 };
+    const disconnectAndReject = disconnectFromSession(session);
     if (!publisher.stream) {
-      session.on('sessionDisconnected', () => {
-        session.off();
-        reject(new e.SubscribeToSessionError()); // TODO: Specific error for this
-      });
-      session.disconnect();
+      disconnectAndReject(() => reject(new e.SubscribeToSessionError()));
     } else {
       const subscriberDiv = document.createElement('div');
       const subscriber = session.subscribe(publisher.stream, subscriberDiv, config, (error?: OT.OTError) => {
         if (error) {
-          session.on('sessionDisconnected', () => {
-            session.off();
-            reject(new e.SubscribeToSessionError());
-          });
-          session.disconnect();
+          disconnectAndReject(() => reject(new e.SubscribeToSessionError()));
         } else {
           resolve({ ...{ session }, ...{ publisher }, ...{ subscriber } });
         }
@@ -201,12 +202,10 @@ export function testConnectivity(
         failedTests: [],
       };
       otLogging.logEvent({ action: 'testConnectivity', variation: 'Success' });
-      flowResults.session.on('sessionDisconnected', () => {
-        flowResults.session.off();
+      return disconnectFromSession(flowResults.session)(() => {
         onComplete && onComplete(undefined, results);
         return resolve(results);
       });
-      flowResults.session.disconnect();
     };
 
     const onFailure = (error: Error) => {
