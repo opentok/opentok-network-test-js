@@ -31,7 +31,6 @@ function disconnectFromSession(session: OT.Session) {
   return new Promise((resolve, reject) => {
     session.on('sessionDisconnected', () => {
       session.off();
-      console.log('disconnectFromSession');
       resolve();
     });
     session.disconnect();
