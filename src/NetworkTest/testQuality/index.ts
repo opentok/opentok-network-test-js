@@ -100,12 +100,14 @@ function publishAndSubscribe(OT: OpenTok) {
     new Promise((resolve, reject) => {
       type StreamCreatedEvent = OT.Event<'streamCreated', OT.Publisher> & { stream: OT.Stream };
       const containerDiv = document.createElement('div');
-      const publisherOptions: OT.PublisherProperties = { resolution: '1280x720' };
       const resolution  = '1280x720';
-      const publiserOptions = Object.assign({}, { resolution }, audioOnly ? { videoSource: null } : {});
+      const width  = 2;
+      const height  = 2;
+      const publisherOptions = Object.assign({}, { resolution, width, height }, audioOnly ? { videoSource: null } : {});
       validateDevices(OT)
         .then(() => {
           const containerDiv = document.createElement('div');
+          document.body.appendChild(containerDiv);
           const publisher = OT.initPublisher(containerDiv, publisherOptions, (error?: OT.OTError) => {
             if (error) {
               reject(new e.InitPublisherError(error.message));
@@ -125,6 +127,7 @@ function publishAndSubscribe(OT: OpenTok) {
             }
           });
           publisher.on('streamCreated', (event: StreamCreatedEvent) => {
+            containerDiv.style.visibility = 'hidden';
             const subscriber =
               session.subscribe(event.stream, containerDiv, { testNetwork: true }, (subscribeError?: OT.OTError) => {
                 return subscribeError ?

@@ -3,7 +3,7 @@ const webpack = require('webpack');
 const TypedocWebpackPlugin = require('typedoc-webpack-plugin');
 
 module.exports = {
-  entry: './src/NetworkTest/index.ts',
+  entry: ['babel-polyfill', './src/NetworkTest/index.ts'],
   devtool: 'source-map',
   module: {
     loaders: [{
