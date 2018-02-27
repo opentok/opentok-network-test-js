@@ -107,10 +107,15 @@ function checkCreateLocalPublisher(OT: OpenTok): Promise<CreateLocalPublisherRes
     validateDevices(OT)
       .then(() => {
         const publisherDiv = document.createElement('div');
+        publisherDiv.style.width = '1px';
+        publisherDiv.style.height = '1px';
+        publisherDiv.style.opacity = '0.01';
         document.body.appendChild(publisherDiv);
-        const publisherOptions = {
-          width: 2,
-          height: 2,
+        const publisherOptions: OT.PublisherProperties = {
+          width: '100%',
+          height: '100%',
+          insertMode: 'append',
+          showControls: false,
         };
         const publisher = OT.initPublisher(publisherDiv, publisherOptions, (error?: OT.OTError) => {
           if (!error) {
