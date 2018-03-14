@@ -1,6 +1,6 @@
 {
   "name": "opentok-network-test-js",
-  "version": "1.0.1",
+  "version": "1.0.4",
   "description": "Precall network test for applications using the OpenTok platform.",
   "main": "dist/index.js",
   "scripts": {
@@ -64,7 +64,7 @@
     "ts-loader": "^3.1.1",
     "tslint": "^5.8.0",
     "tslint-config-airbnb": "^5.4.2",
-    "typedoc": "^0.9.0",
+    "typedoc": "^0.11.0",
     "typedoc-plugin-external-module-name": "^1.0.10",
     "typedoc-webpack-plugin": "^1.1.4",
     "typescript": "^2.6.1",
