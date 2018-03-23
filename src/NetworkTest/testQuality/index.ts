@@ -102,7 +102,7 @@ function publishAndSubscribe(OT: OpenTok) {
       const containerDiv = document.createElement('div');
       containerDiv.style.width = '1px';
       containerDiv.style.height = '1px';
-      containerDiv.style.opacity = '0.01';
+      containerDiv.style.opacity = '0';
       document.body.appendChild(containerDiv);
       const publisherOptions: OT.PublisherProperties = {
         resolution: '1280x720',
@@ -132,7 +132,6 @@ function publishAndSubscribe(OT: OpenTok) {
             }
           });
           publisher.on('streamCreated', (event: StreamCreatedEvent) => {
-            containerDiv.style.visibility = 'hidden';
             const subscriber =
               session.subscribe(event.stream, containerDiv, { testNetwork: true }, (subscribeError?: OT.OTError) => {
                 return subscribeError ?
