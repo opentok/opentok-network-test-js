@@ -76,7 +76,9 @@ declare module OT {
     insertDefaultUI?: boolean;
     insertMode?: 'replace' | 'after' | 'before' | 'append';
     showControls?: boolean;
-  } & Partial<Dimensions>;
+    width?: string | number;
+    height?: string | number;
+  };
 
   type PublisherStyle = WidgetStyle & {
     archiveStatusDisplayMode: 'auto' | 'off';

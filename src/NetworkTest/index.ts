@@ -32,7 +32,7 @@ export default class NetworkTest {
   constructor(OT: OpenTok, credentials: SessionCredentials) {
     this.validateOT(OT);
     this.validateCredentials(credentials);
-    this.startLoggingEngine(credentials.apiKey, credentials.sessionId);
+    this.otLogging = this.startLoggingEngine(credentials.apiKey, credentials.sessionId);
     this.OT = OT;
     this.credentials = credentials;
   }
@@ -69,8 +69,8 @@ export default class NetworkTest {
     }
   }
 
-  private startLoggingEngine(apiKey: string, sessionId: string): void {
-    this.otLogging = new OTKAnalytics({
+  private startLoggingEngine(apiKey: string, sessionId: string): OTKAnalytics {
+    return new OTKAnalytics({
       sessionId,
       partnerId: apiKey,
       source: window.location.href,
