@@ -2,8 +2,8 @@ export default class MOSState {
   statsLog: OT.SubscriberStats[];
   audioScoresLog: number[];
   videoScoresLog: number[];
-  stats: HasAudioVideo<AverageStats>;
-  bandwidth: Bandwidth;
+  stats!: HasAudioVideo<AverageStats>;
+  bandwidth!: Bandwidth;
   intervalId?: number;
 
   constructor() {
