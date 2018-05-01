@@ -14,7 +14,7 @@ function getAverageBitrateAndPlr(type: AV, statsList: QualityStats[]): AverageSt
     sumBps += stat.averageBitrate;
     sumPlr += stat.packetLossRatio;
     if (type === 'video') {
-      sumFrameRate += getOr(0, 'frameRate', stat);
+      sumFrameRate += Number(getOr(0, 'frameRate', stat));
     }
   });
 

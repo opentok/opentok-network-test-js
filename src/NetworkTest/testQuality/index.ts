@@ -100,12 +100,19 @@ function publishAndSubscribe(OT: OpenTok) {
     new Promise((resolve, reject) => {
       type StreamCreatedEvent = OT.Event<'streamCreated', OT.Publisher> & { stream: OT.Stream };
       const containerDiv = document.createElement('div');
-      const publisherOptions: OT.PublisherProperties = { resolution: '1280x720' };
-      const resolution  = '1280x720';
-      const publiserOptions = Object.assign({}, { resolution }, audioOnly ? { videoSource: null } : {});
+      containerDiv.style.width = '1px';
+      containerDiv.style.height = '1px';
+      containerDiv.style.opacity = '0';
+      document.body.appendChild(containerDiv);
+      const publisherOptions: OT.PublisherProperties = {
+        resolution: '1280x720',
+        width: '100%',
+        height: '100%',
+        insertMode: 'append',
+        showControls: false,
+      };
       validateDevices(OT)
         .then(() => {
-          const containerDiv = document.createElement('div');
           const publisher = OT.initPublisher(containerDiv, publisherOptions, (error?: OT.OTError) => {
             if (error) {
               reject(new e.InitPublisherError(error.message));
