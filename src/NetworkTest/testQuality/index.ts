@@ -133,11 +133,14 @@ function publishAndSubscribe(OT: OpenTok) {
           });
           publisher.on('streamCreated', (event: StreamCreatedEvent) => {
             const subscriber =
-              session.subscribe(event.stream, containerDiv, { testNetwork: true }, (subscribeError?: OT.OTError) => {
-                return subscribeError ?
-                  reject(new e.SubscribeToSessionError(subscribeError.message)) :
-                  resolve(subscriber);
-              });
+              session.subscribe(event.stream,
+                containerDiv,
+                { testNetwork: true, insertMode: 'append' },
+                (subscribeError?: OT.OTError) => {
+                  return subscribeError ?
+                    reject(new e.SubscribeToSessionError(subscribeError.message)) :
+                    resolve(subscriber);
+                });
           });
         })
         .catch(reject);
