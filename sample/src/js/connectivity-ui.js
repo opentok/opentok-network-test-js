@@ -103,7 +103,6 @@ export function displayTestQualityResults(error, results) {
     results.video.recommendedResolution || '--';
   resultsEl.querySelector('#video-recommendedFrameRate').textContent =
     results.video.recommendedFrameRate ? results.video.recommendedFrameRate + ' fps' : '--';
-  var statusIconEl = statusContainerEl.querySelector('img');
   if (results.audio.supported) {
     if (results.video.supported) {
       statusIconEl.src = 'assets/icon_pass.svg';
