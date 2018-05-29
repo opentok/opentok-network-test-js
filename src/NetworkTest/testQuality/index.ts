@@ -204,8 +204,7 @@ function checkSubscriberQuality(
               stats && onUpdate && onUpdate(updateStats(stats));
             };
 
-            const resultsCallback: MOSResultsCallback = (state: MOSState) => {
-              clearTimeout(mosEstimatorTimeoutId);
+            const processResults = () => {
               const audioVideoResults: QualityTestResults = buildResults(builder);
               if (!audioOnly && !isAudioQualityAcceptable(audioVideoResults)) {
                 audioOnly = true;
@@ -222,24 +221,14 @@ function checkSubscriberQuality(
               }
             };
 
+            const resultsCallback: MOSResultsCallback = (state: MOSState) => {
+              clearTimeout(mosEstimatorTimeoutId);
+              processResults();
+            };
+
             subscriberMOS(builder.state, subscriber, getStatsListener, resultsCallback);
 
-            mosEstimatorTimeoutId = window.setTimeout(() => {
-              const audioVideoResults: QualityTestResults = buildResults(builder);
-              if (!isAudioQualityAcceptable(audioVideoResults)) {
-                audioOnly = true;
-                checkSubscriberQuality(OT, session, credentials, onUpdate)
-                  .then((results: QualityTestResults) => {
-                    resolve(results);
-                  });
-              } else {
-                session.on('sessionDisconnected', () => {
-                  resolve(audioVideoResults);
-                  session.off();
-                });
-                session.disconnect();
-              }
-            }, audioOnly ? config.getStatsAudioOnlyDuration
+            mosEstimatorTimeoutId = window.setTimeout(processResults, audioOnly ? config.getStatsAudioOnlyDuration
               : config.getStatsVideoAndAudioTestDuration);
 
           } catch (exception) {
