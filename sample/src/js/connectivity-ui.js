@@ -75,6 +75,7 @@ function convertFailedTestsToString(failedTests) {
 export function displayTestQualityResults(error, results) {
   var statusContainerEl = document.getElementById('quality_status_container');
   var statusEl = statusContainerEl.querySelector('p');
+  var statusIconEl = statusContainerEl.querySelector('img');
   statusContainerEl.querySelector('#audio .results').style.display = 'block';
   statusContainerEl.querySelector('#video .results').style.display = 'block';
 
