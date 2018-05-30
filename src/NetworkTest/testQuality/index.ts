@@ -100,6 +100,8 @@ function publishAndSubscribe(OT: OpenTok) {
     new Promise((resolve, reject) => {
       type StreamCreatedEvent = OT.Event<'streamCreated', OT.Publisher> & { stream: OT.Stream };
       const containerDiv = document.createElement('div');
+      containerDiv.style.position = 'fixed';
+      containerDiv.style.bottom = '-1px';
       containerDiv.style.width = '1px';
       containerDiv.style.height = '1px';
       containerDiv.style.opacity = '0';
@@ -133,11 +135,14 @@ function publishAndSubscribe(OT: OpenTok) {
           });
           publisher.on('streamCreated', (event: StreamCreatedEvent) => {
             const subscriber =
-              session.subscribe(event.stream, containerDiv, { testNetwork: true }, (subscribeError?: OT.OTError) => {
-                return subscribeError ?
-                  reject(new e.SubscribeToSessionError(subscribeError.message)) :
-                  resolve(subscriber);
-              });
+              session.subscribe(event.stream,
+                containerDiv,
+                { testNetwork: true, insertMode: 'append' },
+                (subscribeError?: OT.OTError) => {
+                  return subscribeError ?
+                    reject(new e.SubscribeToSessionError(subscribeError.message)) :
+                    resolve(subscriber);
+                });
           });
         })
         .catch(reject);
