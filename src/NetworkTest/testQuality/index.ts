@@ -100,6 +100,8 @@ function publishAndSubscribe(OT: OpenTok) {
     new Promise((resolve, reject) => {
       type StreamCreatedEvent = OT.Event<'streamCreated', OT.Publisher> & { stream: OT.Stream };
       const containerDiv = document.createElement('div');
+      containerDiv.style.position = 'fixed';
+      containerDiv.style.bottom = '-1px';
       containerDiv.style.width = '1px';
       containerDiv.style.height = '1px';
       containerDiv.style.opacity = '0';
