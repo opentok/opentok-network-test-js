@@ -75,6 +75,7 @@ function convertFailedTestsToString(failedTests) {
 export function displayTestQualityResults(error, results) {
   var statusContainerEl = document.getElementById('quality_status_container');
   var statusEl = statusContainerEl.querySelector('p');
+  var statusIconEl = statusContainerEl.querySelector('img');
   statusContainerEl.querySelector('#audio .results').style.display = 'block';
   statusContainerEl.querySelector('#video .results').style.display = 'block';
 
@@ -102,7 +103,6 @@ export function displayTestQualityResults(error, results) {
     results.video.recommendedResolution || '--';
   resultsEl.querySelector('#video-recommendedFrameRate').textContent =
     results.video.recommendedFrameRate ? results.video.recommendedFrameRate + ' fps' : '--';
-  var statusIconEl = statusContainerEl.querySelector('img');
   if (results.audio.supported) {
     if (results.video.supported) {
       statusIconEl.src = 'assets/icon_pass.svg';
