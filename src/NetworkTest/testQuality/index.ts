@@ -28,6 +28,8 @@ type QualityTestResultsBuilder = {
 };
 
 type MOSResultsCallback = (state: MOSState) => void;
+type DeviceMap = { [deviceId: string]: OT.Device };
+type AvailableDevices = { audio: DeviceMap, video: DeviceMap };
 
 let audioOnly = false; // The initial test is audio-video
 
@@ -60,12 +62,8 @@ function connectToSession(session: OT.Session, token: string): Promise<OT.Sessio
 /**
  * Ensure that audio and video devices are available
  */
-function validateDevices(OT: OpenTok): Promise<void> {
+function validateDevices(OT: OpenTok): Promise<AvailableDevices> {
   return new Promise((resolve, reject) => {
-
-    type DeviceMap = { [deviceId: string]: OT.Device };
-    type AvailableDevices = { audio: DeviceMap, video: DeviceMap };
-
     OT.getDevices((error?: OT.OTError, devices: OT.Device[] = []) => {
 
       if (error) {
@@ -82,10 +80,8 @@ function validateDevices(OT: OpenTok): Promise<void> {
 
         if (!Object.keys(availableDevices.audio).length) {
           reject(new e.NoAudioCaptureDevicesError());
-        } else if (!Object.keys(availableDevices.video).length) {
-          reject(new e.NoVideoCaptureDevicesError());
         } else {
-          resolve();
+          resolve(availableDevices);
         }
       }
     });
@@ -98,6 +94,7 @@ function validateDevices(OT: OpenTok): Promise<void> {
 function publishAndSubscribe(OT: OpenTok) {
   return (session: OT.Session): Promise<OT.Subscriber> =>
     new Promise((resolve, reject) => {
+      let publisherOptions: OT.PublisherProperties;
       type StreamCreatedEvent = OT.Event<'streamCreated', OT.Publisher> & { stream: OT.Stream };
       const containerDiv = document.createElement('div');
       containerDiv.style.position = 'fixed';
@@ -106,7 +103,7 @@ function publishAndSubscribe(OT: OpenTok) {
       containerDiv.style.height = '1px';
       containerDiv.style.opacity = '0';
       document.body.appendChild(containerDiv);
-      const publisherOptions: OT.PublisherProperties = {
+      publisherOptions = {
         resolution: '1280x720',
         width: '100%',
         height: '100%',
@@ -114,7 +111,11 @@ function publishAndSubscribe(OT: OpenTok) {
         showControls: false,
       };
       validateDevices(OT)
-        .then(() => {
+        .then((availableDevices: AvailableDevices) => {
+          if (!Object.keys(availableDevices.video).length) {
+            publisherOptions.videoSource = null;
+            audioOnly = true;
+          }
           const publisher = OT.initPublisher(containerDiv, publisherOptions, (error?: OT.OTError) => {
             if (error) {
               reject(new e.InitPublisherError(error.message));

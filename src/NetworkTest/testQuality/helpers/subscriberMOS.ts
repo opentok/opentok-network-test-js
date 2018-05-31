@@ -119,7 +119,7 @@ export default function subscriberMOS(
          * We know that we're receiving "faulty" stats when we see a negative
          * value for bytesReceived.
          */
-        if (stats.audio.bytesReceived < 0 || stats.video.bytesReceived < 0) {
+        if (stats.audio.bytesReceived < 0 || stats.video && stats.video.bytesReceived < 0) {
           mosState.clearInterval();
           return callback(mosState);
         }
