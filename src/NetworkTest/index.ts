@@ -6,6 +6,7 @@
 * Define Network Connectivy class
 */
 
+const version = require('../../package.json').version;
 import { testConnectivity, ConnectivityTestResults } from './testConnectivity';
 import testQuality from './testQuality';
 import {
@@ -74,7 +75,7 @@ export default class NetworkTest {
       sessionId,
       partnerId: apiKey,
       source: window.location.href,
-      clientVersion: 'js-network-test-1.0.0',
+      clientVersion: 'js-network-test-' + version,
       name: 'opentok-network-test',
       componentId: 'opentok-network-test',
     });
