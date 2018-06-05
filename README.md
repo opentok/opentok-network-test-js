@@ -60,11 +60,8 @@ Then run the test methods:
 ```javascript
 otNetworkTest.testConnectivity().then((results) => {
   console.log('OpenTok connectivity test results', results);
-  otNetworkTest.testQuality(updateCallback(stats) {
-    // This function is called repeatedly as the quality test runs.
-    // It includes cumulative audio and video statistics for the test.
-    const currentStats = stats[stats.length - 1];
-    console.log('testQuality stats', currentStats);
+  otNetworkTest.testQuality(function updateCallback(stats) {
+    console.log('intermediate testQuality stats', stats);
   }).then((results) => {
     // This function is called when the quality test is completed.
     console.log('OpenTok quality results', results);
