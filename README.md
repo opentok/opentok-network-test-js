@@ -28,10 +28,18 @@ First, install the package:
 $ npm install opentok-network-test-js
 ```
 
-Now load the OpenTok Network Test in your project:
+Now load the OpenTok Network Test in your project.
+
+Using CommonJS:
 
 ```javascript
 const OTNetworkTest = require('opentok-network-test-js');
+```
+
+... or ES6 ...
+
+```javascript
+import OTNetworkTest from 'opentok-network-test-js';
 ```
 
 Load the OpenTok.js library.
@@ -41,7 +49,7 @@ a configuration object. The configuration object contains an API key for your ap
 OpenTok project, a session ID for a test session, and a token for that session:
 
 ```javascript
-const otNetworkTest = new NetworkTest(OT, {
+const otNetworkTest = new OTNetworkTest(OT, {
   apiKey: '123456', // Add the API key for your OpenTok project here.
   sessionId: '1_MX40NzIwMzJ-fjE1MDElGQkJJfn4', // Add a test session ID for that project
   token: 'T1==cGFydG5lcXN0PQ==' // Add a token for that session here
