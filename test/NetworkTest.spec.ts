@@ -209,7 +209,7 @@ describe('Network Test', () => {
           .finally(done);
       }, 40000);
 
-      fit('should return valid test results or an error when there is no camera', (done) => {
+      it('should return valid test results or an error when there is no camera', (done) => {
         const realOTGetDevices = OT.getDevices;
         OT.getDevices = (callbackFn) => {
           realOTGetDevices((error, devices) => {
