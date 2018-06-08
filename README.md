@@ -340,11 +340,11 @@ the `updateCallback()` function and apply your own quality analysis algorithm.
 
 The `testQuality()` results include MOS scores for video (if supported) and audio (if supported).
 
-A MOS scores is a rating of the audio or video quality. In subjective scoring, a user is
-asked to rank quality from 1 (bad) to 5 (excellent). Instead of asking the user to rank the
-quality, this module calculates the MOS scores based on bitrate, packet loss ratio, and (for video)
-resolution. For example, the audio MOS calculation is based on the
-[ITU G.107 specification][itu-g107]. These algorithms limit the range of scores from 1.0 to 4.5.
+A MOS score is a rating of audio or video quality. In subjective scoring, a user is asked
+to rate quality from 1 (bad) to 5 (excellent). This module uses an objective test, calculating
+the MOS scores based on bitrate, packet loss ratio, and (for video) resolution. For example,
+the audio MOS calculation is based on the [ITU G.107 specification][itu-g107]. These algorithms
+limit the range of scores from 1.0 to 4.5.
 
 | MOS Score  | Meaning   |
 | ---------- | --------- |
