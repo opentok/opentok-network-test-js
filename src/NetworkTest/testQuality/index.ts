@@ -31,7 +31,7 @@ type MOSResultsCallback = (state: MOSState) => void;
 type DeviceMap = { [deviceId: string]: OT.Device };
 type AvailableDevices = { audio: DeviceMap, video: DeviceMap };
 
-let audioOnly = false; // The initial test is audio-video
+let audioOnly = false; // By default, the initial test is audio-video
 
 /**
  * If not already connected, connect to the OpenTok Session
@@ -113,8 +113,10 @@ function publishAndSubscribe(OT: OpenTok) {
       validateDevices(OT)
         .then((availableDevices: AvailableDevices) => {
           if (!Object.keys(availableDevices.video).length) {
-            publisherOptions.videoSource = null;
             audioOnly = true;
+          }
+          if (audioOnly) {
+            publisherOptions.videoSource = null;
           }
           const publisher = OT.initPublisher(containerDiv, publisherOptions, (error?: OT.OTError) => {
             if (error) {
@@ -263,10 +265,12 @@ export default function testQuality(
   OT: OpenTok,
   credentials: SessionCredentials,
   otLogging: OTKAnalytics,
+  options?: TestQualityOptions,
   onUpdate?: UpdateCallback<UpdateCallbackStats>,
   onComplete?: CompletionCallback<QualityTestResults>): Promise<QualityTestResults> {
   return new Promise((resolve, reject) => {
 
+    audioOnly = !!(options && options.audioOnly);
     const onSuccess = (results: QualityTestResults) => {
       onComplete && onComplete(undefined, results);
       otLogging.logEvent({ action: 'testQuality', variation: 'Success' });

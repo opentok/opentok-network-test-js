@@ -103,11 +103,12 @@ export default class NetworkTest {
    * opentok-network-test-js project for details.
    */
   testQuality(
+    options?: TestQualityOptions,
     updateCallback?: UpdateCallback<UpdateCallbackStats>,
     completionCallback?: CompletionCallback<QualityTestResults>): Promise<any> {
     this.otLogging.logEvent({ action: 'testQuality', variation: 'Attempt' });
     this.validateCallbacks('testQuality', updateCallback, completionCallback);
     return testQuality(
-      this.OT, this.credentials, this.otLogging, updateCallback, completionCallback);
+      this.OT, this.credentials, this.otLogging, options, updateCallback, completionCallback);
   }
 }

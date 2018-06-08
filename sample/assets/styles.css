@@ -104,6 +104,10 @@ div.prettyBox img {
   width: 50px;
 }
 
+#precall {
+  display: block
+}
+
 #quality_status_container > div {
   display: flex;
 }
