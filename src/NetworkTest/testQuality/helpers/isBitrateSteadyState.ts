@@ -1,9 +1,10 @@
 import getLatestSampleWindow from './getLatestSampleWindow';
 import calculateQualityStats from './calculateQualityStats';
 import config from './config';
-import { SubscriberStats } from '../../types/opentok/subscriber';
+import { AV } from '../types';
+import { OT } from '../../types/opentok';
 
-export default function isBitrateSteadyState(statsList: SubscriberStats[]): boolean {
+export default function isBitrateSteadyState(statsList: OT.SubscriberStats[]): boolean {
   const latestSamples = getLatestSampleWindow(statsList);
   const steadyStateAllowedDelta = config.steadyStateAllowedDelta;
   let isSteadyState = true;

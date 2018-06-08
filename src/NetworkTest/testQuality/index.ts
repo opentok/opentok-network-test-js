@@ -9,18 +9,19 @@
  * Publishing Test Flow
  */
 
- /* tslint:disable */
+/* tslint:disable */
 import OTKAnalytics from 'opentok-solutions-logging';
 /* tslint:enable */
 import * as Promise from 'promise';
-import { Device, OT as OpenTok } from '../types/opentok';
-import { Subscriber, SubscriberStats } from '../types/opentok/subscriber';
-import { Publisher, PublisherProperties } from '../types/opentok/publisher';
-import { Stream } from '../types/opentok/stream';
-import { Session } from '../types/opentok/session';
-import { OTError } from '../types/opentok/error';
-import { Event } from '../types/opentok/events';
-import { UpdateCallback } from '../types/networkTest';
+import { OT } from '../types/opentok';
+import { AV, Bandwidth, HasAudioVideo } from './types';
+// import { Subscriber, SubscriberStats } from '../types/opentok/subscriber';
+// import { Publisher, PublisherProperties } from '../types/opentok/publisher';
+// import { Stream } from '../types/opentok/stream';
+// import { Session } from '../types/opentok/session';
+// import { OTError } from '../types/opentok/error';
+// import { Event } from '../types/opentok/events';
+import { CompletionCallback, UpdateCallback, UpdateCallbackStats } from '../types/callbacks';
 import { pick } from '../../util';
 import * as e from './errors/';
 import { OTErrorType, errorHasName } from '../errors/types';
@@ -28,16 +29,7 @@ import subscriberMOS from './helpers/subscriberMOS';
 import MOSState from './helpers/MOSState';
 import config from './helpers/config';
 import isSupportedBrowser from './helpers/isSupportedBrowser';
-
-interface AverageStats {
-  bitrate?: number;
-  packetLossRatio?: number;
-  supported?: boolean;
-  reason?: string;
-  frameRate?: number;
-  recommendedFrameRate?: number;
-  recommendedResolution?: string;
-}
+import { AverageStats } from './helpers/stats';
 
 export interface QualityTestResults extends HasAudioVideo<AverageStats> {
   mos: number;
@@ -45,8 +37,8 @@ export interface QualityTestResults extends HasAudioVideo<AverageStats> {
 
 interface QualityTestResultsBuilder {
   state: MOSState;
-  subscriber: Subscriber;
-  credentials: SessionCredentials;
+  subscriber: OT.Subscriber;
+  credentials: OT.SessionCredentials;
   mosScore?: number;
   bandwidth?: Bandwidth;
 }
@@ -58,12 +50,12 @@ let audioOnly = false; // The initial test is audio-video
 /**
  * If not already connected, connect to the OpenTok Session
  */
-function connectToSession(session: Session, token: string): Promise<Session> {
+function connectToSession(session: OT.Session, token: string): Promise<OT.Session> {
   return new Promise((resolve, reject) => {
     if (session.connection) {
       resolve(session);
     } else {
-      session.connect(token, (error?: OTError) => {
+      session.connect(token, (error?: OT.OTError) => {
         if (error) {
           if (errorHasName(error, OTErrorType.AUTHENTICATION_ERROR)) {
             reject(new e.ConnectToSessionTokenError());
@@ -84,20 +76,20 @@ function connectToSession(session: Session, token: string): Promise<Session> {
 /**
  * Ensure that audio and video devices are available
  */
-function validateDevices(OT: OpenTok): Promise<void> {
+function validateDevices(OT: OT.Client): Promise<void> {
   return new Promise((resolve, reject) => {
 
-    type DeviceMap = { [deviceId: string]: Device };
+    type DeviceMap = { [deviceId: string]: OT.Device };
     type AvailableDevices = { audio: DeviceMap, video: DeviceMap };
 
-    OT.getDevices((error?: OTError, devices: Device[] = []) => {
+    OT.getDevices((error?: OT.OTError, devices: OT.Device[] = []) => {
 
       if (error) {
         reject(new e.FailedToObtainMediaDevices());
       } else {
 
         const availableDevices: AvailableDevices = devices.reduce(
-          (acc: AvailableDevices, device: Device) => {
+          (acc: AvailableDevices, device: OT.Device) => {
             const type: AV = device.kind === 'audioInput' ? 'audio' : 'video';
             return { ...acc, [type]: { ...acc[type], [device.deviceId]: device } };
           },
@@ -119,10 +111,10 @@ function validateDevices(OT: OpenTok): Promise<void> {
 /**
  * Create a test publisher and subscribe to the publihser's stream
  */
-function publishAndSubscribe(OT: OpenTok) {
-  return (session: Session): Promise<Subscriber> =>
+function publishAndSubscribe(OT: OT.Client) {
+  return (session: OT.Session): Promise<OT.Subscriber> =>
     new Promise((resolve, reject) => {
-      type StreamCreatedEvent = Event<'streamCreated', Publisher> & { stream: Stream };
+      type StreamCreatedEvent = OT.Event<'streamCreated', OT.Publisher> & { stream: OT.Stream };
       const containerDiv = document.createElement('div');
       containerDiv.style.position = 'fixed';
       containerDiv.style.bottom = '-1px';
@@ -130,7 +122,7 @@ function publishAndSubscribe(OT: OpenTok) {
       containerDiv.style.height = '1px';
       containerDiv.style.opacity = '0';
       document.body.appendChild(containerDiv);
-      const publisherOptions: PublisherProperties = {
+      const publisherOptions: OT.PublisherProperties = {
         resolution: '1280x720',
         width: '100%',
         height: '100%',
@@ -139,11 +131,11 @@ function publishAndSubscribe(OT: OpenTok) {
       };
       validateDevices(OT)
         .then(() => {
-          const publisher = OT.initPublisher(containerDiv, publisherOptions, (error?: OTError) => {
+          const publisher = OT.initPublisher(containerDiv, publisherOptions, (error?: OT.OTError) => {
             if (error) {
               reject(new e.InitPublisherError(error.message));
             } else {
-              session.publish(publisher, (publishError?: OTError) => {
+              session.publish(publisher, (publishError?: OT.OTError) => {
                 if (publishError) {
                   if (errorHasName(publishError, OTErrorType.NOT_CONNECTED)) {
                     return reject(new e.PublishToSessionNotConnectedError());
@@ -162,7 +154,7 @@ function publishAndSubscribe(OT: OpenTok) {
               session.subscribe(event.stream,
                 containerDiv,
                 { testNetwork: true, insertMode: 'append' },
-                (subscribeError?: OTError) => {
+                (subscribeError?: OT.OTError) => {
                   return subscribeError ?
                     reject(new e.SubscribeToSessionError(subscribeError.message)) :
                     resolve(subscriber);
@@ -176,9 +168,9 @@ function publishAndSubscribe(OT: OpenTok) {
  *  Connect to the OpenTok session, create a publisher, and subsribe to the publisher's stream
  */
 function subscribeToTestStream(
-  OT: OpenTok,
-  session: Session,
-  credentials: SessionCredentials): Promise<Subscriber> {
+  OT: OT.Client,
+  session: OT.Session,
+  credentials: OT.SessionCredentials): Promise<OT.Subscriber> {
   return new Promise((resolve, reject) => {
     connectToSession(session, credentials.token)
       .then(publishAndSubscribe(OT))
@@ -205,16 +197,16 @@ function isAudioQualityAcceptable(results: QualityTestResults): boolean {
 }
 
 function checkSubscriberQuality(
-  OT: OpenTok,
-  session: Session,
-  credentials: SessionCredentials,
-  onUpdate?: UpdateCallback<SubscriberStats>): Promise<QualityTestResults> {
+  OT: OT.Client,
+  session: OT.Session,
+  credentials: OT.SessionCredentials,
+  onUpdate?: UpdateCallback<OT.SubscriberStats>): Promise<QualityTestResults> {
 
   let mosEstimatorTimeoutId: number;
 
   return new Promise((resolve, reject) => {
     subscribeToTestStream(OT, session, credentials)
-      .then((subscriber: Subscriber) => {
+      .then((subscriber: OT.Subscriber) => {
         if (!subscriber) {
           reject(new e.MissingSubscriberError());
         } else {
@@ -225,8 +217,8 @@ function checkSubscriberQuality(
               ... { credentials },
             };
 
-            const getStatsListener = (error?: OTError, stats?: SubscriberStats) => {
-              const updateStats = (subscriberStats: SubscriberStats): UpdateCallbackStats => ({
+            const getStatsListener = (error?: OT.OTError, stats?: OT.SubscriberStats) => {
+              const updateStats = (subscriberStats: OT.SubscriberStats): UpdateCallbackStats => ({
                 ...subscriberStats,
                 phase: audioOnly ? 'audio-only' : 'audio-video',
               });
@@ -283,8 +275,8 @@ function validateBrowser(): Promise<void> {
  * This method checks to see if the client can publish to an OpenTok session.
  */
 export default function testQuality(
-  OT: OpenTok,
-  credentials: SessionCredentials,
+  OT: OT.Client,
+  credentials: OT.SessionCredentials,
   otLogging: OTKAnalytics,
   onUpdate?: UpdateCallback<UpdateCallbackStats>,
   onComplete?: CompletionCallback<QualityTestResults>): Promise<QualityTestResults> {

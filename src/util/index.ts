@@ -16,14 +16,16 @@ export const assocPath = (path: string, value: any, obj: Object): Object => {
   const key = keys[0];
   if (!keys.length) {
     return obj;
-  } else if (keys.length === 1) {
-    return assoc(key, value, obj);
-  } else {
-    const valForKey = get(key, obj);
-    const base: Object = (!!valForKey && typeof valForKey === 'object') ? valForKey : { ...obj, [key]: {} };
-    const update = assoc(key, assocPath(keys.slice(1).join('.'), value, get(key, base)), obj);
-    return { ...obj, ...update };
   }
+  if (keys.length === 1) {
+    return assoc(key, value, obj);
+  }
+
+  const valForKey = get(key, obj);
+  const base: Object = (!!valForKey && typeof valForKey === 'object') ? valForKey : { ...obj, [key]: {} };
+  const update = assoc(key, assocPath(keys.slice(1).join('.'), value, get(key, base)), obj);
+  return { ...obj, ...update };
+
 };
 
 /**

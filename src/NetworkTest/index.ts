@@ -7,8 +7,8 @@
 */
 
 const version = require('../../package.json').version;
-import { OT as OpenTok } from './types/opentok';
-import { CompletionCallback, UpdateCallback, UpdateCallbackStats } from './types/networkTest';
+import { OT } from './types/opentok';
+import { NetworkTestTypes as T } from './types/networkTest';
 import { testConnectivity, ConnectivityTestResults } from './testConnectivity';
 import testQuality, { QualityTestResults } from './testQuality';
 import {
@@ -22,22 +22,16 @@ import {
 import OTKAnalytics from 'opentok-solutions-logging';
 /* tslint:enable */
 
-export interface SessionCredentials {
-  apiKey: string;
-  sessionId: string;
-  token: string;
-}
-
 export default class NetworkTest {
-  credentials: SessionCredentials;
-  OT: OpenTok;
+  credentials: OT.SessionCredentials;
+  OT: OT.Client;
   otLogging: OTKAnalytics;
 
   /**
    * Returns an instance of NetworkConnectivity. See the "API reference" section of the
    * README.md file in the root of the opentok-network-test-js project for details.
    */
-  constructor(OT: OpenTok, credentials: SessionCredentials) {
+  constructor(OT: OT.Client, credentials: OT.SessionCredentials) {
     this.validateOT(OT);
     this.validateCredentials(credentials);
     this.otLogging = this.startLoggingEngine(credentials.apiKey, credentials.sessionId);
@@ -45,13 +39,13 @@ export default class NetworkTest {
     this.credentials = credentials;
   }
 
-  private validateOT(OT: OpenTok) {
+  private validateOT(OT: OT.Client) {
     if (!OT || typeof OT !== 'object' || !OT.initSession) {
       throw new MissingOpenTokInstanceError();
     }
   }
 
-  private validateCredentials(credentials: SessionCredentials) {
+  private validateCredentials(credentials: OT.SessionCredentials) {
     if (!credentials) {
       throw new MissingSessionCredentialsError();
     }
@@ -61,8 +55,8 @@ export default class NetworkTest {
   }
   private validateCallbacks(
     action: string,
-    updateCallback?: UpdateCallback<any>,
-    onComplete?: CompletionCallback<any>) {
+    updateCallback?: T.UpdateCallback<any>,
+    onComplete?: T.CompletionCallback<any>) {
     if (updateCallback) {
       if (typeof updateCallback !== 'function' || updateCallback.length !== 1) {
         this.otLogging.logEvent({ action, variation: 'Failure' });
@@ -96,7 +90,7 @@ export default class NetworkTest {
    * opentok-network-test-js project for details.
    */
   testConnectivity(
-    onComplete?: CompletionCallback<ConnectivityTestResults>): Promise<ConnectivityTestResults> {
+    onComplete?: T.CompletionCallback<ConnectivityTestResults>): Promise<ConnectivityTestResults> {
     this.otLogging.logEvent({ action: 'testConnectivity', variation: 'Attempt' });
     this.validateCallbacks('testConnectivity', undefined, onComplete);
     return testConnectivity(this.OT, this.credentials, this.otLogging, onComplete);
@@ -111,8 +105,8 @@ export default class NetworkTest {
    * opentok-network-test-js project for details.
    */
   testQuality(
-    updateCallback?: UpdateCallback<UpdateCallbackStats>,
-    completionCallback?: CompletionCallback<QualityTestResults>): Promise<any> {
+    updateCallback?: T.UpdateCallback<T.UpdateCallbackStats>,
+    completionCallback?: T.CompletionCallback<QualityTestResults>): Promise<any> {
     this.otLogging.logEvent({ action: 'testQuality', variation: 'Attempt' });
     this.validateCallbacks('testQuality', updateCallback, completionCallback);
     return testQuality(

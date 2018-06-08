@@ -13,18 +13,21 @@ import * as Promise from 'promise';
 /* tslint:disable */
 import OTKAnalytics from 'opentok-solutions-logging';
 /* tslint:enable */
-import { Session } from '../types/opentok/session';
-import { Publisher, PublisherProperties } from '../types/opentok/publisher';
-import { Subscriber } from '../types/opentok/subscriber';
-import { OTError } from '../types/opentok/error';
-import { Device, OT as OpenTok } from '../types/opentok';
+// import { Session } from '../types/opentok/session';
+// import { Publisher, PublisherProperties } from '../types/opentok/publisher';
+// import { Subscriber } from '../types/opentok/subscriber';
+// import { OTError } from '../types/opentok/error';
+import { OT } from '../types/opentok';
+import { CompletionCallback } from '../types/callbacks';
 import * as e from './errors';
 import { OTErrorType, errorHasName } from '../errors/types';
 import { mapErrors, FailureCase } from './errors/mapping';
 // import { get, getOr } from '../../util';
-type CreateLocalPublisherResults = { publisher: Publisher };
-type PublishToSessionResults = { session: Session } & CreateLocalPublisherResults;
-type SubscribeToSessionResults = { subscriber: Subscriber } & PublishToSessionResults;
+
+type AV = 'audio' | 'video';
+type CreateLocalPublisherResults = { publisher: OT.Publisher };
+type PublishToSessionResults = { session: OT.Session } & CreateLocalPublisherResults;
+type SubscribeToSessionResults = { subscriber: OT.Subscriber } & PublishToSessionResults;
 export type ConnectivityTestResults = {
   success: boolean,
   failedTests: FailureCase[],
@@ -34,7 +37,7 @@ export type ConnectivityTestResults = {
  * Disconnect from a session. Once disconnected, remove all session
  * event listeners and invoke the provided callback function.
  */
-function disconnectFromSession(session: Session) {
+function disconnectFromSession(session: OT.Session) {
   return new Promise((resolve, reject) => {
     session.on('sessionDisconnected', () => {
       session.off();
@@ -45,15 +48,15 @@ function disconnectFromSession(session: Session) {
 }
 
 /**
- * Attempt to connect to the OpenTok session
+ * Attempt to connect to the OpenTok sessionope
  */
 function connectToSession(
-  OT: OpenTok,
-  { apiKey, sessionId, token }: SessionCredentials,
-): Promise<Session> {
+  OT: OT.Client,
+  { apiKey, sessionId, token }: OT.SessionCredentials,
+): Promise<OT.Session> {
   return new Promise((resolve, reject) => {
     const session = OT.initSession(apiKey, sessionId);
-    session.connect(token, (error?: OTError) => {
+    session.connect(token, (error?: OT.OTError) => {
       if (errorHasName(error, OTErrorType.OT_AUTHENTICATION_ERROR)) {
         reject(new e.ConnectToSessionTokenError());
       } else if (errorHasName(error, OTErrorType.INVALID_SESSION_ID)) {
@@ -74,20 +77,20 @@ function connectToSession(
 /**
  * Ensure that audio and video devices are available
  */
-function validateDevices(OT: OpenTok): Promise<void> {
+function validateDevices(OT: OT.Client): Promise<void> {
   return new Promise((resolve, reject) => {
 
-    type DeviceMap = { [deviceId: string]: Device };
+    type DeviceMap = { [deviceId: string]: OT.Device };
     type AvailableDevices = { audio: DeviceMap, video: DeviceMap };
 
-    OT.getDevices((error?: OTError, devices: Device[] = []) => {
+    OT.getDevices((error?: OT.OTError, devices: OT.Device[] = []) => {
 
       if (error) {
         reject(new e.FailedToObtainMediaDevices());
       } else {
 
         const availableDevices: AvailableDevices = devices.reduce(
-          (acc: AvailableDevices, device: Device) => {
+          (acc: AvailableDevices, device: OT.Device) => {
             const type: AV = device.kind === 'audioInput' ? 'audio' : 'video';
             return { ...acc, [type]: { ...acc[type], [device.deviceId]: device } };
           },
@@ -109,7 +112,7 @@ function validateDevices(OT: OpenTok): Promise<void> {
 /**
  * Create a local publisher object using any specified device options
  */
-function checkCreateLocalPublisher(OT: OpenTok): Promise<CreateLocalPublisherResults> {
+function checkCreateLocalPublisher(OT: OT.Client): Promise<CreateLocalPublisherResults> {
   return new Promise((resolve, reject) => {
     validateDevices(OT)
       .then(() => {
@@ -120,13 +123,13 @@ function checkCreateLocalPublisher(OT: OpenTok): Promise<CreateLocalPublisherRes
         publisherDiv.style.height = '1px';
         publisherDiv.style.opacity = '0.01';
         document.body.appendChild(publisherDiv);
-        const publisherOptions: PublisherProperties = {
+        const publisherOptions: OT.PublisherProperties = {
           width: '100%',
           height: '100%',
           insertMode: 'append',
           showControls: false,
         };
-        const publisher = OT.initPublisher(publisherDiv, publisherOptions, (error?: OTError) => {
+        const publisher = OT.initPublisher(publisherDiv, publisherOptions, (error?: OT.OTError) => {
           if (!error) {
             resolve({ publisher });
           } else {
@@ -144,7 +147,7 @@ function checkCreateLocalPublisher(OT: OpenTok): Promise<CreateLocalPublisherRes
 /**
  * Attempt to publish to the session
  */
-function checkPublishToSession(OT: OpenTok, session: Session): Promise<PublishToSessionResults> {
+function checkPublishToSession(OT: OT.Client, session: OT.Session): Promise<PublishToSessionResults> {
   return new Promise((resolve, reject) => {
     const disconnectAndReject = (rejectError: Error) => {
       disconnectFromSession(session).then(() => {
@@ -153,7 +156,7 @@ function checkPublishToSession(OT: OpenTok, session: Session): Promise<PublishTo
     };
     checkCreateLocalPublisher(OT)
       .then(({ publisher }: CreateLocalPublisherResults) => {
-        session.publish(publisher, (error?: OTError) => {
+        session.publish(publisher, (error?: OT.OTError) => {
           if (error) {
             if (errorHasName(error, OTErrorType.NOT_CONNECTED)) {
               disconnectAndReject(new e.PublishToSessionNotConnectedError());
@@ -188,7 +191,7 @@ function checkSubscribeToSession({ session, publisher }: PublishToSessionResults
       disconnectAndReject(new e.SubscribeToSessionError());
     } else {
       const subscriberDiv = document.createElement('div');
-      const subscriber = session.subscribe(publisher.stream, subscriberDiv, config, (error?: OTError) => {
+      const subscriber = session.subscribe(publisher.stream, subscriberDiv, config, (error?: OT.OTError) => {
         if (error) {
           disconnectAndReject(new e.SubscribeToSessionError());
         } else {
@@ -202,7 +205,7 @@ function checkSubscribeToSession({ session, publisher }: PublishToSessionResults
 /**
  * Attempt to connect to the tokbox client logging server
  */
-function checkLoggingServer(OT: OpenTok, input?: SubscribeToSessionResults): Promise<SubscribeToSessionResults> {
+function checkLoggingServer(OT: OT.Client, input?: SubscribeToSessionResults): Promise<SubscribeToSessionResults> {
   return new Promise((resolve, reject) => {
     const url = `${OT.properties.loggingURL}/logging/ClientEvent`;
     const handleError = () => reject(new e.LoggingServerConnectionError());
@@ -218,8 +221,8 @@ function checkLoggingServer(OT: OpenTok, input?: SubscribeToSessionResults): Pro
  * This method checks to see if the client can connect to TokBox servers required for using OpenTok
  */
 export function testConnectivity(
-  OT: OpenTok,
-  credentials: SessionCredentials,
+  OT: OT.Client,
+  credentials: OT.SessionCredentials,
   otLogging: OTKAnalytics,
   onComplete?: CompletionCallback<any>): Promise<ConnectivityTestResults> {
   return new Promise((resolve, reject) => {
@@ -273,7 +276,7 @@ export function testConnectivity(
     };
 
     connectToSession(OT, credentials)
-      .then((session: Session) => checkPublishToSession(OT, session))
+      .then((session: OT.Session) => checkPublishToSession(OT, session))
       .then(checkSubscribeToSession)
       .then((results: SubscribeToSessionResults) => checkLoggingServer(OT, results))
       .then(onSuccess)

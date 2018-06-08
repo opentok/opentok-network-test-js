@@ -1,5 +1,7 @@
 import config from './config';
 import { get } from '../../../util';
+import { AV } from '../types';
+import { AverageStatsBase } from './stats';
 
 export interface QualityEvaluationResults{
   supported: boolean;

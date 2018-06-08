@@ -1,22 +1,25 @@
 import isBitrateSteadyState from './isBitrateSteadyState';
 import calculateThroughput from './calculateThroughput';
 import MOSState from './MOSState';
-import { Subscriber, SubscriberStats, TrackStats } from '../../types/opentok/subscriber';
-import { OTError } from '../../types/opentok/error';
+import { OT } from '../../types/opentok';
+import { StatsListener } from './stats';
+import { AV } from '../types';
+// import { Subscriber, SubscriberStats, OT.TrackStats } from '../../types/opentok/subscriber';
+// import { OTError } from '../../types/opentok/error';
 import { getOr, last, nth } from '../../../util';
 
-const getPacketsLost = (ts: TrackStats): number => getOr(0, 'packetsLost', ts);
-const getPacketsReceived = (ts: TrackStats): number => getOr(0, 'packetsReceived', ts);
-const getTotalPackets = (ts: TrackStats): number => getPacketsLost(ts) + getPacketsReceived(ts);
-const calculateTotalPackets = (type: AV, current: SubscriberStats, last: SubscriberStats) =>
+const getPacketsLost = (ts: OT.TrackStats): number => getOr(0, 'packetsLost', ts);
+const getPacketsReceived = (ts: OT.TrackStats): number => getOr(0, 'packetsReceived', ts);
+const getTotalPackets = (ts: OT.TrackStats): number => getPacketsLost(ts) + getPacketsReceived(ts);
+const calculateTotalPackets = (type: AV, current: OT.SubscriberStats, last: OT.SubscriberStats) =>
   getTotalPackets(current[type]) - getTotalPackets(last[type]);
-const calculateBitRate = (type: AV, current: SubscriberStats, last: SubscriberStats): number => {
+const calculateBitRate = (type: AV, current: OT.SubscriberStats, last: OT.SubscriberStats): number => {
   const interval = current.timestamp - last.timestamp;
   return current[type] && current[type].bytesReceived ?
     (8 * (current[type].bytesReceived - last[type].bytesReceived)) / (interval / 1000) : 0;
 };
 
-function calculateVideoScore(subscriber: Subscriber, stats: SubscriberStats[]): number {
+function calculateVideoScore(subscriber: OT.Subscriber, stats: OT.SubscriberStats[]): number {
   const MIN_VIDEO_BITRATE = 30000;
   const targetBitrateForPixelCount = (pixelCount: number) => {
     // power function maps resolution to target bitrate, based on rumor config
@@ -49,7 +52,7 @@ function calculateVideoScore(subscriber: Subscriber, stats: SubscriberStats[]): 
   return score;
 }
 
-function calculateAudioScore(subscriber: Subscriber, stats: SubscriberStats[]): number {
+function calculateAudioScore(subscriber: OT.Subscriber, stats: OT.SubscriberStats[]): number {
 
   const audioScore = (roundTripTime: number, packetLossRatio: number) => {
     const LOCAL_DELAY = 20; // 20 msecs: typical frame duration
@@ -101,12 +104,12 @@ function calculateAudioScore(subscriber: Subscriber, stats: SubscriberStats[]): 
 
 export default function subscriberMOS(
   mosState: MOSState,
-  subscriber: Subscriber,
+  subscriber: OT.Subscriber,
   getStatsListener: StatsListener,
   callback: (state: MOSState) => void) {
   mosState.intervalId = window.setInterval(
     () => {
-      subscriber.getStats((error?: OTError, stats?: SubscriberStats) => {
+      subscriber.getStats((error?: OT.OTError, stats?: OT.SubscriberStats) => {
         if (!stats) {
           return null;
         }

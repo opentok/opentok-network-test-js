@@ -1,14 +1,11 @@
 import getLatestSampleWindow from './getLatestSampleWindow';
 import calculateQualityStats from './calculateQualityStats';
 import getQualityEvaluation from './getQualityEvaluation';
+import { AverageStats, AverageStatsBase, QualityStats } from './stats';
+import { AV, HasAudioVideo } from '../types';
 import config from './config';
 import MOSState from './MOSState';
 import { getOr } from '../../../util';
-
-export interface AverageStatsBase {
-  bitrate: number;
-  packetLossRatio: number;
-}
 
 function getAverageBitrateAndPlr(type: AV, statsList: QualityStats[]): AverageStats {
   let sumBps = 0;
@@ -50,9 +47,8 @@ export default function calculateThroughput(state: MOSState): HasAudioVideo<Aver
         supported: false,
         reason: config.strings.noMic,
       };
-    } else {
-      return getAverageBitrateAndPlr('audio', qualityStats.audio);
     }
+    return getAverageBitrateAndPlr('audio', qualityStats.audio);
   };
 
   const averageVideoStats = () => {
@@ -61,9 +57,8 @@ export default function calculateThroughput(state: MOSState): HasAudioVideo<Aver
         supported: false,
         reason: config.strings.noCam,
       };
-    } else {
-      return getAverageBitrateAndPlr('video', qualityStats.video);
     }
+    return getAverageBitrateAndPlr('video', qualityStats.video);
   };
 
   return {

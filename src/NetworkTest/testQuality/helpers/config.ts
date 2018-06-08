@@ -1,3 +1,5 @@
+import { AudioThreshold, VideoThreshold } from '../types';
+
 export type QualityTestConfig = {
   getStatsInterval: number,
   getStatsVideoAndAudioTestDuration: number,

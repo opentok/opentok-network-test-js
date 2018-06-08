@@ -1,7 +1,10 @@
-import { SubscriberStats } from '../../types/opentok/subscriber';
+import { OT } from '../../types/opentok';
+
+import { Bandwidth, HasAudioVideo } from '../types';
+import { AverageStats } from './stats';
 
 export default class MOSState {
-  statsLog: SubscriberStats[];
+  statsLog: OT.SubscriberStats[];
   audioScoresLog: number[];
   videoScoresLog: number[];
   stats: HasAudioVideo<AverageStats> = { audio: {}, video: {} };
