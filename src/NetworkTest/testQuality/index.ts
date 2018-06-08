@@ -20,6 +20,7 @@ import { Stream } from '../types/opentok/stream';
 import { Session } from '../types/opentok/session';
 import { OTError } from '../types/opentok/error';
 import { Event } from '../types/opentok/events';
+import { UpdateCallback } from '../types/networkTest';
 import { pick } from '../../util';
 import * as e from './errors/';
 import { OTErrorType, errorHasName } from '../errors/types';
@@ -28,13 +29,27 @@ import MOSState from './helpers/MOSState';
 import config from './helpers/config';
 import isSupportedBrowser from './helpers/isSupportedBrowser';
 
-type QualityTestResultsBuilder = {
-  state: MOSState,
-  subscriber: Subscriber,
-  credentials: SessionCredentials,
-  mosScore?: number,
-  bandwidth?: Bandwidth,
-};
+interface AverageStats {
+  bitrate?: number;
+  packetLossRatio?: number;
+  supported?: boolean;
+  reason?: string;
+  frameRate?: number;
+  recommendedFrameRate?: number;
+  recommendedResolution?: string;
+}
+
+export interface QualityTestResults extends HasAudioVideo<AverageStats> {
+  mos: number;
+}
+
+interface QualityTestResultsBuilder {
+  state: MOSState;
+  subscriber: Subscriber;
+  credentials: SessionCredentials;
+  mosScore?: number;
+  bandwidth?: Bandwidth;
+}
 
 type MOSResultsCallback = (state: MOSState) => void;
 

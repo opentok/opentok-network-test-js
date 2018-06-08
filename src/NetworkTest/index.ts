@@ -8,8 +8,9 @@
 
 const version = require('../../package.json').version;
 import { OT as OpenTok } from './types/opentok';
+import { CompletionCallback, UpdateCallback, UpdateCallbackStats } from './types/networkTest';
 import { testConnectivity, ConnectivityTestResults } from './testConnectivity';
-import testQuality from './testQuality';
+import testQuality, { QualityTestResults } from './testQuality';
 import {
   IncompleteSessionCredentialsError,
   InvalidOnCompleteCallback,

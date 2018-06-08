@@ -38,7 +38,7 @@
     "promise": "^8.0.1"
   },
   "devDependencies": {
-    "@opentok/client": "^2.13.2",
+    "@opentok/client": "^2.14.3",
     "@types/opentok": "^2.3.4",
     "@types/webrtc": "0.0.22",
     "awesome-typescript-loader": "^5.0.0",

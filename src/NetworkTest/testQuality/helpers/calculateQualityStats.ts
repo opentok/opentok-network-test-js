@@ -1,4 +1,11 @@
 import { SubscriberStats } from '../../types/opentok/subscriber';
+import { AV, HasAudioVideo } from '../../types/networkTest';
+
+export interface QualityStats {
+  averageBitrate: number;
+  packetLossRatio: number;
+  frameRate?: number;
+}
 
 function calculateStats(type: AV, samples: SubscriberStats[]): QualityStats[] {
 

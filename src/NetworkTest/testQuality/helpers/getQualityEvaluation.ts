@@ -1,6 +1,12 @@
 import config from './config';
 import { get } from '../../../util';
 
+export interface QualityEvaluationResults{
+  supported: boolean;
+  recommendedFrameRate?: number;
+  recommendedResolution?: string;
+  reason?: string;
+}
 
 export default function getQualityEvaluation(stats: AverageStatsBase, type: AV): QualityEvaluationResults {
   const qualityThresholds = config.qualityThresholds;

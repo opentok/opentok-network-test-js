@@ -5,6 +5,11 @@ import config from './config';
 import MOSState from './MOSState';
 import { getOr } from '../../../util';
 
+export interface AverageStatsBase {
+  bitrate: number;
+  packetLossRatio: number;
+}
+
 function getAverageBitrateAndPlr(type: AV, statsList: QualityStats[]): AverageStats {
   let sumBps = 0;
   let sumPlr = 0;
