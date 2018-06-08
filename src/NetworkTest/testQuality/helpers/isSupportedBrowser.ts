@@ -1,4 +1,4 @@
-type Browser =
+export type Browser =
   'Chrome' |
   'Firefox' |
   'not a browser' |

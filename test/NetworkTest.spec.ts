@@ -1,8 +1,8 @@
 /* tslint:disable */
 ///<reference path="../src/types/index.d.ts"/>
 
-import * as OT from '@opentok/client';
-import * as Promise from 'promise';
+import { OT as OpenTok } from '../src/NetworkTest/types/opentok';
+import * as OT from '@opentok/client' as OpenTok;
 import {
   primary as sessionCredentials,
   faultyLogging as badLoggingCredentials,
@@ -33,7 +33,7 @@ const malformedCredentials = { apiKey: '1234', invalidProp: '1234', token: '1234
 const badCredentials = { apiKey: '1234', sessionId: '1234', token: '1234' };
 const networkTest = new NetworkTest(OT, sessionCredentials);
 const badCredentialsNetworkTest = new NetworkTest(OT, badCredentials);
-const validOnUpdateCallback = (stats: OT.SubscriberStats) => stats;
+const validOnUpdateCallback = (stats: SubscriberStats) => stats;
 const validOnCompleteCallback = (error?: Error, results?: any) => results;
 
 const customMatchers: jasmine.CustomMatcherFactories = {

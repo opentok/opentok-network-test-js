@@ -1,5 +1,7 @@
+import { SubscriberStats } from '../../types/opentok/subscriber';
+
 export default class MOSState {
-  statsLog: OT.SubscriberStats[];
+  statsLog: SubscriberStats[];
   audioScoresLog: number[];
   videoScoresLog: number[];
   stats: HasAudioVideo<AverageStats> = { audio: {}, video: {} };
@@ -34,7 +36,7 @@ export default class MOSState {
   }
 
   private pruneAudioScores() {
-    const { audioScoresLog } = this;
+    const audioScoresLog = this.audioScoresLog;
     while (audioScoresLog.length > MOSState.maxLogLength) {
       audioScoresLog.shift();
     }
@@ -42,7 +44,7 @@ export default class MOSState {
   }
 
   private pruneVideoScores() {
-    const { videoScoresLog } = this;
+    const videoScoresLog = this.videoScoresLog;
     while (videoScoresLog.length > MOSState.maxLogLength) {
       videoScoresLog.shift();
     }
@@ -59,12 +61,13 @@ export default class MOSState {
     const hasVideoTrack = this.hasVideoTrack();
     if (hasAudioTrack && hasVideoTrack) {
       return Math.min(this.audioScore(), this.videoScore());
-    } else if (hasAudioTrack && !hasVideoTrack) {
-      return this.audioScore();
-    } else if (!hasAudioTrack && hasVideoTrack) {
-      return this.videoScore();
-    } else {
-      return 0;
     }
+    if (hasAudioTrack && !hasVideoTrack) {
+      return this.audioScore();
+    }
+    if (!hasAudioTrack && hasVideoTrack) {
+      return this.videoScore();
+    }
+    return 0;
   }
 }

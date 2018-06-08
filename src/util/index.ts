@@ -2,12 +2,10 @@
  * @module Util
  */
 
-
 /**
  * Returns a copy of an object, setting or overriding the property with the provided value
  */
 export const assoc = (key: string, value: any, obj: Object): Object => ({ ...obj, [key]: value });
-
 
 /**
  * Returns a copy of an object, setting or overriding the property at the specified path
@@ -56,7 +54,7 @@ export const pick =
     props: K[],
     obj: T,
     all: boolean = false): Partial<T> => {
-    const update = (acc: object, prop: string): Partial<T> =>
+    const update = (acc: object, prop: K): Partial<T> =>
       obj[prop] !== undefined || all ? { ...acc, [prop]: obj[prop] } : acc;
     return props.reduce(update, {});
   };
@@ -67,7 +65,6 @@ export const pick =
  */
 export const pickAll = <T extends { [key: string]: any }, K extends keyof T>(props: K[], obj: T): Partial<T> =>
   pick(props, obj, true);
-
 
 /**
  * Returns the last element from an array

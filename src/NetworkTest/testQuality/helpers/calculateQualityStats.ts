@@ -1,5 +1,6 @@
+import { SubscriberStats } from '../../types/opentok/subscriber';
 
-function calculateStats(type: AV, samples: OT.SubscriberStats[]): QualityStats[] {
+function calculateStats(type: AV, samples: SubscriberStats[]): QualityStats[] {
 
   const qualityStats: QualityStats[] = [];
 
@@ -29,7 +30,7 @@ function calculateStats(type: AV, samples: OT.SubscriberStats[]): QualityStats[]
   return qualityStats;
 }
 
-export default function calculateQualityStats(latestSamples: OT.SubscriberStats[]): HasAudioVideo<QualityStats[]> {
+export default function calculateQualityStats(latestSamples: SubscriberStats[]): HasAudioVideo<QualityStats[]> {
   if (latestSamples.length < 2) {
     throw new Error('Cannot calculate bitrate with less than two data points.');
   }

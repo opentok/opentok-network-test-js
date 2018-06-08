@@ -1,4 +1,4 @@
-type QualityTestConfig = {
+export type QualityTestConfig = {
   getStatsInterval: number,
   getStatsVideoAndAudioTestDuration: number,
   getStatsAudioOnlyDuration: number,

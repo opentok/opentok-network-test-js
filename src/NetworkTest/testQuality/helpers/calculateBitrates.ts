@@ -1,4 +1,6 @@
-function calculateDeltas(type: AV, samples: OT.SubscriberStats[]): Kbps[] {
+import { SubscriberStats } from '../../types/opentok/subscriber';
+
+function calculateDeltas(type: AV, samples: SubscriberStats[]): Kbps[] {
   const bitrates: Kbps[] = [];
   for (let i = 1; i < samples.length; i += 1) {
     const currStat = samples[i];
@@ -17,7 +19,7 @@ function calculateDeltas(type: AV, samples: OT.SubscriberStats[]): Kbps[] {
   return bitrates;
 }
 
-export default function calculateBitrateDeltas(latestSamples: OT.SubscriberStats[]): KbpsMap {
+export default function calculateBitrateDeltas(latestSamples: SubscriberStats[]): KbpsMap {
 
   if (latestSamples.length < 2) {
     throw new Error('Cannot calculate bitrate with less than two data points.');

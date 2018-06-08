@@ -7,6 +7,7 @@
 */
 
 const version = require('../../package.json').version;
+import { OT as OpenTok } from './types/opentok';
 import { testConnectivity, ConnectivityTestResults } from './testConnectivity';
 import testQuality from './testQuality';
 import {
@@ -16,10 +17,15 @@ import {
   MissingOpenTokInstanceError,
   MissingSessionCredentialsError,
 } from './errors';
-import { getOr } from '../util';
 /* tslint:disable */
-const OTKAnalytics = require('opentok-solutions-logging');
+import OTKAnalytics from 'opentok-solutions-logging';
 /* tslint:enable */
+
+export interface SessionCredentials {
+  apiKey: string;
+  sessionId: string;
+  token: string;
+}
 
 export default class NetworkTest {
   credentials: SessionCredentials;
