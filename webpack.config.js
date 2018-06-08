@@ -1,15 +1,18 @@
 const path = require('path');
 const webpack = require('webpack');
-const TypedocWebpackPlugin = require('typedoc-webpack-plugin');
+const nodeExternals = require('webpack-node-externals');
+const UglifyJSPlugin = require('uglifyjs-webpack-plugin');
 
 module.exports = {
   entry: './src/NetworkTest/index.ts',
   devtool: 'source-map',
+  mode: 'production',
   module: {
-    loaders: [{
-      test: /\.(js|ts)$/,
-      loader: 'babel-loader!ts-loader'
-    }]
+    rules: [{
+      test: /\.tsx?$/,
+      exclude: /node_modules/,
+      loader: "ts-loader",
+    }],
   },
   resolve: {
     extensions: ['.ts', '.js', '.json']
@@ -18,22 +21,21 @@ module.exports = {
   output: {
     filename: 'index.js',
     path: path.resolve(__dirname, 'dist'),
-    library: 'OpenTokNetworkConnectivity',
+    library: 'opentok-network-test-js',
     libraryTarget: 'umd',
     umdNamedDefine: true
   },
-  plugins: [
-    new webpack.optimize.UglifyJsPlugin({ minimize: true, mangle: false }),
-    new TypedocWebpackPlugin({
-      name: 'OpenTok Network Connectivity Test',
-      readme: './README.md',
-      exclude: '**/**/{types|mapping}.ts',
-      module: 'commonjs',
-      theme: 'minimal',
-      includeDeclarations: true,
-      ignoreCompilerErrors: true,
-      target: 'ES6',
-      media: './media'
-    }, './src')
-  ]
+  optimization: {
+    minimizer: [
+      new UglifyJSPlugin({
+        sourceMap: true,
+        uglifyOptions: {
+          compress: {
+            keep_classnames: true,
+            keep_fnames: true,
+          }
+        }
+      })
+    ]
+  }
 };

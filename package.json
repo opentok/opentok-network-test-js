@@ -2,7 +2,8 @@
   "name": "opentok-network-test-js",
   "version": "1.0.8",
   "description": "Precall network test for applications using the OpenTok platform.",
-  "main": "dist/index.js",
+  "main": "dist/NetworkTest/index.js",
+  "types": "dist/NetworkTest/index.d.ts",
   "scripts": {
     "build": "webpack --config webpack.config.js",
     "docs": "open dist/docs/index.html",
@@ -38,9 +39,9 @@
   },
   "devDependencies": {
     "@opentok/client": "^2.13.2",
-    "@types/axios": "^0.14.0",
     "@types/opentok": "^2.3.4",
     "@types/webrtc": "0.0.22",
+    "awesome-typescript-loader": "^5.0.0",
     "babel-core": "^6.26.0",
     "babel-loader": "^7.1.4",
     "babel-preset-env": "^1.6.1",
@@ -61,13 +62,16 @@
     "karma-webpack": "^2.0.13",
     "opentok": "^2.6.2",
     "string-replace-loader": "^1.3.0",
-    "ts-loader": "^3.5.0",
+    "ts-loader": "^4.0.0",
     "tslint": "^5.9.1",
     "tslint-config-airbnb": "^5.7.0",
     "typedoc": "^0.11.0",
     "typedoc-plugin-external-module-name": "^1.1.1",
     "typedoc-webpack-plugin": "^1.1.4",
     "typescript": "^2.7.2",
-    "webpack": "^3.11.0"
+    "uglifyjs-webpack-plugin": "^1.2.5",
+    "webpack": "^4.0.0",
+    "webpack-cli": "^3.0.3",
+    "webpack-node-externals": "^1.7.2"
   }
 }
