@@ -309,7 +309,7 @@ is invoked when the connectivity check completes. This callback function takes t
         (for example, because no camera was found), this property is undefined.
 
       * `recommendedResolution` (String) -- The recommended video resolution. This will be
-        set to `'1280x720'`, `'640x480'`, or `'320x240`. However, if video is unsupported,
+        set to `'1280x720'`, `'640x480'`, or `'320x240`'. However, if video is unsupported,
         this is set to `null`. If the the test ran in audio-only mode (for example, because
         no camera was found), this property is undefined.
 
