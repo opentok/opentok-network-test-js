@@ -348,11 +348,11 @@ resolution. For example, the audio MOS calculation is based on the
 
 | MOS Score  | Meaning   |
 | ---------- | --------- |
-| 4.0 - 4.5  | Excellent |
-| 3.0 - 3.99 | Good      |
-| 2.5 - 2.99 | Fair      |
-| 2.0 - 2.49 | Poor      |
-| 1.0 - 1.99 | Bad       |
+| 3.8 - 4.5  | Excellent |
+| 3.1 - 3.79 | Good      |
+| 2.4 - 3.09 | Fair      |
+| 1.7 - 2.39 | Poor      |
+| 1.0 - 1.69 | Bad       |
 
 ## Building the module
 

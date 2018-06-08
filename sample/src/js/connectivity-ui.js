@@ -73,16 +73,16 @@ function convertFailedTestsToString(failedTests) {
 }
 
 function rateMosScore(mos) {
-  if (mos >= 4) {
+  if (mos >= 3.8) {
     return 'Excellent';
   }
-  if (mos >= 3) {
+  if (mos >= 3.1) {
     return 'Good';
   }
-  if (mos >= 2.5) {
+  if (mos >= 2.4) {
     return 'Fair';
   }
-  if (mos >= 2) {
+  if (mos >= 1.7) {
     return 'Poor';
   }
   return 'Bad';
