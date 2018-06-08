@@ -54,17 +54,23 @@ export default class MOSState {
     this.pruneVideoScores();
   }
 
-  qualityScore(): number {
+  audioQualityScore(): number {
     const hasAudioTrack = this.hasAudioTrack();
-    const hasVideoTrack = this.hasVideoTrack();
-    if (hasAudioTrack && hasVideoTrack) {
-      return Math.min(this.audioScore(), this.videoScore());
-    } else if (hasAudioTrack && !hasVideoTrack) {
-      return this.audioScore();
-    } else if (!hasAudioTrack && hasVideoTrack) {
-      return this.videoScore();
-    } else {
-      return 0;
+    const audioScore = this.audioScore();
+    console.log('audioScore', audioScore);
+    if (hasAudioTrack) {
+      return audioScore;
     }
+    return 1;
+  }
+
+  videoQualityScore(): number {
+    const hasVideoTrack = this.hasVideoTrack();
+    const videoScore = this.videoScore();
+    console.log('videoScore', videoScore);
+    if (hasVideoTrack) {
+      return videoScore;
+    }
+    return 1;
   }
 }

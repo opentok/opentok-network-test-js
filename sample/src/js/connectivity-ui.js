@@ -72,6 +72,22 @@ function convertFailedTestsToString(failedTests) {
   return mappedFailures.join(', ');
 }
 
+function rateMosScore(mos) {
+  if (mos >= 4) {
+    return 'Excellent';
+  }
+  if (mos >= 3) {
+    return 'Good';
+  }
+  if (mos >= 2.5) {
+    return 'Fair';
+  }
+  if (mos >= 2) {
+    return 'Poor';
+  }
+  return 'Bad';
+}
+
 export function displayTestQualityResults(error, results) {
   var statusContainerEl = document.getElementById('quality_status_container');
   var statusEl = statusContainerEl.querySelector('p');
@@ -85,16 +101,22 @@ export function displayTestQualityResults(error, results) {
     return;
   }
 
-  statusEl.textContent = 'Test complete. Quality estimate: ' + results.mos.toFixed(2);
+  statusEl.textContent = 'Test complete.';
   var resultsEl = statusContainerEl.querySelector('#audio .results');
   resultsEl.style.display = 'block';
   resultsEl.querySelector('#audio-supported').textContent = results.audio.supported ? 'Yes' : 'No';
+  var audioMos = results.audio.mos;
+  resultsEl.querySelector('#audio-mos').textContent = audioMos.toFixed(2)
+    + ' (' + rateMosScore(audioMos) + ')';
   resultsEl.querySelector('#audio-bitrate').textContent = results.audio.bitrate ?
     (results.audio.bitrate / 1000).toFixed(2) + ' kbps' : '--';
   resultsEl.querySelector('#audio-plr').textContent = results.audio.supported ?
     (results.audio.packetLossRatio / 100).toFixed(2) + '%' : '--';
   resultsEl = statusContainerEl.querySelector('#video .results');
   resultsEl.querySelector('#video-supported').textContent = results.video.supported ? 'Yes' : 'No';
+  var videoMos = results.video.mos;
+  resultsEl.querySelector('#video-mos').textContent = videoMos.toFixed(2)
+    + ' (' + rateMosScore(videoMos) + ')';
   resultsEl.querySelector('#video-bitrate').textContent = results.video.bitrate ?
     (results.video.bitrate / 1000).toFixed(2) + ' kbps' : '--';
   resultsEl.querySelector('#video-plr').textContent = results.video.supported ?

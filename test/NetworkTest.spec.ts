@@ -183,14 +183,14 @@ describe('Network Test', () => {
 
       it('should return valid test results or an error', (done) => {
         const validateResults = (results: QualityTestResults) => {
-          const { mos, audio, video } = results;
+          const { audio, video } = results;
 
-          expect(mos).toEqual(jasmine.any(Number));
 
           expect(audio.bitrate).toEqual(jasmine.any(Number));
           expect(audio.supported).toEqual(jasmine.any(Boolean));
           expect(audio.reason || '').toEqual(jasmine.any(String));
           expect(audio.packetLossRatio).toEqual(jasmine.any(Number));
+          expect(audio.mos).toEqual(jasmine.any(Number));
 
           expect(video.bitrate).toEqual(jasmine.any(Number));
           expect(video.supported).toEqual(jasmine.any(Boolean));
@@ -199,6 +199,7 @@ describe('Network Test', () => {
           expect(video.frameRate).toEqual(jasmine.any(Number));
           expect(video.recommendedResolution).toEqual(jasmine.any(String));
           expect(video.recommendedFrameRate).toEqual(jasmine.any(Number));
+          expect(audio.mos).toEqual(jasmine.any(Number));
         };
 
         const validateError = (error?: QualityTestError) => {
