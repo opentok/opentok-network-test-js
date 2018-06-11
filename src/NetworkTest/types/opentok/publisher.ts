@@ -3,6 +3,26 @@ import { Session } from './session';
 import { Event, OTEventEmitter, VideoDimensionsChangedEvent } from './events';
 import { Dimensions, WidgetProperties, WidgetStyle } from './widget';
 
+export interface OutgoingTrackStats {
+  bytesSent: number;
+  packetsLost: number;
+  packetsSent: number;
+}
+
+export interface PublisherStats {
+  audio: OutgoingTrackStats;
+  video: OutgoingTrackStats & { frameRate: number; };
+  timestamp: number;
+}
+
+export interface PublisherStatContainer {
+  subscriberId?: string;
+  connectionId?: string;
+  stats: PublisherStats;
+}
+
+export type PublisherStatsArr = PublisherStatContainer[];
+
 export interface PublisherStyle extends WidgetStyle {
   archiveStatusDisplayMode: 'auto' | 'off';
 }
@@ -38,10 +58,12 @@ export interface Publisher extends OTEventEmitter<{
   accessDialogOpened: Event<'accessDialogOpened', Publisher>;
 
   audioLevelUpdated: Event<'audioLevelUpdated', Publisher> & {
-    audioLevel: number;
+    audioLevel: number,
   };
 
   destroyed: Event<'destroyed', Publisher>;
+
+  getStats(callback: (error?: Error, stats?: PublisherStatsArr) => void): void;
 
   mediaStopped: Event<'mediaStopped', Publisher> & {
     track: MediaStreamTrack | undefined,
@@ -73,6 +95,7 @@ export interface Publisher extends OTEventEmitter<{
   getStyle(): PublisherProperties;
   publishAudio(value: boolean): void;
   publishVideo(value: boolean): void;
+  cycleVideo(): Promise<{ deviceId: string }>;
   setStyle<Style extends keyof PublisherStyle>(style: Style, value: PublisherStyle[Style]): void;
   videoWidth(): number | undefined;
   videoHeight(): number | undefined;

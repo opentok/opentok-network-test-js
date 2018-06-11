@@ -13,7 +13,7 @@ export namespace OT {
    * OpenTok.js Client SDK
    */
   export interface Client {
-    properties: {
+    properties?: {
       version: string;
       buildHash: string;
       debug: boolean;
@@ -41,9 +41,9 @@ export namespace OT {
       callback: (error: OT.Error | undefined, devices?: Device[]) => void,
     ): void;
     initPublisher(
-      targetElement?: HTMLElement | string,
-      properties?: OTPublisher.PublisherProperties,
-      callback?: () => void,
+      targetElement?: HTMLElement | string | undefined,
+      properties?: OTPublisher.PublisherProperties | undefined,
+      callback?: (error?: Error) => void,
     ): Publisher;
     initSession(
       partnerId: string,
