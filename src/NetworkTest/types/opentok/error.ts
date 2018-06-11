@@ -1,4 +1,4 @@
-export interface OTError {
+export interface Error {
   name: string;
   message: string;
 }

@@ -109,7 +109,7 @@ export default function subscriberMOS(
   callback: (state: MOSState) => void) {
   mosState.intervalId = window.setInterval(
     () => {
-      subscriber.getStats((error?: OT.OTError, stats?: OT.SubscriberStats) => {
+      subscriber.getStats((error?: OT.Error, stats?: OT.SubscriberStats) => {
         if (!stats) {
           return null;
         }

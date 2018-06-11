@@ -38,7 +38,7 @@ export namespace OT {
 
     checkSystemRequirements(): number;
     getDevices(
-      callback: (error: OTError | undefined, devices?: Device[]) => void,
+      callback: (error: OT.Error | undefined, devices?: Device[]) => void,
     ): void;
     initPublisher(
       targetElement?: HTMLElement | string,
@@ -56,7 +56,7 @@ export namespace OT {
       version: number,
     ): void;
 
-    reportIssue(callback: (error?: OTError.OTError, reportId?: string) => void): void;
+    reportIssue(callback: (error?: OT.Error, reportId?: string) => void): void;
 
     setLogLevel(level: number): void;
 
@@ -86,15 +86,15 @@ export namespace OT {
     extensionRegistered?: string;
   }
 
+  export type Session = OTSession.Session;
   export type Event<Type, Target> = OTEvent.Event<Type, Target>;
   export type Connection  = OTConnection.Connection;
   export type Stream  = OTStream.Stream;
-  export type Session = OTSession.Session;
   export type Publisher = OTPublisher.Publisher;
   export type PublisherProperties = OTPublisher.PublisherProperties;
   export type Subscriber = OTSubscriber.Subscriber;
   export type SubscriberStats = OTSubscriber.SubscriberStats;
   export type SubscriberProperties = OTSubscriber.SubscriberProperties;
   export type TrackStats = OTSubscriber.TrackStats;
-  export type OTError = OTError.OTError;
+  export type Error = OTError.Error;
 }

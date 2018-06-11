@@ -55,7 +55,7 @@ function connectToSession(session: OT.Session, token: string): Promise<OT.Sessio
     if (session.connection) {
       resolve(session);
     } else {
-      session.connect(token, (error?: OT.OTError) => {
+      session.connect(token, (error?: OT.Error) => {
         if (error) {
           if (errorHasName(error, OTErrorType.AUTHENTICATION_ERROR)) {
             reject(new e.ConnectToSessionTokenError());
@@ -82,7 +82,7 @@ function validateDevices(OT: OT.Client): Promise<void> {
     type DeviceMap = { [deviceId: string]: OT.Device };
     type AvailableDevices = { audio: DeviceMap, video: DeviceMap };
 
-    OT.getDevices((error?: OT.OTError, devices: OT.Device[] = []) => {
+    OT.getDevices((error?: OT.Error, devices: OT.Device[] = []) => {
 
       if (error) {
         reject(new e.FailedToObtainMediaDevices());
@@ -131,11 +131,11 @@ function publishAndSubscribe(OT: OT.Client) {
       };
       validateDevices(OT)
         .then(() => {
-          const publisher = OT.initPublisher(containerDiv, publisherOptions, (error?: OT.OTError) => {
+          const publisher = OT.initPublisher(containerDiv, publisherOptions, (error?: OT.Error) => {
             if (error) {
               reject(new e.InitPublisherError(error.message));
             } else {
-              session.publish(publisher, (publishError?: OT.OTError) => {
+              session.publish(publisher, (publishError?: OT.Error) => {
                 if (publishError) {
                   if (errorHasName(publishError, OTErrorType.NOT_CONNECTED)) {
                     return reject(new e.PublishToSessionNotConnectedError());
@@ -154,7 +154,7 @@ function publishAndSubscribe(OT: OT.Client) {
               session.subscribe(event.stream,
                 containerDiv,
                 { testNetwork: true, insertMode: 'append' },
-                (subscribeError?: OT.OTError) => {
+                (subscribeError?: OT.Error) => {
                   return subscribeError ?
                     reject(new e.SubscribeToSessionError(subscribeError.message)) :
                     resolve(subscriber);
@@ -217,7 +217,7 @@ function checkSubscriberQuality(
               ... { credentials },
             };
 
-            const getStatsListener = (error?: OT.OTError, stats?: OT.SubscriberStats) => {
+            const getStatsListener = (error?: OT.Error, stats?: OT.SubscriberStats) => {
               const updateStats = (subscriberStats: OT.SubscriberStats): UpdateCallbackStats => ({
                 ...subscriberStats,
                 phase: audioOnly ? 'audio-only' : 'audio-video',

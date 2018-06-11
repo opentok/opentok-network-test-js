@@ -21,4 +21,4 @@ export interface AverageStatsBase {
   packetLossRatio: number;
 }
 
-export type StatsListener = (error?: OT.OTError, stats?: OT.SubscriberStats) => void;
+export type StatsListener = (error?: OT.Error, stats?: OT.SubscriberStats) => void;

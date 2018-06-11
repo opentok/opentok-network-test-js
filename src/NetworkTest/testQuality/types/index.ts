@@ -9,7 +9,7 @@ export interface HasAudioVideo<A> {
 export interface AudioThreshold { bps: number; plr: number; }
 export interface VideoThreshold extends AudioThreshold { recommendedSetting: string; }
 
-export type StatsListener = (error?: OT.OTError, stats?: OT.SubscriberStats) => void;
+export type StatsListener = (error?: OT.Error, stats?: OT.SubscriberStats) => void;
 export interface Kbps { kbps: number; }
 export interface KbpsMap extends HasAudioVideo<Kbps[]> { }
 export interface Bandwidth extends HasAudioVideo<number> { }

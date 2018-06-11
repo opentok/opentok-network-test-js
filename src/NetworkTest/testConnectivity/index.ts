@@ -56,7 +56,7 @@ function connectToSession(
 ): Promise<OT.Session> {
   return new Promise((resolve, reject) => {
     const session = OT.initSession(apiKey, sessionId);
-    session.connect(token, (error?: OT.OTError) => {
+    session.connect(token, (error?: OT.Error) => {
       if (errorHasName(error, OTErrorType.OT_AUTHENTICATION_ERROR)) {
         reject(new e.ConnectToSessionTokenError());
       } else if (errorHasName(error, OTErrorType.INVALID_SESSION_ID)) {
@@ -83,7 +83,7 @@ function validateDevices(OT: OT.Client): Promise<void> {
     type DeviceMap = { [deviceId: string]: OT.Device };
     type AvailableDevices = { audio: DeviceMap, video: DeviceMap };
 
-    OT.getDevices((error?: OT.OTError, devices: OT.Device[] = []) => {
+    OT.getDevices((error?: OT.Error, devices: OT.Device[] = []) => {
 
       if (error) {
         reject(new e.FailedToObtainMediaDevices());
@@ -129,7 +129,7 @@ function checkCreateLocalPublisher(OT: OT.Client): Promise<CreateLocalPublisherR
           insertMode: 'append',
           showControls: false,
         };
-        const publisher = OT.initPublisher(publisherDiv, publisherOptions, (error?: OT.OTError) => {
+        const publisher = OT.initPublisher(publisherDiv, publisherOptions, (error?: OT.Error) => {
           if (!error) {
             resolve({ publisher });
           } else {
@@ -156,7 +156,7 @@ function checkPublishToSession(OT: OT.Client, session: OT.Session): Promise<Publ
     };
     checkCreateLocalPublisher(OT)
       .then(({ publisher }: CreateLocalPublisherResults) => {
-        session.publish(publisher, (error?: OT.OTError) => {
+        session.publish(publisher, (error?: OT.Error) => {
           if (error) {
             if (errorHasName(error, OTErrorType.NOT_CONNECTED)) {
               disconnectAndReject(new e.PublishToSessionNotConnectedError());
@@ -191,7 +191,7 @@ function checkSubscribeToSession({ session, publisher }: PublishToSessionResults
       disconnectAndReject(new e.SubscribeToSessionError());
     } else {
       const subscriberDiv = document.createElement('div');
-      const subscriber = session.subscribe(publisher.stream, subscriberDiv, config, (error?: OT.OTError) => {
+      const subscriber = session.subscribe(publisher.stream, subscriberDiv, config, (error?: OT.Error) => {
         if (error) {
           disconnectAndReject(new e.SubscribeToSessionError());
         } else {
