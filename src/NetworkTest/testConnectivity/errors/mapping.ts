@@ -6,7 +6,6 @@
  * Map Connectivity Errors to Failure Types
  */
 
-
 import { ConnectivityError } from './index';
 
 export enum FailureType {

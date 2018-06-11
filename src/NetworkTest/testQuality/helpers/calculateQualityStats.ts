@@ -1,6 +1,5 @@
 import { SubscriberStats } from '../../types/opentok/subscriber';
-import { AV, HasAudioVideo } from '../types';
-import { QualityStats } from './stats';
+import { AV, HasAudioVideo, QualityStats } from '../types/stats';
 
 function calculateStats(type: AV, samples: SubscriberStats[]): QualityStats[] {
 

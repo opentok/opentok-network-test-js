@@ -1,7 +1,7 @@
 import getLatestSampleWindow from './getLatestSampleWindow';
 import calculateQualityStats from './calculateQualityStats';
 import config from './config';
-import { AV } from '../types';
+import { AV } from '../types/stats';
 import { OT } from '../../types/opentok';
 
 export default function isBitrateSteadyState(statsList: OT.SubscriberStats[]): boolean {

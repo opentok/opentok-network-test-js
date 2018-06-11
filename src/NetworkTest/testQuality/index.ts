@@ -14,13 +14,7 @@ import OTKAnalytics from 'opentok-solutions-logging';
 /* tslint:enable */
 import * as Promise from 'promise';
 import { OT } from '../types/opentok';
-import { AV, Bandwidth, HasAudioVideo } from './types';
-// import { Subscriber, SubscriberStats } from '../types/opentok/subscriber';
-// import { Publisher, PublisherProperties } from '../types/opentok/publisher';
-// import { Stream } from '../types/opentok/stream';
-// import { Session } from '../types/opentok/session';
-// import { OTError } from '../types/opentok/error';
-// import { Event } from '../types/opentok/events';
+import { AverageStats, AV, Bandwidth, HasAudioVideo } from './types/stats';
 import { CompletionCallback, UpdateCallback, UpdateCallbackStats } from '../types/callbacks';
 import { pick } from '../../util';
 import * as e from './errors/';
@@ -29,7 +23,6 @@ import subscriberMOS from './helpers/subscriberMOS';
 import MOSState from './helpers/MOSState';
 import config from './helpers/config';
 import isSupportedBrowser from './helpers/isSupportedBrowser';
-import { AverageStats } from './helpers/stats';
 
 export interface QualityTestResults extends HasAudioVideo<AverageStats> {
   mos: number;

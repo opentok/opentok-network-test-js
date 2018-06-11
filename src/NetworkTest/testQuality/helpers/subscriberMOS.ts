@@ -2,11 +2,10 @@ import isBitrateSteadyState from './isBitrateSteadyState';
 import calculateThroughput from './calculateThroughput';
 import MOSState from './MOSState';
 import { OT } from '../../types/opentok';
-import { StatsListener } from './stats';
-import { AV } from '../types';
-// import { Subscriber, SubscriberStats, OT.TrackStats } from '../../types/opentok/subscriber';
-// import { OTError } from '../../types/opentok/error';
+import { AV } from '../types/stats';
 import { getOr, last, nth } from '../../../util';
+
+export type StatsListener = (error?: OT.Error, stats?: OT.SubscriberStats) => void;
 
 const getPacketsLost = (ts: OT.TrackStats): number => getOr(0, 'packetsLost', ts);
 const getPacketsReceived = (ts: OT.TrackStats): number => getOr(0, 'packetsReceived', ts);

@@ -1,7 +1,6 @@
 import { OT } from '../../types/opentok';
 
-import { Bandwidth, HasAudioVideo } from '../types';
-import { AverageStats } from './stats';
+import { AverageStats, Bandwidth, HasAudioVideo } from '../types/stats';
 
 export default class MOSState {
   statsLog: OT.SubscriberStats[];

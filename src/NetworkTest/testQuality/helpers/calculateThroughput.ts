@@ -1,8 +1,7 @@
 import getLatestSampleWindow from './getLatestSampleWindow';
 import calculateQualityStats from './calculateQualityStats';
 import getQualityEvaluation from './getQualityEvaluation';
-import { AverageStats, AverageStatsBase, QualityStats } from './stats';
-import { AV, HasAudioVideo } from '../types';
+import { AV, AverageStats, AverageStatsBase, HasAudioVideo, QualityStats } from '../types/stats';
 import config from './config';
 import MOSState from './MOSState';
 import { getOr } from '../../../util';

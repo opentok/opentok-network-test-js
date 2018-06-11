@@ -1,4 +1,6 @@
-import { AudioThreshold, VideoThreshold } from '../types';
+
+interface AudioThreshold { bps: number; plr: number; }
+interface VideoThreshold extends AudioThreshold { recommendedSetting: string; }
 
 export type QualityTestConfig = {
   getStatsInterval: number,

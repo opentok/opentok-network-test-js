@@ -1,4 +1,13 @@
-import { OT } from '../../types/opentok';
+export type AV = 'audio' | 'video';
+
+export interface HasAudioVideo<A> {
+  audio: A;
+  video: A;
+}
+
+export interface Kbps { kbps: number; }
+export interface KbpsMap extends HasAudioVideo<Kbps[]> { }
+export interface Bandwidth extends HasAudioVideo<number> { }
 
 export interface QualityStats {
   averageBitrate: number;
@@ -20,5 +29,3 @@ export interface AverageStatsBase {
   bitrate: number;
   packetLossRatio: number;
 }
-
-export type StatsListener = (error?: OT.Error, stats?: OT.SubscriberStats) => void;

@@ -1,5 +1,5 @@
 import { OT } from '../../types/opentok';
-import { AV, Kbps, KbpsMap } from '../types';
+import { AV, Kbps, KbpsMap } from '../types/stats';
 
 function calculateDeltas(type: AV, samples: OT.SubscriberStats[]): Kbps[] {
   const bitrates: Kbps[] = [];

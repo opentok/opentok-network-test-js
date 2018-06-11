@@ -7,7 +7,7 @@
  */
 
 import { get } from '../../util';
-import { OTError } from '../types/opentok/error';
+import { OT } from '../types/opentok';
 
 export enum OTErrorType {
   JS_EXCEPTION = 'JS_EXCEPTION',
@@ -45,4 +45,4 @@ export enum OTErrorType {
 }
 
 export const errorHasName =
-  (error: OTError | null = null, name: OTErrorType): boolean => get('name', error) === name;
+  (error: OT.Error | null = null, name: OTErrorType): boolean => get('name', error) === name;
