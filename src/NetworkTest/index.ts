@@ -19,7 +19,7 @@ import {
   MissingSessionCredentialsError,
 } from './errors';
 /* tslint:disable */
-import OTKAnalytics from 'opentok-solutions-logging';
+import OTKAnalytics = require('opentok-solutions-logging');
 /* tslint:enable */
 
 export default class NetworkTest {

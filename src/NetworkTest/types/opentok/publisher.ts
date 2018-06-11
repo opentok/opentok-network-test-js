@@ -27,7 +27,24 @@ export interface PublisherStyle extends WidgetStyle {
   archiveStatusDisplayMode: 'auto' | 'off';
 }
 
-export interface PublisherProperties extends WidgetProperties {
+export interface GetUserMediaProperties {
+  audioSource?: string | null | boolean | MediaStreamTrack;
+  disableAudioProcessing?: boolean;
+  facingMode?: 'user' | 'environment' | 'left' | 'right';
+  frameRate?: 30 | 15 | 7 | 1;
+  maxResolution?: Dimensions;
+  resolution?: (
+    '1280x960' |
+    '1280x720' |
+    '640x480' |
+    '640x360' |
+    '320x240' |
+    '320x180'
+  );
+  videoSource?: string | null | boolean | MediaStreamTrack;
+}
+
+export interface PublisherProperties extends WidgetProperties, GetUserMediaProperties {
   audioBitrate?: number;
   audioFallbackEnabled?: boolean;
   audioSource?: string | null;

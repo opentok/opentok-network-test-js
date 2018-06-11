@@ -11,7 +11,7 @@
 import axios from 'axios';
 import * as Promise from 'promise';
 /* tslint:disable */
-import OTKAnalytics from 'opentok-solutions-logging';
+import OTKAnalytics = require('opentok-solutions-logging');
 /* tslint:enable */
 import { OT } from '../types/opentok';
 import { CompletionCallback } from '../types/callbacks';
