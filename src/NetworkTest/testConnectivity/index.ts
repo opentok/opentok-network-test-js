@@ -18,7 +18,7 @@ import { CompletionCallback } from '../types/callbacks';
 import * as e from './errors';
 import { OTErrorType, errorHasName } from '../errors/types';
 import { mapErrors, FailureCase } from './errors/mapping';
-// import { get, getOr } from '../../util';
+import { getOr } from '../../util';
 
 type AV = 'audio' | 'video';
 type CreateLocalPublisherResults = { publisher: OT.Publisher };
@@ -203,7 +203,7 @@ function checkSubscribeToSession({ session, publisher }: PublishToSessionResults
  */
 function checkLoggingServer(OT: OT.Client, input?: SubscribeToSessionResults): Promise<SubscribeToSessionResults> {
   return new Promise((resolve, reject) => {
-    const url = `${OT.properties.loggingURL}/logging/ClientEvent`;
+    const url = `${getOr('', 'properties.loggingURL', OT)}/logging/ClientEvent`;
     const handleError = () => reject(new e.LoggingServerConnectionError());
 
     axios.post(url)
