@@ -1,5 +1,5 @@
 import { Connection } from './connection';
-import { OTError } from './error';
+import { Error } from './error';
 import { OTEventEmitter, Event } from './events';
 import { Publisher } from './publisher';
 import { Stream } from './stream';
@@ -70,24 +70,24 @@ export interface Session extends OTEventEmitter<{
   connection?: Connection;
   sessionId: string;
 
-  connect(token: string, callback: (error?: OTError) => void): void;
+  connect(token: string, callback: (error?: Error) => void): void;
   disconnect(): void;
-  forceDisconnect(connection: Connection, callback: (error?: OTError) => void): void;
-  forceUnpublish(stream: Stream, callback: (error?: OTError) => void): void;
+  forceDisconnect(connection: Connection, callback: (error?: Error) => void): void;
+  forceUnpublish(stream: Stream, callback: (error?: Error) => void): void;
   getPublisherForStream(stream: Stream): Publisher | undefined;
   getSubscribersForStream(stream: Stream): [Subscriber];
-  publish(publisher: Publisher, callback: (error?: OTError) => void): void;
+  publish(publisher: Publisher, callback: (error?: Error) => void): void;
 
   signal(
     signal: { type?: string, data?: string, to?: Connection },
-    callback: (error?: OTError) => void,
+    callback: (error?: Error) => void,
   ): void;
 
   subscribe(
     stream: Stream,
     targetElement?: HTMLElement | string,
     properties?: SubscriberProperties,
-    callback?: (error?: OTError) => void,
+    callback?: (error?: Error) => void,
   ): Subscriber;
 
   unpublish(publisher: Publisher): void;

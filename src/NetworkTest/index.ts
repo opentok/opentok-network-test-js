@@ -8,7 +8,7 @@
 
 const version = require('../../package.json').version;
 import { OT } from './types/opentok';
-import { NetworkTestTypes as T } from './types/networkTest';
+import { CompletionCallback, UpdateCallback, UpdateCallbackStats } from './types/callbacks';
 import { testConnectivity, ConnectivityTestResults } from './testConnectivity';
 import testQuality, { QualityTestResults } from './testQuality';
 import {
@@ -55,8 +55,8 @@ export default class NetworkTest {
   }
   private validateCallbacks(
     action: string,
-    updateCallback?: T.UpdateCallback<any>,
-    onComplete?: T.CompletionCallback<any>) {
+    updateCallback?: UpdateCallback<any>,
+    onComplete?: CompletionCallback<any>) {
     if (updateCallback) {
       if (typeof updateCallback !== 'function' || updateCallback.length !== 1) {
         this.otLogging.logEvent({ action, variation: 'Failure' });
@@ -90,7 +90,7 @@ export default class NetworkTest {
    * opentok-network-test-js project for details.
    */
   testConnectivity(
-    onComplete?: T.CompletionCallback<ConnectivityTestResults>): Promise<ConnectivityTestResults> {
+    onComplete?: CompletionCallback<ConnectivityTestResults>): Promise<ConnectivityTestResults> {
     this.otLogging.logEvent({ action: 'testConnectivity', variation: 'Attempt' });
     this.validateCallbacks('testConnectivity', undefined, onComplete);
     return testConnectivity(this.OT, this.credentials, this.otLogging, onComplete);
@@ -105,8 +105,8 @@ export default class NetworkTest {
    * opentok-network-test-js project for details.
    */
   testQuality(
-    updateCallback?: T.UpdateCallback<T.UpdateCallbackStats>,
-    completionCallback?: T.CompletionCallback<QualityTestResults>): Promise<any> {
+    updateCallback?: UpdateCallback<UpdateCallbackStats>,
+    completionCallback?: CompletionCallback<QualityTestResults>): Promise<any> {
     this.otLogging.logEvent({ action: 'testQuality', variation: 'Attempt' });
     this.validateCallbacks('testQuality', updateCallback, completionCallback);
     return testQuality(

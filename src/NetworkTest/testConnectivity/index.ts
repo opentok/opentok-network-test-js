@@ -13,10 +13,6 @@ import * as Promise from 'promise';
 /* tslint:disable */
 import OTKAnalytics from 'opentok-solutions-logging';
 /* tslint:enable */
-// import { Session } from '../types/opentok/session';
-// import { Publisher, PublisherProperties } from '../types/opentok/publisher';
-// import { Subscriber } from '../types/opentok/subscriber';
-// import { OTError } from '../types/opentok/error';
 import { OT } from '../types/opentok';
 import { CompletionCallback } from '../types/callbacks';
 import * as e from './errors';
