@@ -23,6 +23,10 @@
   version "2.14.3"
   resolved "https://registry.yarnpkg.com/@opentok/client/-/client-2.14.3.tgz#6fa8615608cb1eebd3bbd759374e748014462b73"
 
+"@types/node@^10.3.2":
+  version "10.3.2"
+  resolved "https://registry.yarnpkg.com/@types/node/-/node-10.3.2.tgz#3840ec6c12556fdda6e0e6d036df853101d732a4"
+
 "@types/opentok@^2.3.4":
   version "2.3.4"
   resolved "https://registry.yarnpkg.com/@types/opentok/-/opentok-2.3.4.tgz#7f9b72ecb1bedcf25111b40035ec853abf63e93e"

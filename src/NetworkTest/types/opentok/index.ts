@@ -41,8 +41,8 @@ export namespace OT {
       callback: (error: OT.Error | undefined, devices?: Device[]) => void,
     ): void;
     initPublisher(
-      targetElement?: HTMLElement | string | undefined,
-      properties?: OTPublisher.PublisherProperties | undefined,
+      targetElement?: HTMLElement | string,
+      properties?: OTPublisher.PublisherProperties,
       callback?: (error?: Error) => void,
     ): Publisher;
     initSession(
