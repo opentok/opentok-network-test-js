@@ -6,7 +6,6 @@
   "types": "dist/NetworkTest/index.d.ts",
   "scripts": {
     "build": "rm -rf dist && tsc",
-    "docs": "open dist/docs/index.html",
     "test-setup": "node test/setup/setup.js",
     "test-teardown": "rm test/credentials.json",
     "karma": "karma start",
