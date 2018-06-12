@@ -1,4 +1,4 @@
-/* tslint:enable */
+/* tslint: disable */
 
 import * as OTClient from '@opentok/client';
 import {
@@ -8,7 +8,7 @@ import {
 } from './credentials.json';
 import {
   NetworkTestError,
-  MissingOTClientInstanceError,
+  MissingOpenTokInstanceError,
   MissingSessionCredentialsError,
   IncompleteSessionCredentialsError,
   InvalidOnCompleteCallback,
@@ -59,8 +59,8 @@ describe('Network Test', () => {
   });
 
   it('its constructor requires OT and valid session credentials', () => {
-    expect(() => new NetworkTest(sessionCredentials)).toThrow(new MissingOTClientInstanceError());
-    expect(() => new NetworkTest({}, sessionCredentials)).toThrow(new MissingOTClientInstanceError());
+    expect(() => new NetworkTest(sessionCredentials)).toThrow(new MissingOpenTokInstanceError());
+    expect(() => new NetworkTest({}, sessionCredentials)).toThrow(new MissingOpenTokInstanceError());
     expect(() => new NetworkTest(OTClient)).toThrow(new MissingSessionCredentialsError());
     expect(() => new NetworkTest(OTClient, malformedCredentials)).toThrow(new IncompleteSessionCredentialsError());
     expect(new NetworkTest(OTClient, sessionCredentials)).toBeInstanceOf(NetworkTest);

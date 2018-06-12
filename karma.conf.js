@@ -38,9 +38,7 @@ module.exports = function (config) {
   config.set({
     hostname: '127.0.0.1',
     basePath: './test',
-    files: [
-      { pattern: '*.spec.ts' },
-    ],
+    files: [{ pattern: '*.spec.ts'}],
     autoWatch: true,
     singleRun: true,
     frameworks: ['jasmine'],
@@ -52,21 +50,13 @@ module.exports = function (config) {
     },
     webpack: {
       module: {
-        loaders: [
-          {
-            test: /\.js(x?)$/,
-            exclude: [ /opentok\.js/ ],
-            loader: 'babel-loader',
-          },
-          {
-            test: /\.ts(x?)$/,
-            loader: 'ts-loader',
-            exclude: [ /opentok\.js/ ],
-            options: {
-              transpileOnly: true,
-            }
-          },
-        ]
+        rules: [{
+          test: /\.tsx?$/,
+          loader: 'awesome-typescript-loader',
+          options: {
+            transpileOnly: true,
+          }
+        }],
       },
       resolve: webpackConfig.resolve,
       devtool: 'inline-source-map',
