@@ -1,6 +1,6 @@
 
-interface AudioThreshold { bps: number; plr: number; }
-interface VideoThreshold extends AudioThreshold { recommendedSetting: string; }
+export interface AudioThreshold { bps: number; plr: number; }
+export interface VideoThreshold extends AudioThreshold { recommendedSetting: string; }
 
 export type QualityTestConfig = {
   getStatsInterval: number,

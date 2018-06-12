@@ -5,7 +5,7 @@ import { OT } from '../../types/opentok';
 import { AV } from '../types/stats';
 import { getOr, last, nth } from '../../../util';
 
-export type StatsListener = (error?: OT.Error, stats?: OT.SubscriberStats) => void;
+export type StatsListener = (error?: OT.OTError, stats?: OT.SubscriberStats) => void;
 
 const getPacketsLost = (ts: OT.TrackStats): number => getOr(0, 'packetsLost', ts);
 const getPacketsReceived = (ts: OT.TrackStats): number => getOr(0, 'packetsReceived', ts);
@@ -108,7 +108,7 @@ export default function subscriberMOS(
   callback: (state: MOSState) => void) {
   mosState.intervalId = window.setInterval(
     () => {
-      subscriber.getStats((error?: OT.Error, stats?: OT.SubscriberStats) => {
+      subscriber.getStats((error?: OT.OTError, stats?: OT.SubscriberStats) => {
         if (!stats) {
           return null;
         }

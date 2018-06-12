@@ -1,6 +1,6 @@
 import { Event, OTEventEmitter, VideoDimensionsChangedEvent } from './events';
 import { Stream } from './stream';
-import { Error } from './error';
+import { OTError } from './error';
 import { Dimensions, WidgetProperties, WidgetStyle  } from './widget';
 
 export interface SubscriberStyle extends WidgetStyle {
@@ -64,7 +64,7 @@ export interface Subscriber extends OTEventEmitter<{
 
   getAudioVolume(): number;
   getImgData(): string | null;
-  getStats(callback: (error?: Error, stats?: SubscriberStats) => void): void;
+  getStats(callback: (error?: OTError, stats?: SubscriberStats) => void): void;
   restrictFrameRate(value: boolean): void;
   setAudioVolume(volume: number): void;
   setPreferredFrameRate(frameRate: number): void;

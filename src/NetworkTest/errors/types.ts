@@ -44,5 +44,6 @@ export enum OTErrorType {
   ANVIL_CONNECT_FAILED = 'ANVIL_CONNECT_FAILED',
 }
 
+
 export const errorHasName =
-  (error: OT.Error | null = null, name: OTErrorType): boolean => get('name', error) === name;
+  (error: OT.OTError | null = null, name: OTErrorType): boolean => get('name', error) === name;

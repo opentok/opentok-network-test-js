@@ -6,7 +6,7 @@ export type InputDeviceType = 'audioInput' | 'videoInput';
 
 export default function filterDevicesForType(OT: OT.Client, type: InputDeviceType) {
   return new Promise((resolve, reject) => {
-    OT.getDevices((error?: OT.Error, devices: OT.Device[] = []) => {
+    OT.getDevices((error?: OT.OTError, devices: OT.Device[] = []) => {
       if (error) {
         reject(new e.FailedToObtainMediaDevices());
       } else {

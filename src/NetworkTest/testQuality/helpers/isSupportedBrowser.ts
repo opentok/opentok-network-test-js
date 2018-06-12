@@ -1,3 +1,5 @@
+import { get } from '../../../util';
+
 export type Browser =
   'Chrome' |
   'Firefox' |
@@ -18,10 +20,10 @@ function detectBrowser(): Browser {
   }
 
   // Firefox.
-  if (navigator.mozGetUserMedia) {
+  if (get('mozGetUserMedia', navigator)) {
     return 'Firefox';
   }
-  if (navigator.webkitGetUserMedia) {
+  if (get('webkitGetUserMedia', navigator)) {
     // Chrome, Chromium, Webview, Opera, all use the chrome shim for now
     if (window.hasOwnProperty('webkitRTCPeerConnection')) {
       return 'Chrome';

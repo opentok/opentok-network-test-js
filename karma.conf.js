@@ -1,6 +1,7 @@
 const path = require('path');
 const webpack = require('webpack');
 const webpackConfig = require('./webpack.config');
+const nodeExternals = require('webpack-node-externals');
 
 module.exports = function (config) {
   let sauceLaunchers = {
@@ -38,7 +39,7 @@ module.exports = function (config) {
     hostname: '127.0.0.1',
     basePath: './test',
     files: [
-      '*.spec.ts',
+      { pattern: '*.spec.ts' },
     ],
     autoWatch: true,
     singleRun: true,
@@ -54,22 +55,16 @@ module.exports = function (config) {
         loaders: [
           {
             test: /\.js(x?)$/,
+            exclude: [ /opentok\.js/ ],
             loader: 'babel-loader',
           },
           {
             test: /\.ts(x?)$/,
             loader: 'ts-loader',
+            exclude: [ /opentok\.js/ ],
             options: {
               transpileOnly: true,
             }
-          },
-          {
-            test: /opentok\.js/,
-            loader: 'string-replace-loader',
-            options: {
-              search: '_dereq_(\'ws\')',
-              replace: 'window.WebSocket',
-            },
           },
         ]
       },

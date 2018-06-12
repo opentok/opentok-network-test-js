@@ -1,5 +1,5 @@
 import { Connection } from './connection';
-import { Error } from './error';
+import { OTError } from './error';
 import { OTEventEmitter, Event } from './events';
 import { Publisher } from './publisher';
 import { Stream } from './stream';
