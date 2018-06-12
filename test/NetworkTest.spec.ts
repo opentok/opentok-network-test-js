@@ -188,13 +188,16 @@ describe('Network Test', () => {
           expect(audio.reason || '').toEqual(jasmine.any(String));
           expect(audio.packetLossRatio).toEqual(jasmine.any(Number));
 
-          expect(video.bitrate).toEqual(jasmine.any(Number));
           expect(video.supported).toEqual(jasmine.any(Boolean));
-          expect(video.reason || '').toEqual(jasmine.any(String));
-          expect(video.packetLossRatio).toEqual(jasmine.any(Number));
-          expect(video.frameRate).toEqual(jasmine.any(Number));
-          expect(video.recommendedResolution).toEqual(jasmine.any(String));
-          expect(video.recommendedFrameRate).toEqual(jasmine.any(Number));
+          if (video.supported) {
+            expect(video.bitrate).toEqual(jasmine.any(Number));
+            expect(video.packetLossRatio).toEqual(jasmine.any(Number));
+            expect(video.frameRate).toEqual(jasmine.any(Number));
+            expect(video.recommendedResolution).toEqual(jasmine.any(String));
+            expect(video.recommendedFrameRate).toEqual(jasmine.any(Number));
+          } else {
+            expect(video.reason).toEqual(jasmine.any(String));
+          }
         };
 
         const validateError = (error?: QualityTestError) => {

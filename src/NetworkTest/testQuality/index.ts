@@ -113,8 +113,10 @@ function publishAndSubscribe(OT: OpenTok) {
       validateDevices(OT)
         .then((availableDevices: AvailableDevices) => {
           if (!Object.keys(availableDevices.video).length) {
-            publisherOptions.videoSource = null;
             audioOnly = true;
+          }
+          if (audioOnly) {
+            publisherOptions.videoSource = null;
           }
           const publisher = OT.initPublisher(containerDiv, publisherOptions, (error?: OT.OTError) => {
             if (error) {
