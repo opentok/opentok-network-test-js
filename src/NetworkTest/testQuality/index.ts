@@ -187,7 +187,9 @@ function checkSubscriberQuality(
   OT: OpenTok,
   session: OT.Session,
   credentials: SessionCredentials,
-  onUpdate?: UpdateCallback<OT.SubscriberStats>): Promise<QualityTestResults> {
+  onUpdate?: UpdateCallback<OT.SubscriberStats>,
+  audioOnlyFallback?: boolean,
+): Promise<QualityTestResults> {
 
   let mosEstimatorTimeoutId: number;
 
@@ -199,7 +201,7 @@ function checkSubscriberQuality(
         } else {
           try {
             const builder: QualityTestResultsBuilder = {
-              state: new MOSState(),
+              state: new MOSState(audioOnlyFallback),
               ... { subscriber },
               ... { credentials },
             };
@@ -216,7 +218,7 @@ function checkSubscriberQuality(
               const audioVideoResults: QualityTestResults = buildResults(builder);
               if (!audioOnly && !isAudioQualityAcceptable(audioVideoResults)) {
                 audioOnly = true;
-                checkSubscriberQuality(OT, session, credentials, onUpdate)
+                checkSubscriberQuality(OT, session, credentials, onUpdate, true)
                   .then((results: QualityTestResults) => {
                     resolve(results);
                   });
