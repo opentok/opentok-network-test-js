@@ -17,6 +17,8 @@ import {
   MissingSessionCredentialsError,
 } from './errors';
 import { getOr } from '../util';
+import { ErrorNameObj } from './errors';
+
 /* tslint:disable */
 const OTKAnalytics = require('opentok-solutions-logging');
 /* tslint:enable */
@@ -25,6 +27,7 @@ export default class NetworkTest {
   credentials: SessionCredentials;
   OT: OpenTok;
   otLogging: OTKAnalytics;
+  errorNames: ErrorNameObj;
 
   /**
    * Returns an instance of NetworkConnectivity. See the "API reference" section of the
@@ -36,6 +39,7 @@ export default class NetworkTest {
     this.otLogging = this.startLoggingEngine(credentials.apiKey, credentials.sessionId);
     this.OT = OT;
     this.credentials = credentials;
+    this.errorNames = new ErrorNameObj();
   }
 
   private validateOT(OT: OpenTok) {

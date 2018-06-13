@@ -43,5 +43,11 @@ export enum OTErrorType {
   ANVIL_CONNECT_FAILED = 'ANVIL_CONNECT_FAILED',
 }
 
+export enum ErrorNames {
+  NETWORK_TEST_ERROR = 'NetworkTestError',
+  MISSING_OPENTOK_INSTANCE = 'MissingOpenTokInstanceError',
+  INCOMPLETE_SESSON_CREDENTIALS = 'IncompleteSessionCredentialsError',
+}
+
 export const errorHasName =
   (error: OT.OTError | null = null, name: OTErrorType): boolean => get('name', error) === name;

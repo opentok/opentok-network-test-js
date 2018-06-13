@@ -2,14 +2,21 @@
  * @module Errors
  */
 
+import { ErrorNames } from './types';
+
+export class ErrorNameObj {
+  NETWORK_TEST_ERROR = ErrorNames.NETWORK_TEST_ERROR;
+  MISSING_OPENTOK_INSTANCE = ErrorNames.MISSING_OPENTOK_INSTANCE;
+  INCOMPLETE_SESSON_CREDENTIALS = ErrorNames.INCOMPLETE_SESSON_CREDENTIALS;
+}
+
  /**
   * Base class for errors used throughout Network Connectivity tests.
   */
 export class NetworkTestError extends Error {
   constructor(message: string) {
     super(message);
-    Object.setPrototypeOf(this, NetworkTestError.prototype);
-    this.name = this.constructor.name;
+    this.name = ErrorNames.NETWORK_TEST_ERROR;
     this.stack = (new Error(message)).stack;
   }
 }
@@ -17,6 +24,7 @@ export class NetworkTestError extends Error {
 export class MissingOpenTokInstanceError extends NetworkTestError {
   constructor() {
     super('An instance of OT, the OpenTok.js client SDK, is required.');
+    this.name = ErrorNames.MISSING_OPENTOK_INSTANCE;
   }
 }
 
