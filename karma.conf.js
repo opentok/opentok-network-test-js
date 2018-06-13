@@ -67,8 +67,9 @@ module.exports = function (config) {
             test: /opentok\.js/,
             loader: 'string-replace-loader',
             options: {
-              search: '_dereq_(\'ws\')',
-              replace: 'window.WebSocket',
+              search: 'var _ws = __webpack_require__.*?;',
+              replace: 'var _ws = window.WebSocket;',
+              flags: 'i',
             },
           },
         ]

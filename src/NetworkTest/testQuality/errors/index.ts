@@ -82,18 +82,21 @@ export class MediaDeviceError extends QualityTestError {
 export class FailedToObtainMediaDevices extends QualityTestError {
   constructor() {
     super('Failed to obtain media devices.');
+    this.name = 'FailedToObtainMediaDevices';
   }
 }
 
 export class NoVideoCaptureDevicesError extends QualityTestError {
   constructor() {
     super('This browser has no video capture devices');
+    this.name = 'NoVideoCaptureDevices';
   }
 }
 
 export class NoAudioCaptureDevicesError extends QualityTestError {
   constructor() {
     super('This browser has no audio capture devices.');
+    this.name = 'NoAudioCaptureDevices';
   }
 }
 

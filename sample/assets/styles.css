@@ -121,6 +121,10 @@ div.prettyBox img {
   min-height: 80px
 }
 
+#video-unsupported-reason {
+  display: none;
+}
+
 @media screen and (max-width: 380px) {
   h1 {
     font-size: 24px;

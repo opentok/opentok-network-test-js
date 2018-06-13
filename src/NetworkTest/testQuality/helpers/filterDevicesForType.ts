@@ -1,5 +1,5 @@
 import * as Promise from 'promise';
-import * as e from '../../testConnectivity/errors';
+import * as e from '../../testQuality/errors';
 
 export default function filterDevicesForType(OT: OpenTok, type: InputDeviceType) {
   return new Promise((resolve, reject) => {
