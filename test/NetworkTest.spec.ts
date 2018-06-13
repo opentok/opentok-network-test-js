@@ -142,10 +142,10 @@ describe('Network Test', () => {
           .then((results: ConnectivityTestResults) => {
             expect(results.failedTests).toBeInstanceOf(Array);
             if (results.failedTests.find(f => f.type === 'api')) {
-              done();
               OTClient.properties.apiURL = OTClient.properties.apiURL.replace('bad-OTClient', 'OTClient');
             }
             OTClient.properties.apiURL = OTClient.properties.apiURL.replace('bad-OTClient', 'OTClient');
+            done();
           });
       }, 10000);
     });
