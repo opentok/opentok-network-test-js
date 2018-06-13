@@ -21,6 +21,7 @@ import { ConnectToSessionTokenError, ConnectToSessionSessionIdError, Connectivit
 import { ConnectToSessionError as QualityTestSessionError } from '../src/NetworkTest/testQuality/errors';
 import { pick, head, nth } from '../src/util';
 import NetworkTest from '../src/NetworkTest';
+import { ErrorNames } from '../src/NetworkTest/errors/types';
 import { ConnectivityTestResults } from '../src/NetworkTest/testConnectivity/index';
 import { QualityTestError } from '../src/NetworkTest/testQuality/errors/index';
 import { Stats } from 'fs-extra';
@@ -57,7 +58,7 @@ const customMatchers: jasmine.CustomMatcherFactories = {
   },
 };
 
-describe('Network Test', () => {
+describe('NetworkTest', () => {
 
   beforeAll(() => {
     jasmine.addMatchers(customMatchers);
@@ -69,6 +70,13 @@ describe('Network Test', () => {
     expect(() => new NetworkTest(OT)).toThrow(new MissingSessionCredentialsError());
     expect(() => new NetworkTest(OT, malformedCredentials)).toThrow(new IncompleteSessionCredentialsError());
     expect(new NetworkTest(OT, sessionCredentials)).toBeInstanceOf(NetworkTest);
+  });
+
+  it('it contains a valid errorNames property', () => {
+    const otNetworkTest = new NetworkTest(OT, sessionCredentials);
+    for (const key in ErrorNames) {
+      expect(otNetworkTest[key] === ErrorNames[key]);
+    }
   });
 
   describe('Connectivity Test', () => {
