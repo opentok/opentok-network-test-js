@@ -32,12 +32,17 @@ export const assocPath = (path: string, value: any, obj: Object): Object => {
  * Returns a (nested) property from the provided object or undefined
  */
 export const get = <T>(props: string, obj: any): T => {
-  let result = Object.assign({}, obj);
-  const properties = typeof props === 'string' ? props.split('.') : props;
-  properties.some((p) => {
-    result = result[p];
-    return (result === undefined);
-  });
+  if (!obj) {
+    return obj;
+  }
+  const [current, ...rest] = props.split('.');
+  const result = obj[current];
+  if (result === undefined || result === null) {
+    return result;
+  }
+  if (rest.length) {
+    return get(rest.join('.'), result);
+  }
   return result;
 };
 
