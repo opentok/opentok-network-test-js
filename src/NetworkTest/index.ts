@@ -40,6 +40,7 @@ export default class NetworkTest {
     this.OT = OT;
     this.credentials = credentials;
     this.errorNames = new ErrorNameObj();
+    Object.freeze(this.errorNames);
   }
 
   private validateOT(OT: OpenTok) {

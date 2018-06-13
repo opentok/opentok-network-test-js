@@ -5,9 +5,12 @@
 import { ErrorNames } from './types';
 
 export class ErrorNameObj {
-  NETWORK_TEST_ERROR = ErrorNames.NETWORK_TEST_ERROR;
-  MISSING_OPENTOK_INSTANCE = ErrorNames.MISSING_OPENTOK_INSTANCE;
-  INCOMPLETE_SESSON_CREDENTIALS = ErrorNames.INCOMPLETE_SESSON_CREDENTIALS;
+  [key: string]: any;
+  constructor() {
+    for (const key in ErrorNames) {
+      this[key] = ErrorNames[key];
+    }
+  }
 }
 
  /**
