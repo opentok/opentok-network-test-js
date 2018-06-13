@@ -55,7 +55,7 @@ export class ConnectToSessionSessionIdError extends ConnectToSessionError {
 export class ConnectToSessionNetworkError extends ConnectToSessionError {
   constructor() {
     super('Failed to connect to the session due to a network error.',
-      ErrorNames.CONNECT_TO_SESSION_ERROR);
+      ErrorNames.CONNECT_TO_SESSION_NETWORK_ERROR);
   }
 }
 
@@ -115,7 +115,7 @@ export class FailedToCreateLocalPublisher extends PublishToSessionError {
 export class PublishToSessionNotConnectedError extends PublishToSessionError {
   constructor() {
     super('Precall failed to publish to the session because it was not connected.',
-      ErrorNames.PUBLISH_TO_SESSION_ERROR);
+      ErrorNames.PUBLISH_TO_SESSION_NOT_CONNECTED);
   }
 }
 

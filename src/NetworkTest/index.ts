@@ -10,6 +10,7 @@ const version = require('../../package.json').version;
 import { testConnectivity, ConnectivityTestResults } from './testConnectivity';
 import testQuality from './testQuality';
 import {
+  ErrorNameObj,
   IncompleteSessionCredentialsError,
   InvalidOnCompleteCallback,
   InvalidOnUpdateCallback,
@@ -17,7 +18,6 @@ import {
   MissingSessionCredentialsError,
 } from './errors';
 import { getOr } from '../util';
-import { ErrorNameObj } from './errors';
 
 /* tslint:disable */
 const OTKAnalytics = require('opentok-solutions-logging');

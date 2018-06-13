@@ -49,13 +49,6 @@ export class MissingSessionCredentialsError extends NetworkTestError {
   }
 }
 
-export class InvalidSessionCredentialsError extends NetworkTestError {
-  constructor() {
-    super('NetworkConnectivity session credentials must include an apiKey, sessionId, and token.',
-      ErrorNames.INVALID_SESSON_CREDENTIALS);
-  }
-}
-
 export class InvalidOnUpdateCallback extends NetworkTestError {
   constructor() {
     super('The onUpdate callback must be a function that accepts a single parameter.',

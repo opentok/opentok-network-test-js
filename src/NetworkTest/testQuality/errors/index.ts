@@ -102,7 +102,7 @@ export class PublishToSessionError extends QualityTestError {
 
 export class InitPublisherError extends PublishToSessionError {
   constructor(message?: string) {
-    super(message || 'Failed to initialize publisher.', ErrorNames.PUBLISH_TO_SESSION_ERROR);
+    super(message || 'Failed to initialize publisher.', ErrorNames.INIT_PUBLISHER_ERROR);
   }
 }
 

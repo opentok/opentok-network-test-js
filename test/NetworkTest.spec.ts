@@ -10,7 +10,6 @@ import {
 } from './credentials.json';
 import {
   NetworkTestError,
-  InvalidSessionCredentialsError,
   MissingOpenTokInstanceError,
   MissingSessionCredentialsError,
   IncompleteSessionCredentialsError,
