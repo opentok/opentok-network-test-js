@@ -94,7 +94,6 @@ function validateDevices(OT: OpenTok): Promise<AvailableDevices> {
 function publishAndSubscribe(OT: OpenTok) {
   return (session: OT.Session): Promise<OT.Subscriber> =>
     new Promise((resolve, reject) => {
-      let publisherOptions: OT.PublisherProperties;
       type StreamCreatedEvent = OT.Event<'streamCreated', OT.Publisher> & { stream: OT.Stream };
       const containerDiv = document.createElement('div');
       containerDiv.style.position = 'fixed';
@@ -103,18 +102,18 @@ function publishAndSubscribe(OT: OpenTok) {
       containerDiv.style.height = '1px';
       containerDiv.style.opacity = '0';
       document.body.appendChild(containerDiv);
-      publisherOptions = {
-        resolution: '1280x720',
-        width: '100%',
-        height: '100%',
-        insertMode: 'append',
-        showControls: false,
-      };
       validateDevices(OT)
         .then((availableDevices: AvailableDevices) => {
           if (!Object.keys(availableDevices.video).length) {
             audioOnly = true;
           }
+          let publisherOptions: OT.PublisherProperties = {
+            resolution: '1280x720',
+            width: '100%',
+            height: '100%',
+            insertMode: 'append',
+            showControls: false,
+          };
           if (audioOnly) {
             publisherOptions.videoSource = null;
           }
