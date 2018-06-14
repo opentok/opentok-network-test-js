@@ -10,7 +10,6 @@ const version = require('../../package.json').version;
 import { testConnectivity, ConnectivityTestResults } from './testConnectivity';
 import testQuality from './testQuality';
 import {
-  ErrorNameObj,
   IncompleteSessionCredentialsError,
   InvalidOnCompleteCallback,
   InvalidOnUpdateCallback,
@@ -23,11 +22,10 @@ import { getOr } from '../util';
 const OTKAnalytics = require('opentok-solutions-logging');
 /* tslint:enable */
 
-export default class NetworkTest {
+export class NetworkTest {
   credentials: SessionCredentials;
   OT: OpenTok;
   otLogging: OTKAnalytics;
-  errorNames: ErrorNameObj;
 
   /**
    * Returns an instance of NetworkConnectivity. See the "API reference" section of the
@@ -39,8 +37,6 @@ export default class NetworkTest {
     this.otLogging = this.startLoggingEngine(credentials.apiKey, credentials.sessionId);
     this.OT = OT;
     this.credentials = credentials;
-    this.errorNames = new ErrorNameObj();
-    Object.freeze(this.errorNames);
   }
 
   private validateOT(OT: OpenTok) {
@@ -117,3 +113,5 @@ export default class NetworkTest {
       this.OT, this.credentials, this.otLogging, updateCallback, completionCallback);
   }
 }
+
+export { ErrorNames } from './errors/types';

@@ -28,18 +28,22 @@ First, install the package:
 $ npm install opentok-network-test-js
 ```
 
-Now load the OpenTok Network Test in your project.
+Now load the OpenTok Network Test in your project. The module exports two objects:
+
+* OTNetworkTest -- The class containing methods for testing your OpenTok connectivity and quality
+
+* ErrorNames -- An object enumerating error name values
 
 Using CommonJS:
 
 ```javascript
-const OTNetworkTest = require('opentok-network-test-js');
+const { OTNetworkTest, ErrorNames } = require('opentok-network-test-js');
 ```
 
 ... or ES6 ...
 
 ```javascript
-import OTNetworkTest from 'opentok-network-test-js';
+import { OTNetworkTest, ErrorNames } from 'opentok-network-test-js';
 ```
 
 Load the OpenTok.js library.
@@ -164,7 +168,7 @@ The `OTNetworkTest()` constructor includes the following parameters (both requir
 The constructor throws an Error object with a `message` property and a `name` property. The
 message property describes the error. You should check the `name` property to determine the
 type of error. The `name` property will be set to one of the values defined as properties of
-the `OTNetworkTest.errorNames` object (see [Error.name values](#errorname-values)):
+the `ErrorNames` object (see [ErrorNames](#errornames)):
 
     For example:
 
@@ -173,12 +177,12 @@ the `OTNetworkTest.errorNames` object (see [Error.name values](#errorname-values
       const otNetworkTest = new OTNetworkTest(OT, configuration);
     } catch (error) {
       switch (error.name) {
-        case OTNetworkTest.errorNames.MISSING_OPENTOK_INSTANCE:
+        case ErrorNames.MISSING_OPENTOK_INSTANCE:
           console.error('Missing OT instance in constructor.');
           break;
-        case OTNetworkTest.errorNames.INCOMPLETE_SESSON_CREDENTIALS:
-        case OTNetworkTest.errorNames.MISSING_SESSON_CREDENTIALS:
-        case OTNetworkTest.errorNames.INVALID_SESSON_CREDENTIALS:
+        case ErrorNames.INCOMPLETE_SESSON_CREDENTIALS:
+        case ErrorNames.MISSING_SESSON_CREDENTIALS:
+        case ErrorNames.INVALID_SESSON_CREDENTIALS:
           console.error('Missing or invalid OpenTok session credentials.');
           break;
         default:
@@ -230,8 +234,8 @@ This callback function takes two parameters:
     * `error` -- An object defining the reason for the type of failure. This object includes
     a `message` property and a `name` property. The message property describes the error.
     You should check the `name` property to determine the type of error. The `name` property
-    will be set to one of the values defined as properties of the `OTNetworkTest.errorNames`
-    object (see [Error.name values](#errorname-values)):
+    will be set to one of the values defined as properties of the `ErrorNames`
+    object (see [ErrorNames](#errornames)):
 
       For example:
 
@@ -239,11 +243,11 @@ This callback function takes two parameters:
       otNetworkTest.testConnectivity(function(error, results){
         results.failedTests && results.failedTests.forEach(result) => {
           switch (failedTest.error.name) {
-            case OTNetworkTest.errorNames.FAILED_TO_OBTAIN_MEDIA_DEVICES:
+            case ErrorNames.FAILED_TO_OBTAIN_MEDIA_DEVICES:
             // Display UI message about granting access to the microphone and camera
               break;
-            case OTNetworkTest.errorNames.NO_AUDIO_CAPTURE_DEVICES:
-            case OTNetworkTest.errorNames.NO_VIDEO_CAPTURE_DEVICES:
+            case ErrorNames.NO_AUDIO_CAPTURE_DEVICES:
+            case ErrorNames.NO_VIDEO_CAPTURE_DEVICES:
               // Display UI message about no available camera or microphone
               break;
             // Handle other errors, as needed
@@ -316,7 +320,7 @@ is invoked when the connectivity check completes. This callback function takes t
 * `error` -- An Error object. This object has two properties: a `message` property and
   a `name` property. The message property describes the error. You should check the `name`
   property to determine the type of error. The `name` property will be set to one of the
-  values defined as properties of the `OTNetworkTest.errorNames` object
+  values defined as properties of the `ErrorNames` object
   (see [Error.name values](#errorname-values)).
 
   ```javascript
@@ -325,17 +329,17 @@ is invoked when the connectivity check completes. This callback function takes t
   }, function completionCallback(error, results) {
     if (error) {
       switch (error.name) {
-        case OTNetworkTest.errorNames.UNSUPPORTED_BROWSER:
+        case ErrorNames.UNSUPPORTED_BROWSER:
           // Display UI message about unsupported browser
           break;
-        case OTNetworkTest.errorNames.CONNECT_TO_SESSION_NETWORK_ERROR:
+        case ErrorNames.CONNECT_TO_SESSION_NETWORK_ERROR:
           // Display UI message about network error
           break;
-        case OTNetworkTest.errorNames.FAILED_TO_OBTAIN_MEDIA_DEVICES:
+        case ErrorNames.FAILED_TO_OBTAIN_MEDIA_DEVICES:
           // Display UI message about granting access to the microphone and camera
           break;
-        case OTNetworkTest.errorNames.NO_AUDIO_CAPTURE_DEVICES:
-        case OTNetworkTest.errorNames.NO_VIDEO_CAPTURE_DEVICES:
+        case ErrorNames.NO_AUDIO_CAPTURE_DEVICES:
+        case ErrorNames.NO_VIDEO_CAPTURE_DEVICES:
           // Display UI message about no available camera or microphone
           break;
         default:
@@ -405,14 +409,15 @@ The results, including the MOS score and the recommended video resolution and fr
 subjective. You can adjust the values used in the source code, or you can use the data passed into
 the `updateCallback()` function and apply your own quality analysis algorithm.
 
-### Error.name values
+### ErrorNames
 
-You should check the `name` property of an Error object to determine the
-type of error.
+The ErrorNames object includes properties that enumerate values used in the
+`name` property of OTNetworkTest error objects. You should check the `name` property of
+an error object (against the values defined in ErrorNames) to determine the type of error.
 
 #### Errors thrown by the OTNetworkTest() constructor
 
-| Error.name property set<br/>to this property of<br/>OTNetworkTest.errorNames ... | Description |
+| Error.name property set<br/>to this property of<br/>ErrorNames ... | Description |
 | ------------------------------------------------------------------------------------ | ----------- |
 |   `MISSING_OPENTOK_INSTANCE` | An instance of OT, the OpenTok.js client SDK, was not passed into the constructor. |
 |   `INCOMPLETE_SESSON_CREDENTIALS` | The sessionInfo object passed into the constructor did not include an `apiKey`, `sessionId`,  or `token` object. |
@@ -424,7 +429,7 @@ The `testConnectivity()` `callback error` parameter or the error passed into the
 method of the Promise returned by `testConnectivity()` has a `name` property set to one of
 the following:
 
-| Error.name property set to this property<br/>of OTNetworkTest.errorNames ... | Description |
+| Error.name property set to this property<br/>of ErrorNames ... | Description |
 | -------------------------------------------------------------------------------- | ----------- |
 |   `INVALID_ON_COMPLETE_CALLBACK` | The `callback` parameter is invalid. It must be a function that accepts error and results parameters. |
 |   `API_CONNECTIVITY_ERROR` | The test failed to connect to OpenTOK API Server. | 
@@ -449,7 +454,7 @@ the following:
 The `testQuality()` `completionCallback error` parameter or the error passed into the `.catch()`
 method of the Promise returned by `testQuality()` has a `name` property set to one of the following:
 
-| Error.name property set to this<br/>property of OTNetworkTest.errorNames ... | Description |
+| Error.name property set to this<br/>property of ErrorNames ... | Description |
 | -------------------------------------------------------------------------------- | ----------- |
 |   `INVALID_ON_UPDATE_CALLBACK` | The `updateCallback` parameter is invalid. It must be a function that accepts a single parameter. |
 |   `INVALID_ON_COMPLETE_CALLBACK` | The `completionCallback` parameter is invalid. It must be a function that accepts error and results parameters. |

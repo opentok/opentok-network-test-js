@@ -19,8 +19,7 @@ import {
 import { ConnectToSessionTokenError, ConnectToSessionSessionIdError, ConnectivityError, ConnectToSessionError, PublishToSessionError } from '../src/NetworkTest/testConnectivity/errors';
 import { ConnectToSessionError as QualityTestSessionError } from '../src/NetworkTest/testQuality/errors';
 import { pick, head, nth } from '../src/util';
-import NetworkTest from '../src/NetworkTest';
-import { ErrorNames } from '../src/NetworkTest/errors/types';
+import { NetworkTest, ErrorNames } from '../src/NetworkTest';
 import { ConnectivityTestResults } from '../src/NetworkTest/testConnectivity/index';
 import { QualityTestError } from '../src/NetworkTest/testQuality/errors/index';
 import { Stats } from 'fs-extra';
@@ -71,11 +70,8 @@ describe('NetworkTest', () => {
     expect(new NetworkTest(OT, sessionCredentials)).toBeInstanceOf(NetworkTest);
   });
 
-  it('it contains a valid errorNames property', () => {
-    const otNetworkTest = new NetworkTest(OT, sessionCredentials);
-    for (const key in ErrorNames) {
-      expect(otNetworkTest[key] === ErrorNames[key]);
-    }
+  fit('it contains a valid ErrorNames module', () => {
+    expect(ErrorNames.MISSING_OPENTOK_INSTANCE).toBe('MissingOpenTokInstanceError');
   });
 
   describe('Connectivity Test', () => {

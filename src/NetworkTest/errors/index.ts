@@ -5,18 +5,6 @@
 import { ErrorNames } from './types';
 
 /**
- * Class defining the OTNetworkTest.errorNames object
- */
-export class ErrorNameObj {
-  [key: string]: any;
-  constructor() {
-    for (const key in ErrorNames) {
-      this[key] = ErrorNames[key];
-    }
-  }
-}
-
- /**
   * Base class for errors used throughout Network Connectivity tests.
   */
 export class NetworkTestError extends Error {
