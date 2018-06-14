@@ -166,26 +166,26 @@ message property describes the error. You should check the `name` property to de
 type of error. The `name` property will be set to one of the values defined as properties of
 the `OTNetworkTest.errorNames` object (see [Error.name values](#errorname-values)):
 
-For example:
+    For example:
 
-```javascript
-try {
-  const otNetworkTest = new OTNetworkTest(OT, configuration);
-} catch (error) {
-  switch (error.name) {
-    case OTNetworkTest.errorNames.MISSING_OPENTOK_INSTANCE:
-      console.error('Missing OT instance in constructor.');
-      break;
-    case OTNetworkTest.errorNames.INCOMPLETE_SESSON_CREDENTIALS:
-    case OTNetworkTest.errorNames.MISSING_SESSON_CREDENTIALS:
-    case OTNetworkTest.errorNames.INVALID_SESSON_CREDENTIALS:
-      console.error('Missing or invalid OpenTok session credentials.');
-      break;
-    default:
-      console.error('Unknown error .');
-  }
-}
-```
+    ```javascript
+    try {
+      const otNetworkTest = new OTNetworkTest(OT, configuration);
+    } catch (error) {
+      switch (error.name) {
+        case OTNetworkTest.errorNames.MISSING_OPENTOK_INSTANCE:
+          console.error('Missing OT instance in constructor.');
+          break;
+        case OTNetworkTest.errorNames.INCOMPLETE_SESSON_CREDENTIALS:
+        case OTNetworkTest.errorNames.MISSING_SESSON_CREDENTIALS:
+        case OTNetworkTest.errorNames.INVALID_SESSON_CREDENTIALS:
+          console.error('Missing or invalid OpenTok session credentials.');
+          break;
+        default:
+          console.error('Unknown error .');
+      }
+    }
+    ```
 
 ### OTNetworkTest.testConnectivity(callback)
 
@@ -195,43 +195,66 @@ It includes one parameter: `callback`.
 The `callback` parameter is the function to be called when the connectivity check completes.
 This callback function takes two parameters:
 
-* `error` -- An Error object. The `name` Property of this object is set to `ConnectivityError`.
-  The `message` property describes the reason for the error. This will usually result from an
-  invalid API key, session ID, or token passed into the `OTNetworkTest()` constructor. This
-  is only set when the test could not run because of an error. If the connectivity can run
-  (even if it results in failed tests), this property is undefined.
+* `error` -- This value is undefined. See the description of the `failedTests` property of
+  the `results` parameter, described below.
 
 * `results` -- An object that contains the following properties:
 
   * `success` (Boolean) -- `true` if connectivity to OpenTok servers succeeded; `false` if
     any connectivity test failed.
 
-  * `failedTests` (Array) -- If connectivity failed, this array contains a list of strings
-    defining the failure types: `'api'`, `'messaging'`, `'media'`, `'logging'`.
+  * `failedTests` (Array) -- If connectivity failed, this array contains an object for each
+    failure type. The object has two properties, `type` and `errors`:
 
-    * `'api'` -- The test could not connect to the OpenTok API server. Connection to this
+    * `type` -- A sting defining the failure type. It will be set to one of the following values:
+
+      * `'api'` -- The test could not connect to the OpenTok API server. Connection to this
       server is required to connect to an OpenTok session.
 
-    * `'messaging'` -- The test could not establish a connection to the OpenTok messaging WebSocket.
+      * `'messaging'` -- The test could not establish a connection to the OpenTok messaging WebSocket.
       This connection is required to connect to an OpenTok session. In addition to other causes
       for WebSocket connectivity failures, this failure type will occur if you pass an invalid
       OpenTok API key, session ID, or token into the `OTNetworkTest()` constructor.
 
-    * `'media'` -- The test could not connect to the OpenTok Media Router. If your app uses
+      * `'media'` -- The test could not connect to the OpenTok Media Router. If your app uses
       a routed session, it will not succeed in using OpenTok. However, if your app uses
       a relayed session, the client *may* still succeed in using the OpenTok session, although
       it may fail if the relayed session requires use of a TURN server.
 
-    * `'logging'` -- The test could not connect to the OpenTok logging server. The OpenTok.js
+      * `'logging'` -- The test could not connect to the OpenTok logging server. The OpenTok.js
       library periodically logs data (such as video and audio quality) to this server. The client
       can still connect to an OpenTok session, however TokBox will not collect data that may help
       you debug issues with the session, using tools like [OpenTok
       Inspector](https://tokbox.com/developer/tools/inspector/).
 
-    If all connectivity tests succeed, this property is undefined.
+    * `error` -- An object defining the reason for the type of failure. This object includes
+    a `message` property and a `name` property. The message property describes the error.
+    You should check the `name` property to determine the type of error. The `name` property
+    will be set to one of the values defined as properties of the `OTNetworkTest.errorNames`
+    object (see [Error.name values](#errorname-values)):
 
-  `results` is undefined if there was an error in running the tests (and the `error` parameter
-  is unset).
+      For example:
+
+      ```javascript
+      otNetworkTest.testConnectivity(function(error, results){
+        results.failedTests && results.failedTests.forEach(result) => {
+          switch (failedTest.error.name) {
+            case OTNetworkTest.errorNames.FAILED_TO_OBTAIN_MEDIA_DEVICES:
+            // Display UI message about granting access to the microphone and camera
+              break;
+            case OTNetworkTest.errorNames.NO_AUDIO_CAPTURE_DEVICES:
+            case OTNetworkTest.errorNames.NO_VIDEO_CAPTURE_DEVICES:
+              // Display UI message about no available camera or microphone
+              break;
+            // Handle other errors, as needed
+            default:
+              console.error('Unknown error .');
+          }
+        }
+      });
+      ```
+
+    If all connectivity tests succeed, the `failedTests` property is undefined.
 
 The callback function is optional. The `testConnectivity()` method returns a JavaScript promise.
 The promise is resolved on success, and the `results` object is passed into the `success`
