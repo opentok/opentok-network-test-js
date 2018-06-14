@@ -23,7 +23,7 @@ export class NetworkTestError extends Error {
   name: string;
   constructor(message: string, name?: string) {
     super(message);
-    this.name = ErrorNames.NETWORK_TEST_ERROR;
+    this.name = name || ErrorNames.NETWORK_TEST_ERROR;
     this.stack = (new Error(message)).stack;
   }
 }
