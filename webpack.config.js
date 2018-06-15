@@ -15,11 +15,10 @@ module.exports = {
   resolve: {
     extensions: ['.ts', '.js', '.json']
   },
-  target: 'node',
   output: {
     filename: 'index.js',
     path: path.resolve(__dirname, 'dist/NetworkTest/'),
-    library: 'OpenTokNetworkTest',
+    library: 'OpenTokNetworkConnectivity',
     libraryTarget: 'umd',
     umdNamedDefine: true
   },
