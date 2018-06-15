@@ -106,7 +106,7 @@ export default class NetworkTest {
    */
   testQuality(
     updateCallback?: UpdateCallback<UpdateCallbackStats>,
-    completionCallback?: CompletionCallback<QualityTestResults>): Promise<any> {
+    completionCallback?: CompletionCallback<QualityTestResults>): Promise<QualityTestResults> {
     this.otLogging.logEvent({ action: 'testQuality', variation: 'Attempt' });
     this.validateCallbacks('testQuality', updateCallback, completionCallback);
     return testQuality(
