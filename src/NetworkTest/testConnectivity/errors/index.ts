@@ -156,5 +156,3 @@ export class LoggingServerConnectionError extends ConnectivityError {
     this.name = this.constructor.name;
   }
 }
-
-

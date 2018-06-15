@@ -1,7 +1,10 @@
 import * as Promise from 'promise';
 import * as e from '../../testQuality/errors';
+import { OT } from '../../types/opentok';
 
-export default function filterDevicesForType(OT: OpenTok, type: InputDeviceType) {
+export type InputDeviceType = 'audioInput' | 'videoInput';
+
+export default function filterDevicesForType(OT: OT.Client, type: InputDeviceType) {
   return new Promise((resolve, reject) => {
     OT.getDevices((error?: OT.OTError, devices: OT.Device[] = []) => {
       if (error) {
