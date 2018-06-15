@@ -215,7 +215,7 @@ export function testConnectivity(
   OT: OpenTok,
   credentials: SessionCredentials,
   otLogging: OTKAnalytics,
-  onComplete?: CompletionCallback<any>): Promise<ConnectivityTestResults> {
+  onComplete?: TestConnectivityCallback): Promise<ConnectivityTestResults> {
   return new Promise((resolve, reject) => {
 
     const onSuccess = (flowResults: SubscribeToSessionResults) => {
@@ -225,7 +225,7 @@ export function testConnectivity(
       };
       otLogging.logEvent({ action: 'testConnectivity', variation: 'Success' });
       return disconnectFromSession(flowResults.session).then(() => {
-        onComplete && onComplete(undefined, results);
+        onComplete && onComplete(results);
         return resolve(results);
       });
     };
@@ -248,7 +248,7 @@ export function testConnectivity(
           failedTests,
           success: false,
         };
-        onComplete && onComplete(undefined, results);
+        onComplete && onComplete(results);
         otLogging.logEvent({ action: 'testConnectivity', variation: 'Success' });
         resolve(results);
       };

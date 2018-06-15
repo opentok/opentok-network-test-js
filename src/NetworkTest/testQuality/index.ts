@@ -263,7 +263,7 @@ export default function testQuality(
   credentials: SessionCredentials,
   otLogging: OTKAnalytics,
   onUpdate?: UpdateCallback<UpdateCallbackStats>,
-  onComplete?: CompletionCallback<QualityTestResults>): Promise<QualityTestResults> {
+  onComplete?: TestQualityCompletionCallback): Promise<QualityTestResults> {
   return new Promise((resolve, reject) => {
 
     const onSuccess = (results: QualityTestResults) => {

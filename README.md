@@ -197,68 +197,64 @@ This method checks to see if the client can connect to OpenTok servers.
 It includes one parameter: `callback`.
 
 The `callback` parameter is the function to be called when the connectivity check completes.
-This callback function takes two parameters:
+This callback function takes one `results` parameter, which is an object that has the following
+two properties:
 
-* `error` -- This value is undefined. See the description of the `failedTests` property of
-  the `results` parameter, described below.
+* `success` (Boolean) -- `true` if connectivity to OpenTok servers succeeded; `false` if
+  any connectivity test failed.
 
-* `results` -- An object that contains the following properties:
+* `failedTests` (Array) -- If connectivity failed, this array contains an object for each
+  failure type. The object has two properties, `type` and `errors`:
 
-  * `success` (Boolean) -- `true` if connectivity to OpenTok servers succeeded; `false` if
-    any connectivity test failed.
+  * `type` -- A sting defining the failure type. It will be set to one of the following values:
 
-  * `failedTests` (Array) -- If connectivity failed, this array contains an object for each
-    failure type. The object has two properties, `type` and `errors`:
+    * `'api'` -- The test could not connect to the OpenTok API server. Connection to this
+    server is required to connect to an OpenTok session.
 
-    * `type` -- A sting defining the failure type. It will be set to one of the following values:
+    * `'messaging'` -- The test could not establish a connection to the OpenTok messaging WebSocket.
+    This connection is required to connect to an OpenTok session. In addition to other causes
+    for WebSocket connectivity failures, this failure type will occur if you pass an invalid
+    OpenTok API key, session ID, or token into the `OTNetworkTest()` constructor.
 
-      * `'api'` -- The test could not connect to the OpenTok API server. Connection to this
-      server is required to connect to an OpenTok session.
+    * `'media'` -- The test could not connect to the OpenTok Media Router. If your app uses
+    a routed session, it will not succeed in using OpenTok. However, if your app uses
+    a relayed session, the client *may* still succeed in using the OpenTok session, although
+    it may fail if the relayed session requires use of a TURN server.
 
-      * `'messaging'` -- The test could not establish a connection to the OpenTok messaging WebSocket.
-      This connection is required to connect to an OpenTok session. In addition to other causes
-      for WebSocket connectivity failures, this failure type will occur if you pass an invalid
-      OpenTok API key, session ID, or token into the `OTNetworkTest()` constructor.
+    * `'logging'` -- The test could not connect to the OpenTok logging server. The OpenTok.js
+    library periodically logs data (such as video and audio quality) to this server. The client
+    can still connect to an OpenTok session, however TokBox will not collect data that may help
+    you debug issues with the session, using tools like [OpenTok
+    Inspector](https://tokbox.com/developer/tools/inspector/).
 
-      * `'media'` -- The test could not connect to the OpenTok Media Router. If your app uses
-      a routed session, it will not succeed in using OpenTok. However, if your app uses
-      a relayed session, the client *may* still succeed in using the OpenTok session, although
-      it may fail if the relayed session requires use of a TURN server.
+  * `error` -- An object defining the reason for the type of failure. This object includes
+  a `message` property and a `name` property. The message property describes the error.
+  You should check the `name` property to determine the type of error. The `name` property
+  will be set to one of the values defined as properties of the `ErrorNames`
+  object (see [ErrorNames](#errornames)):
 
-      * `'logging'` -- The test could not connect to the OpenTok logging server. The OpenTok.js
-      library periodically logs data (such as video and audio quality) to this server. The client
-      can still connect to an OpenTok session, however TokBox will not collect data that may help
-      you debug issues with the session, using tools like [OpenTok
-      Inspector](https://tokbox.com/developer/tools/inspector/).
+    For example:
 
-    * `error` -- An object defining the reason for the type of failure. This object includes
-    a `message` property and a `name` property. The message property describes the error.
-    You should check the `name` property to determine the type of error. The `name` property
-    will be set to one of the values defined as properties of the `ErrorNames`
-    object (see [ErrorNames](#errornames)):
-
-      For example:
-
-      ```javascript
-      otNetworkTest.testConnectivity(function(error, results){
-        results.failedTests && results.failedTests.forEach(result) => {
-          switch (failedTest.error.name) {
-            case ErrorNames.FAILED_TO_OBTAIN_MEDIA_DEVICES:
-            // Display UI message about granting access to the microphone and camera
-              break;
-            case ErrorNames.NO_AUDIO_CAPTURE_DEVICES:
-            case ErrorNames.NO_VIDEO_CAPTURE_DEVICES:
-              // Display UI message about no available camera or microphone
-              break;
-            // Handle other errors, as needed
-            default:
-              console.error('Unknown error .');
-          }
+    ```javascript
+    otNetworkTest.testConnectivity(function(results) {
+      results.failedTests && results.failedTests.forEach(result) => {
+        switch (failedTest.error.name) {
+          case ErrorNames.FAILED_TO_OBTAIN_MEDIA_DEVICES:
+          // Display UI message about granting access to the microphone and camera
+            break;
+          case ErrorNames.NO_AUDIO_CAPTURE_DEVICES:
+          case ErrorNames.NO_VIDEO_CAPTURE_DEVICES:
+            // Display UI message about no available camera or microphone
+            break;
+          // Handle other errors, as needed
+          default:
+            console.error('Unknown error .');
         }
-      });
-      ```
+      }
+    });
+    ```
 
-    If all connectivity tests succeed, the `failedTests` property is undefined.
+  If all connectivity tests succeed, the `failedTests` property is undefined.
 
 The callback function is optional. The `testConnectivity()` method returns a JavaScript promise.
 The promise is resolved on success, and the `results` object is passed into the `success`
@@ -425,8 +421,9 @@ an error object (against the values defined in ErrorNames) to determine the type
 
 #### testConnectivity() errors
 
-The `testConnectivity()` `callback error` parameter or the error passed into the `.catch()`
-method of the Promise returned by `testConnectivity()` has a `name` property set to one of
+The `testConnectivity()` `callback` function includes a `results` parameter, and the `testConnectivity()` method returns a JavaScript promise that includes a `results` parameter.
+The `results` object contains a `failedTests` array, and each element of this array (if there are
+any elements) has an `error` property, which is error object has a `name` property set to one of
 the following:
 
 | Error.name property set to this property<br/>of ErrorNames ... | Description |
