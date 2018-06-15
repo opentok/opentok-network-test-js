@@ -98,7 +98,10 @@ function validateDevices(OT: OpenTok): Promise<AvailableDevices> {
 /**
  * Create a local publisher object using any specified device options
  */
-function checkCreateLocalPublisher(OT: OpenTok): Promise<CreateLocalPublisherResults> {
+function checkCreateLocalPublisher(
+  OT: OpenTok,
+  options?: NetworkTestOptions,
+): Promise<CreateLocalPublisherResults> {
   return new Promise((resolve, reject) => {
     validateDevices(OT)
       .then((availableDevices: AvailableDevices) => {
@@ -109,12 +112,15 @@ function checkCreateLocalPublisher(OT: OpenTok): Promise<CreateLocalPublisherRes
         publisherDiv.style.height = '1px';
         publisherDiv.style.opacity = '0.01';
         document.body.appendChild(publisherDiv);
-        const publisherOptions: OT.PublisherProperties = {
+        let publisherOptions: OT.PublisherProperties = {
           width: '100%',
           height: '100%',
           insertMode: 'append',
           showControls: false,
         };
+        if (options && options.audioOnly) {
+          publisherOptions.videoSource = null;
+        }
         if (!Object.keys(availableDevices.audio).length) {
           publisherOptions.audioSource = null;
         }
@@ -139,14 +145,17 @@ function checkCreateLocalPublisher(OT: OpenTok): Promise<CreateLocalPublisherRes
 /**
  * Attempt to publish to the session
  */
-function checkPublishToSession(OT: OpenTok, session: OT.Session): Promise<PublishToSessionResults> {
+function checkPublishToSession(
+  OT: OpenTok, session: OT.Session,
+  options?: NetworkTestOptions,
+): Promise<PublishToSessionResults> {
   return new Promise((resolve, reject) => {
     const disconnectAndReject = (rejectError: Error) => {
       disconnectFromSession(session).then(() => {
         reject(rejectError);
       });
     };
-    checkCreateLocalPublisher(OT)
+    checkCreateLocalPublisher(OT, options)
       .then(({ publisher }: CreateLocalPublisherResults) => {
         session.publish(publisher, (error?: OT.OTError) => {
           if (error) {
@@ -217,6 +226,7 @@ export function testConnectivity(
   OT: OpenTok,
   credentials: SessionCredentials,
   otLogging: OTKAnalytics,
+  options?: NetworkTestOptions,
   onComplete?: CompletionCallback<any>): Promise<ConnectivityTestResults> {
   return new Promise((resolve, reject) => {
 
@@ -269,7 +279,7 @@ export function testConnectivity(
     };
 
     connectToSession(OT, credentials)
-      .then((session: OT.Session) => checkPublishToSession(OT, session))
+      .then((session: OT.Session) => checkPublishToSession(OT, session, options))
       .then(checkSubscribeToSession)
       .then((results: SubscribeToSessionResults) => checkLoggingServer(OT, results))
       .then(onSuccess)

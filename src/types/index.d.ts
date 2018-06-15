@@ -20,7 +20,7 @@ type SessionCredentials = {
   token: string
 }
 
-interface TestQualityOptions {
+interface NetworkTestOptions {
   audioOnly?: boolean
 }
 
