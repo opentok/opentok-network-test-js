@@ -18,7 +18,7 @@ import { CompletionCallback } from '../types/callbacks';
 import * as e from './errors';
 import { OTErrorType, errorHasName } from '../errors/types';
 import { mapErrors, FailureCase } from './errors/mapping';
-import { getOr } from '../../util';
+import { getOr } from '../util';
 
 type AV = 'audio' | 'video';
 type CreateLocalPublisherResults = { publisher: OT.Publisher };

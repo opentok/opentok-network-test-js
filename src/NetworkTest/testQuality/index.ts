@@ -16,7 +16,7 @@ import * as Promise from 'promise';
 import { OT } from '../types/opentok';
 import { AverageStats, AV, Bandwidth, HasAudioVideo } from './types/stats';
 import { CompletionCallback, UpdateCallback, UpdateCallbackStats } from '../types/callbacks';
-import { pick } from '../../util';
+import { pick } from '../util';
 import * as e from './errors/';
 import { OTErrorType, errorHasName } from '../errors/types';
 import subscriberMOS from './helpers/subscriberMOS';

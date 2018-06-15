@@ -4,7 +4,7 @@ import getQualityEvaluation from './getQualityEvaluation';
 import { AV, AverageStats, AverageStatsBase, HasAudioVideo, QualityStats } from '../types/stats';
 import config from './config';
 import MOSState from './MOSState';
-import { getOr } from '../../../util';
+import { getOr } from '../../util';
 
 function getAverageBitrateAndPlr(type: AV, statsList: QualityStats[]): AverageStats {
   let sumBps = 0;

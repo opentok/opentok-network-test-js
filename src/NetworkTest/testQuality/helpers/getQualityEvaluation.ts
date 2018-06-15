@@ -1,5 +1,5 @@
 import config from './config';
-import { get } from '../../../util';
+import { get } from '../../util';
 import { AV, AverageStatsBase } from '../types/stats';
 
 export interface QualityEvaluationResults{

@@ -1,4 +1,4 @@
-import { get } from '../../../util';
+import { get } from '../../util';
 
 export type Browser =
   'Chrome' |

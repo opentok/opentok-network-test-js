@@ -6,7 +6,7 @@
  * Define errors returned by OpenTok.js
  */
 
-import { get } from '../../util';
+import { get } from '../util';
 import { OTError } from '../types/opentok/error';
 
 export enum OTErrorType {
