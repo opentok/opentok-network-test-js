@@ -77,7 +77,11 @@ describe('Network Test', () => {
       it('should contain success and failedTests properties', (done) => {
         networkTest.testConnectivity()
           .then((results: ConnectivityTestResults) => {
+<<<<<<< HEAD
             expect(results.success).toBeABoolean;
+=======
+            expect(results.success).toBeABoolean
+>>>>>>> develop
             expect(results.failedTests).toBeInstanceOf(Array);
             done();
           });
@@ -183,13 +187,16 @@ describe('Network Test', () => {
           expect(audio.reason || '').toEqual(jasmine.any(String));
           expect(audio.packetLossRatio).toEqual(jasmine.any(Number));
 
-          expect(video.bitrate).toEqual(jasmine.any(Number));
           expect(video.supported).toEqual(jasmine.any(Boolean));
-          expect(video.reason || '').toEqual(jasmine.any(String));
-          expect(video.packetLossRatio).toEqual(jasmine.any(Number));
-          expect(video.frameRate).toEqual(jasmine.any(Number));
-          expect(video.recommendedResolution).toEqual(jasmine.any(String));
-          expect(video.recommendedFrameRate).toEqual(jasmine.any(Number));
+          if (video.supported) {
+            expect(video.bitrate).toEqual(jasmine.any(Number));
+            expect(video.packetLossRatio).toEqual(jasmine.any(Number));
+            expect(video.frameRate).toEqual(jasmine.any(Number));
+            expect(video.recommendedResolution).toEqual(jasmine.any(String));
+            expect(video.recommendedFrameRate).toEqual(jasmine.any(Number));
+          } else {
+            expect(video.reason).toEqual(jasmine.any(String));
+          }
         };
 
         const validateError = (error?: QualityTestError) => {
@@ -203,6 +210,44 @@ describe('Network Test', () => {
           .catch(validateError)
           .finally(done);
       }, 40000);
+
+      it('should return valid test results or an error when there is no camera', (done) => {
+        const realOTGetDevices = OT.getDevices;
+        OT.getDevices = (callbackFn) => {
+          realOTGetDevices((error, devices) => {
+            devices = devices.filter(device => device.kind != 'videoInput');
+            callbackFn(error, devices);
+          });
+        };
+
+        const validateResults = (results: QualityTestResults) => {
+          const { mos, audio, video } = results;
+
+          expect(mos).toEqual(jasmine.any(Number));
+
+          expect(audio.bitrate).toEqual(jasmine.any(Number));
+          expect(audio.supported).toEqual(jasmine.any(Boolean));
+          expect(audio.reason || '').toEqual(jasmine.any(String));
+          expect(audio.packetLossRatio).toEqual(jasmine.any(Number));
+
+          expect(video.supported).toEqual(false);
+          expect(video.reason).toEqual('No camera was found.');
+        };
+
+        const validateError = (error?: QualityTestError) => {
+          expect(error).toBe(QualityTestError);
+        };
+
+        const onUpdate = (stats: Stats) => console.info('Subscriber stats:', stats);
+
+        networkTest.testQuality(onUpdate)
+          .then(validateResults)
+          .catch(validateError)
+          .finally(() => {
+            OT.getDevices = realOTGetDevices;
+            done();
+          });
+      }, 8000);
     });
   });
 });

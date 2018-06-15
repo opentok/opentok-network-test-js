@@ -24,6 +24,8 @@ type AV = 'audio' | 'video';
 type CreateLocalPublisherResults = { publisher: OT.Publisher };
 type PublishToSessionResults = { session: OT.Session } & CreateLocalPublisherResults;
 type SubscribeToSessionResults = { subscriber: OT.Subscriber } & PublishToSessionResults;
+type DeviceMap = { [deviceId: string]: OT.Device };
+type AvailableDevices = { audio: DeviceMap, video: DeviceMap };
 export type ConnectivityTestResults = {
   success: boolean,
   failedTests: FailureCase[],
@@ -73,12 +75,8 @@ function connectToSession(
 /**
  * Ensure that audio and video devices are available
  */
-function validateDevices(OT: OT.Client): Promise<void> {
+function validateDevices(OT: OT.Client): Promise<AvailableDevices> {
   return new Promise((resolve, reject) => {
-
-    type DeviceMap = { [deviceId: string]: OT.Device };
-    type AvailableDevices = { audio: DeviceMap, video: DeviceMap };
-
     OT.getDevices((error?: OT.OTError, devices: OT.Device[] = []) => {
 
       if (error) {
@@ -93,12 +91,10 @@ function validateDevices(OT: OT.Client): Promise<void> {
           { audio: {}, video: {} },
         );
 
-        if (!Object.keys(availableDevices.audio).length) {
-          reject(new e.NoAudioCaptureDevicesError());
-        } else if (!Object.keys(availableDevices.video).length) {
-          reject(new e.NoVideoCaptureDevicesError());
+        if (!Object.keys(availableDevices.audio).length && !Object.keys(availableDevices.video).length) {
+          reject(new e.FailedToObtainMediaDevices());
         } else {
-          resolve();
+          resolve(availableDevices);
         }
       }
     });
@@ -111,7 +107,7 @@ function validateDevices(OT: OT.Client): Promise<void> {
 function checkCreateLocalPublisher(OT: OT.Client): Promise<CreateLocalPublisherResults> {
   return new Promise((resolve, reject) => {
     validateDevices(OT)
-      .then(() => {
+      .then((availableDevices: AvailableDevices) => {
         const publisherDiv = document.createElement('div');
         publisherDiv.style.position = 'fixed';
         publisherDiv.style.bottom = '-1px';
@@ -125,6 +121,12 @@ function checkCreateLocalPublisher(OT: OT.Client): Promise<CreateLocalPublisherR
           insertMode: 'append',
           showControls: false,
         };
+        if (!Object.keys(availableDevices.audio).length) {
+          publisherOptions.audioSource = null;
+        }
+        if (!Object.keys(availableDevices.video).length) {
+          publisherOptions.videoSource = null;
+        }
         const publisher = OT.initPublisher(publisherDiv, publisherOptions, (error?: OT.OTError) => {
           if (!error) {
             resolve({ publisher });

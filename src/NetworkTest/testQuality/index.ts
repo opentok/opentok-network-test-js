@@ -37,6 +37,8 @@ interface QualityTestResultsBuilder {
 }
 
 type MOSResultsCallback = (state: MOSState) => void;
+type DeviceMap = { [deviceId: string]: OT.Device };
+type AvailableDevices = { audio: DeviceMap, video: DeviceMap };
 
 let audioOnly = false; // The initial test is audio-video
 
@@ -69,12 +71,8 @@ function connectToSession(session: OT.Session, token: string): Promise<OT.Sessio
 /**
  * Ensure that audio and video devices are available
  */
-function validateDevices(OT: OT.Client): Promise<void> {
+function validateDevices(OT: OT.Client): Promise<AvailableDevices> {
   return new Promise((resolve, reject) => {
-
-    type DeviceMap = { [deviceId: string]: OT.Device };
-    type AvailableDevices = { audio: DeviceMap, video: DeviceMap };
-
     OT.getDevices((error?: OT.OTError, devices: OT.Device[] = []) => {
 
       if (error) {
@@ -91,10 +89,8 @@ function validateDevices(OT: OT.Client): Promise<void> {
 
         if (!Object.keys(availableDevices.audio).length) {
           reject(new e.NoAudioCaptureDevicesError());
-        } else if (!Object.keys(availableDevices.video).length) {
-          reject(new e.NoVideoCaptureDevicesError());
         } else {
-          resolve();
+          resolve(availableDevices);
         }
       }
     });
@@ -107,6 +103,7 @@ function validateDevices(OT: OT.Client): Promise<void> {
 function publishAndSubscribe(OT: OT.Client) {
   return (session: OT.Session): Promise<OT.Subscriber> =>
     new Promise((resolve, reject) => {
+      let publisherOptions: OT.PublisherProperties;
       type StreamCreatedEvent = OT.Event<'streamCreated', OT.Publisher> & { stream: OT.Stream };
       const containerDiv = document.createElement('div');
       containerDiv.style.position = 'fixed';
@@ -115,7 +112,7 @@ function publishAndSubscribe(OT: OT.Client) {
       containerDiv.style.height = '1px';
       containerDiv.style.opacity = '0';
       document.body.appendChild(containerDiv);
-      const publisherOptions: OT.PublisherProperties = {
+      publisherOptions = {
         resolution: '1280x720',
         width: '100%',
         height: '100%',
@@ -123,7 +120,13 @@ function publishAndSubscribe(OT: OT.Client) {
         showControls: false,
       };
       validateDevices(OT)
-        .then(() => {
+        .then((availableDevices: AvailableDevices) => {
+          if (!Object.keys(availableDevices.video).length) {
+            audioOnly = true;
+          }
+          if (audioOnly) {
+            publisherOptions.videoSource = null;
+          }
           const publisher = OT.initPublisher(containerDiv, publisherOptions, (error?: OT.OTError) => {
             if (error) {
               reject(new e.InitPublisherError(error.message));
@@ -193,7 +196,9 @@ function checkSubscriberQuality(
   OT: OT.Client,
   session: OT.Session,
   credentials: OT.SessionCredentials,
-  onUpdate?: UpdateCallback<OT.SubscriberStats>): Promise<QualityTestResults> {
+  onUpdate?: UpdateCallback<OT.SubscriberStats>,
+  audioOnlyFallback?: boolean,
+): Promise<QualityTestResults> {
 
   let mosEstimatorTimeoutId: number;
 
@@ -205,7 +210,7 @@ function checkSubscriberQuality(
         } else {
           try {
             const builder: QualityTestResultsBuilder = {
-              state: new MOSState(),
+              state: new MOSState(audioOnlyFallback),
               ... { subscriber },
               ... { credentials },
             };
@@ -222,7 +227,7 @@ function checkSubscriberQuality(
               const audioVideoResults: QualityTestResults = buildResults(builder);
               if (!audioOnly && !isAudioQualityAcceptable(audioVideoResults)) {
                 audioOnly = true;
-                checkSubscriberQuality(OT, session, credentials, onUpdate)
+                checkSubscriberQuality(OT, session, credentials, onUpdate, true)
                   .then((results: QualityTestResults) => {
                     resolve(results);
                   });

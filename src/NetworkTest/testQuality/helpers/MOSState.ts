@@ -9,11 +9,13 @@ export default class MOSState {
   stats: HasAudioVideo<AverageStats> = { audio: {}, video: {} };
   bandwidth: Bandwidth = { audio: 0, video: 0 };
   intervalId?: number;
+  audioOnlyFallback: boolean;
 
-  constructor() {
+  constructor(audioOnly?: boolean) {
     this.statsLog = [];
     this.audioScoresLog = [];
     this.videoScoresLog = [];
+    this.audioOnlyFallback = !!audioOnly;
   }
 
   static readonly maxLogLength: number = 1000;

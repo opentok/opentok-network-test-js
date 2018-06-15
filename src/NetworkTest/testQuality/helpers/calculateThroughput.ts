@@ -51,6 +51,12 @@ export default function calculateThroughput(state: MOSState): HasAudioVideo<Aver
   };
 
   const averageVideoStats = () => {
+    if (state.audioOnlyFallback) {
+      return {
+        supported: false,
+        reason: config.strings.bandwidthLow,
+      };
+    }
     if (!state.hasVideoTrack()) {
       return {
         supported: false,

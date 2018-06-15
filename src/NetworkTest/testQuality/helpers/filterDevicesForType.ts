@@ -1,5 +1,5 @@
 import * as Promise from 'promise';
-import * as e from '../../testConnectivity/errors';
+import * as e from '../../testQuality/errors';
 import { OT } from '../../types/opentok';
 
 export type InputDeviceType = 'audioInput' | 'videoInput';
