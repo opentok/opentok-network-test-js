@@ -77,11 +77,7 @@ describe('Network Test', () => {
       it('should contain success and failedTests properties', (done) => {
         networkTest.testConnectivity()
           .then((results: ConnectivityTestResults) => {
-<<<<<<< HEAD
             expect(results.success).toBeABoolean;
-=======
-            expect(results.success).toBeABoolean
->>>>>>> develop
             expect(results.failedTests).toBeInstanceOf(Array);
             done();
           });
