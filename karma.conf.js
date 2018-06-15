@@ -52,10 +52,15 @@ module.exports = function (config) {
       module: {
         rules: [{
           test: /\.tsx?$/,
-          loader: 'awesome-typescript-loader',
-          options: {
-            transpileOnly: true,
-          }
+          use: [
+            { loader: 'babel-loader' },
+            {
+              loader: 'ts-loader',
+              options: {
+                transpileOnly: true,
+              }
+           },
+          ],
         }],
       },
       resolve: webpackConfig.resolve,

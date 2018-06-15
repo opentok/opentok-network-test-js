@@ -9,7 +9,10 @@ module.exports = {
   module: {
     rules: [{
       test: /\.tsx?$/,
-      loader: 'awesome-typescript-loader',
+      use: [
+        { loader: 'babel-loader' },
+        { loader: 'ts-loader' },
+      ],
     }],
   },
   resolve: {
