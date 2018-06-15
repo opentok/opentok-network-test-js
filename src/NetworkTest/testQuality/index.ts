@@ -165,8 +165,8 @@ function subscribeToTestStream(
 
 function buildResults(builder: QualityTestResultsBuilder): QualityTestResults {
   const baseProps: (keyof AverageStats)[] = ['bitrate', 'packetLossRatio', 'supported', 'reason', 'mos'];
-  builder.state.stats.audio.mos = builder.state.videoQualityScore();
-  builder.state.stats.video.mos = builder.state.audioQualityScore();
+  builder.state.stats.audio.mos = builder.state.audioQualityScore();
+  builder.state.stats.video.mos = builder.state.videoQualityScore();
   return {
     audio: pick(baseProps, builder.state.stats.audio),
     video: pick(baseProps.concat(['frameRate', 'recommendedResolution', 'recommendedFrameRate']),
