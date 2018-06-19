@@ -19,7 +19,7 @@ import {
 import { ConnectToSessionTokenError, ConnectToSessionSessionIdError, ConnectivityError, ConnectToSessionError, PublishToSessionError } from '../src/NetworkTest/testConnectivity/errors';
 import { ConnectToSessionError as QualityTestSessionError } from '../src/NetworkTest/testQuality/errors';
 import { pick, head, nth } from '../src/util';
-import { NetworkTest, ErrorNames } from '../src/NetworkTest';
+import NetworkTest, { ErrorNames } from '../src/NetworkTest';
 import { ConnectivityTestResults } from '../src/NetworkTest/testConnectivity/index';
 import { QualityTestError } from '../src/NetworkTest/testQuality/errors/index';
 import { Stats } from 'fs-extra';
@@ -162,7 +162,7 @@ describe('NetworkTest', () => {
       it('validates its onUpdate and onComplete callbacks', () => {
         expect(() => networkTest.testQuality('callback').toThrow(new InvalidOnUpdateCallback()))
         expect(() => networkTest.testQuality(validOnUpdateCallback, 'callback').toThrow(new InvalidOnCompleteCallback()))
-        expect(() => networkTest.testConnectivity(validOnUpdateCallback, validOnCompleteCallback).not.toThrowError(NetworkTestError))
+        expect(() => networkTest.testConnectivity(null, validOnUpdateCallback, validOnCompleteCallback).not.toThrowError(NetworkTestError))
       });
 
       it('should return an error if invalid session credentials are used', (done) => {
@@ -174,30 +174,34 @@ describe('NetworkTest', () => {
           expect(error).toBeInstanceOf(QualityTestSessionError);
         };
 
-        badCredentialsNetworkTest.testQuality()
+        badCredentialsNetworkTest.testQuality(null)
           .then(validateResults)
           .catch(validateError)
           .finally(done);
       });
 
-      it('should return valid test results or an error', (done) => {
+      fit('should return valid test results or an error', (done) => {
         const validateResults = (results: QualityTestResults) => {
-          const { mos, audio, video } = results;
+          const { audio, video } = results;
 
-          expect(mos).toEqual(jasmine.any(Number));
 
           expect(audio.bitrate).toEqual(jasmine.any(Number));
           expect(audio.supported).toEqual(jasmine.any(Boolean));
           expect(audio.reason || '').toEqual(jasmine.any(String));
           expect(audio.packetLossRatio).toEqual(jasmine.any(Number));
+          expect(audio.mos).toEqual(jasmine.any(Number));
 
-          expect(video.bitrate).toEqual(jasmine.any(Number));
           expect(video.supported).toEqual(jasmine.any(Boolean));
-          expect(video.reason || '').toEqual(jasmine.any(String));
-          expect(video.packetLossRatio).toEqual(jasmine.any(Number));
-          expect(video.frameRate).toEqual(jasmine.any(Number));
-          expect(video.recommendedResolution).toEqual(jasmine.any(String));
-          expect(video.recommendedFrameRate).toEqual(jasmine.any(Number));
+          if (video.supported) {
+            expect(video.bitrate).toEqual(jasmine.any(Number));
+            expect(video.packetLossRatio).toEqual(jasmine.any(Number));
+            expect(video.frameRate).toEqual(jasmine.any(Number));
+            expect(video.recommendedResolution).toEqual(jasmine.any(String));
+            expect(video.recommendedFrameRate).toEqual(jasmine.any(Number));
+            expect(video.mos).toEqual(jasmine.any(Number));
+          } else {
+            expect(video.reason).toEqual(jasmine.any(String));
+          }
         };
 
         const validateError = (error?: QualityTestError) => {
@@ -211,6 +215,44 @@ describe('NetworkTest', () => {
           .catch(validateError)
           .finally(done);
       }, 40000);
+
+      it('should return valid test results or an error when there is no camera', (done) => {
+        const realOTGetDevices = OT.getDevices;
+        OT.getDevices = (callbackFn) => {
+          realOTGetDevices((error, devices) => {
+            devices = devices.filter(device => device.kind != 'videoInput');
+            callbackFn(error, devices);
+          });
+        };
+
+        const validateResults = (results: QualityTestResults) => {
+          const { mos, audio, video } = results;
+
+          expect(mos).toEqual(jasmine.any(Number));
+
+          expect(audio.bitrate).toEqual(jasmine.any(Number));
+          expect(audio.supported).toEqual(jasmine.any(Boolean));
+          expect(audio.reason || '').toEqual(jasmine.any(String));
+          expect(audio.packetLossRatio).toEqual(jasmine.any(Number));
+
+          expect(video.supported).toEqual(false);
+          expect(video.reason).toEqual('No camera was found.');
+        };
+
+        const validateError = (error?: QualityTestError) => {
+          expect(error).toBe(QualityTestError);
+        };
+
+        const onUpdate = (stats: Stats) => console.info('Subscriber stats:', stats);
+
+        networkTest.testQuality(onUpdate)
+          .then(validateResults)
+          .catch(validateError)
+          .finally(() => {
+            OT.getDevices = realOTGetDevices;
+            done();
+          });
+      }, 8000);
     });
   });
 });

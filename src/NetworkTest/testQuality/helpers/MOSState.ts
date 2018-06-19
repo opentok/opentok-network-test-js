@@ -5,11 +5,13 @@ export default class MOSState {
   stats: HasAudioVideo<AverageStats> = { audio: {}, video: {} };
   bandwidth: Bandwidth = { audio: 0, video: 0 };
   intervalId?: number;
+  audioOnlyFallback: boolean;
 
-  constructor() {
+  constructor(audioOnly?: boolean) {
     this.statsLog = [];
     this.audioScoresLog = [];
     this.videoScoresLog = [];
+    this.audioOnlyFallback = !!audioOnly;
   }
 
   static readonly maxLogLength: number = 1000;
@@ -54,17 +56,11 @@ export default class MOSState {
     this.pruneVideoScores();
   }
 
-  qualityScore(): number {
-    const hasAudioTrack = this.hasAudioTrack();
-    const hasVideoTrack = this.hasVideoTrack();
-    if (hasAudioTrack && hasVideoTrack) {
-      return Math.min(this.audioScore(), this.videoScore());
-    } else if (hasAudioTrack && !hasVideoTrack) {
-      return this.audioScore();
-    } else if (!hasAudioTrack && hasVideoTrack) {
-      return this.videoScore();
-    } else {
-      return 0;
-    }
+  audioQualityScore(): number {
+    return this.hasAudioTrack() ? this.audioScore() : 1;
+  }
+
+  videoQualityScore(): number {
+    return this.hasVideoTrack() ? this.videoScore() : 1;
   }
 }

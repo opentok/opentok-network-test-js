@@ -12,7 +12,7 @@ to use [OpenTok](https://tokbox.com). Run this on a web client to get the follow
 
 * Whether the client will be able to succeed in connecting to an OpenTok session
 
-* A [MOS estimate](https://en.wikipedia.org/wiki/Mean_opinion_score) for the session quality
+* [MOS estimates](https://en.wikipedia.org/wiki/Mean_opinion_score) for the audio and video quality
   the client will experience
 
 * A recommended frame rate and resolution to use for publishing to a session
@@ -105,6 +105,28 @@ otNetworkTest.testConnectivity().then((results) => {
 });
 ```
 
+You can also run the tests in audio-only mode by passing in an `options` object
+with `audioOnly` set to `true` into the constructor:
+
+```javascript
+const sessionInfo = {
+  apiKey: '123456', // Add the API key for your OpenTok project here.
+  sessionId: '1_MX40NzIwMzJ-fjE1MDElGQkJJfn4', // Add a test session ID for that project
+  token: 'T1==cGFydG5lcXN0PQ==' // Add a token for that session here
+}
+const options = {audioOnly: true};
+const otNetworkTest = new NetworkTest(OT, sessionInfo, options);
+
+otNetworkTest.testQuality(updateCallback(stats) {
+  const currentStats = stats[stats.length - 1];
+  console.log('testQuality stats', currentStats);
+}).then((results) => {
+  console.log('OpenTok quality results', results);
+).catch((error) => {
+  console.log('OpenTok quality test error', error);
+});
+````
+
 This code uses Promises returned by the `OTNetworkTest.testConnectivity()`
 and `OTNetworkTest.testQuality()` methods. Alternatively, you can pass completion
 handler functions into each of these methods.
@@ -133,7 +155,7 @@ The OTNetworkTest NPM module includes three public methods:
 
 ### OTNetworkTest() constructor
 
-The `OTNetworkTest()` constructor includes the following parameters (both required):
+The `OTNetworkTest()` constructor includes the following parameters:
 
 * `ot` -- A reference to the OpenTok.js `OT` object. You must load OpenTok.js into the
   web page and pass the OpenTok.js `OT` into the `OTNetworkTest()` constructor.
@@ -159,13 +181,27 @@ The `OTNetworkTest()` constructor includes the following parameters (both requir
      The test session must be a routed session -- one that uses the [OpenTok Media
      Router](https://tokbox.com/developer/guides/create-session/#media-mode).
 
-
      To test connectivity
      in a specific region, specify a location hint when [creating the test
      session](https://tokbox.com/developer/guides/create-session/).
 
   * `token` -- A token corresponding to the test session. The role of the token must be
     either `publisher` or `moderator`.
+
+    The `sessionInfo` parameter is required.
+
+* `options` --The `options` parameter is an object containing one property: `audioOnly`.
+  Set this property to `true` to run audio-only tests.
+
+  When this option is set to `false` (the default), the quality test will try to run
+  an audio-video quality test (using both the camera and microphone). If there is no
+  camera available, or if the results of the audio-video test do not support adequate
+  audio quality, the test continues in audio-only mode.
+
+  Setting the `audioOnly` to `true` will reduce the time of the quality test on systems that
+  have both a microphone and camera attached (since the audio-only test is shorter than the audio-video test).
+
+  The `options` parameter is optional.
 
 The constructor throws an Error object with a `message` property and a `name` property. The
 message property describes the error. You should check the `name` property to determine the
@@ -176,7 +212,7 @@ the `ErrorNames` object (see [ErrorNames](#errornames)):
 
     ```javascript
     try {
-      const otNetworkTest = new NetworkTest(OT, configuration);
+      const otNetworkTest = new NetworkTest(OT, sessionInfo);
     } catch (error) {
       switch (error.name) {
         case ErrorNames.MISSING_OPENTOK_INSTANCE:
@@ -191,7 +227,7 @@ the `ErrorNames` object (see [ErrorNames](#errornames)):
           console.error('Unknown error .');
       }
     }
-    ```
+    ````
 
 ### OTNetworkTest.testConnectivity(callback)
 
@@ -263,12 +299,17 @@ The promise is resolved on success, and the `results` object is passed into the 
 callback method of the promise's `then()` function, or the `error` object is passed into the
 promise's `catch()` function.
 
-### OTNetworkTest.testQuality(options, updateCallback, completionCallback)
+### OTNetworkTest.testQuality(updateCallback, completionCallback)
 
 This function runs a test publisher (using the API key, session ID and token provided in the constructor). Based on the measured video bitrate, audio bitrate, and the audio packet loss for
 the published stream, it provides the following results:
 
-* The MOS estimate (from 0 - 5) for the client participating in an OpenTok session.
+* Whether audio and video are supported and a reason why they aren't supported (if they aren't).
+
+* The MOS estimate (from 0 - 5) for the the audio and video published by the client.
+
+* Statistics for the test, including bitrate and packet loss ratio (for both audio and video),
+  as well as the video packet loss ratio.
 
 * The recommended supported publisher settings. These settings include the recommended video
   frame rate and resolution for a stream published by the client. Or, if the stats do not support
@@ -302,7 +343,7 @@ video in the test stream. The object has the following data:
     timestamp: 1512679143897, // The timestamp of the sample
     phase: 'audio-video' // Either 'audio-video' or 'audio-only'
   }
-  ```
+  ````
 
 The `phase` property is set to 'audio-video' during the initial audio-video test. If a
 secondary audio-only test is required (because audio quality was not acceptable during the
@@ -353,34 +394,38 @@ is invoked when the connectivity check completes. This callback function takes t
 
 * `results` -- An object that contains the following properties:
 
-  * `mos` (Number) -- The MOS for the call quality. This will be in a range from 0 to 5.
-    Values less than 1 indicate inadequate quality. Values greater than 4 are considered
-    excellent quality.
-
   * `video` (Object) -- Contains the following properties:
 
       * `supported` (Boolean) -- Whether the results indicate that video is supported.
 
       * `recommendedFrameRate` (Number) -- The recommended video frame rate. However, if
-        video is unsupported, this is set to `null`.
+        video is unsupported, this is set to `null`. If the the test ran in audio-only mode
+        (for example, because no camera was found), this property is undefined.
 
       * `recommendedResolution` (String) -- The recommended video resolution. This will be
-        set to `'1280x720'`, `'640x480'`, or `'320x240`. However, if video is unsupported,
-        this is set to `null`.
+        set to `'1280x720'`, `'640x480'`, or `'320x240`'. However, if video is unsupported,
+        this is set to `null`. If the the test ran in audio-only mode (for example, because
+        no camera was found), this property is undefined.
 
       * `reason` (String) -- A string describing the reason for an unsupported video recommendation.
-        For example, `'No microphone was found.'`
+        For example, `'No camera was found.'`
 
       * `bitrate` (Number) -- The average number of video bits per second during the last
-        five seconds of the test.
+        five seconds of the test. If the the test ran in audio-only mode (for example, because
+        no camera was found), this property is undefined.
 
       * `frameRate` (Number) -- The average number of frames per second during the last five seconds
         of the test. Note that this is different than the `recommendedFrameRate`. The `frameRate`
         value is the actual frame rate observed during the test, and the `recommendedFrameRate`
-        is the recommended frame rate.
+        is the recommended frame rate. If the the test ran in audio-only mode (for example,
+        because no camera was found), this property is undefined.
 
       * `packetLossRatio` (Number) -- The audio packet loss ratio during the last five seconds
-        of the test.
+        of the test. If the the test ran in audio-only mode (for example, because no camera was
+        found), this property is undefined.
+
+      * `mos` (Number) -- The MOS score for the test video quality. This will be in a range from
+        1 to 4.5. See [MOS scores](#mos-scores) below for more information.
 
   * `audio` (Object) -- Contains the following properties:
 
@@ -395,8 +440,14 @@ is invoked when the connectivity check completes. This callback function takes t
     * `packetLossRatio` (Number) -- The video packet loss ratio during the last five seconds
       of the test.
 
+    * `mos` (Number) -- The MOS score for the test audio quality. This will be in a range from
+      1 to 4.5. See [MOS scores](#mos-scores) below for more information.
+
   `results` is undefined if there was an error in running the tests (and the `error` parameter
   is unset).
+
+  *Important:* v1 included a `results.mos` property (an overall MOS rating for the test). This
+  was removed in v2 and replaced with `results.audio.mos` and `results.video.mos` properties.
 
 The `completionCallback` function is optional. The `testConnectivity()` method returns a JavaScript
 promise. The promise is resolved on success, and the `results` object is passed into the `success`
@@ -472,6 +523,24 @@ method of the Promise returned by `testQuality()` has a `name` property set to o
 |   `SUBSCRIBE_TO_SESSION_ERROR` | The test encountered an unknown error while attempting to subscribe to a test stream. | 
 |   `SUBSCRIBER_GET_STATS_ERROR` | The test failed to get audio and video statistics for the test stream. | 
 
+## MOS scores
+
+The `testQuality()` results include MOS scores for video (if supported) and audio (if supported).
+
+A MOS score is a rating of audio or video quality. In subjective scoring, a user is asked
+to rate quality from 1 (bad) to 5 (excellent). This module uses an objective test, calculating
+the MOS scores based on bitrate, packet loss ratio, and (for video) resolution. For example,
+the audio MOS calculation is based on the [ITU G.107 specification][itu-g107]. These algorithms
+limit the range of scores from 1.0 to 4.5.
+
+| MOS Score  | Meaning   |
+| ---------- | --------- |
+| 3.8 - 4.5  | Excellent |
+| 3.1 - 3.79 | Good      |
+| 2.4 - 3.09 | Fair      |
+| 1.7 - 2.39 | Poor      |
+| 1.0 - 1.69 | Bad       |
+
 ## Building the module
 
 To build the module:
@@ -484,3 +553,6 @@ $ npm run build
 ## Sample app
 
 See the /sample subdirectory (and the /sample/README.md file) for a sample app.
+
+
+[itu-g107]: https://www.itu.int/rec/dologin_pub.asp?lang=s&id=T-REC-G.107-201402-S!!PDF-E

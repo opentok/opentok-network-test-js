@@ -19,6 +19,11 @@ type SessionCredentials = {
   sessionId: string,
   token: string
 }
+
+interface NetworkTestOptions {
+  audioOnly?: boolean
+}
+
 type UpdateCallback<A> = (stats: OT.SubscriberStats) => void
 type AV = 'audio' | 'video';
 type TestQualityResults = {
@@ -28,6 +33,7 @@ type TestQualityResults = {
     packetLoss: number,
     supported: boolean,
     reason?: string,
+    mos?: number,
   },
   video: {
     bitrate: number,
@@ -37,6 +43,7 @@ type TestQualityResults = {
     recommendedResolution?: string,
     supported: boolean,
     reason?: string,
+    mos?: number,
   },
 }
 
@@ -53,9 +60,7 @@ type UpdateCallbackStats = OT.SubscriberStats & { phase: string; };
    video: A;
  }
 
-interface QualityTestResults extends HasAudioVideo<AverageStats> {
-  mos: number;
-}
+interface QualityTestResults extends HasAudioVideo<AverageStats> {}
 
 type TestConnectivityCallback = (results: ConnectivityTestResults | null) => void
 type TestQualityCompletionCallback = (error: Error | undefined, results: QualityTestResults | null) => void
@@ -81,6 +86,7 @@ interface AverageStats {
   frameRate?: number;
   recommendedFrameRate?: number;
   recommendedResolution?: string;
+  mos?: number;
 }
 
 type QualityEvaluationResults = {

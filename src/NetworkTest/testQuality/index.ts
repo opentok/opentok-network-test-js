@@ -28,8 +28,10 @@ type QualityTestResultsBuilder = {
 };
 
 type MOSResultsCallback = (state: MOSState) => void;
+type DeviceMap = { [deviceId: string]: OT.Device };
+type AvailableDevices = { audio: DeviceMap, video: DeviceMap };
 
-let audioOnly = false; // The initial test is audio-video
+let audioOnly = false; // By default, the initial test is audio-video
 
 /**
  * If not already connected, connect to the OpenTok Session
@@ -60,12 +62,8 @@ function connectToSession(session: OT.Session, token: string): Promise<OT.Sessio
 /**
  * Ensure that audio and video devices are available
  */
-function validateDevices(OT: OpenTok): Promise<void> {
+function validateDevices(OT: OpenTok): Promise<AvailableDevices> {
   return new Promise((resolve, reject) => {
-
-    type DeviceMap = { [deviceId: string]: OT.Device };
-    type AvailableDevices = { audio: DeviceMap, video: DeviceMap };
-
     OT.getDevices((error?: OT.OTError, devices: OT.Device[] = []) => {
 
       if (error) {
@@ -82,10 +80,8 @@ function validateDevices(OT: OpenTok): Promise<void> {
 
         if (!Object.keys(availableDevices.audio).length) {
           reject(new e.NoAudioCaptureDevicesError());
-        } else if (!Object.keys(availableDevices.video).length) {
-          reject(new e.NoVideoCaptureDevicesError());
         } else {
-          resolve();
+          resolve(availableDevices);
         }
       }
     });
@@ -106,15 +102,21 @@ function publishAndSubscribe(OT: OpenTok) {
       containerDiv.style.height = '1px';
       containerDiv.style.opacity = '0';
       document.body.appendChild(containerDiv);
-      const publisherOptions: OT.PublisherProperties = {
-        resolution: '1280x720',
-        width: '100%',
-        height: '100%',
-        insertMode: 'append',
-        showControls: false,
-      };
       validateDevices(OT)
-        .then(() => {
+        .then((availableDevices: AvailableDevices) => {
+          if (!Object.keys(availableDevices.video).length) {
+            audioOnly = true;
+          }
+          let publisherOptions: OT.PublisherProperties = {
+            resolution: '1280x720',
+            width: '100%',
+            height: '100%',
+            insertMode: 'append',
+            showControls: false,
+          };
+          if (audioOnly) {
+            publisherOptions.videoSource = null;
+          }
           const publisher = OT.initPublisher(containerDiv, publisherOptions, (error?: OT.OTError) => {
             if (error) {
               reject(new e.InitPublisherError(error.message));
@@ -164,9 +166,10 @@ function subscribeToTestStream(
 }
 
 function buildResults(builder: QualityTestResultsBuilder): QualityTestResults {
-  const baseProps: (keyof AverageStats)[] = ['bitrate', 'packetLossRatio', 'supported', 'reason'];
+  const baseProps: (keyof AverageStats)[] = ['bitrate', 'packetLossRatio', 'supported', 'reason', 'mos'];
+  builder.state.stats.audio.mos = builder.state.audioQualityScore();
+  builder.state.stats.video.mos = builder.state.videoQualityScore();
   return {
-    mos: builder.state.qualityScore(),
     audio: pick(baseProps, builder.state.stats.audio),
     video: pick(baseProps.concat(['frameRate', 'recommendedResolution', 'recommendedFrameRate']),
       builder.state.stats.video),
@@ -184,7 +187,9 @@ function checkSubscriberQuality(
   OT: OpenTok,
   session: OT.Session,
   credentials: SessionCredentials,
-  onUpdate?: UpdateCallback<OT.SubscriberStats>): Promise<QualityTestResults> {
+  onUpdate?: UpdateCallback<OT.SubscriberStats>,
+  audioOnlyFallback?: boolean,
+): Promise<QualityTestResults> {
 
   let mosEstimatorTimeoutId: number;
 
@@ -196,7 +201,7 @@ function checkSubscriberQuality(
         } else {
           try {
             const builder: QualityTestResultsBuilder = {
-              state: new MOSState(),
+              state: new MOSState(audioOnlyFallback),
               ... { subscriber },
               ... { credentials },
             };
@@ -213,7 +218,7 @@ function checkSubscriberQuality(
               const audioVideoResults: QualityTestResults = buildResults(builder);
               if (!audioOnly && !isAudioQualityAcceptable(audioVideoResults)) {
                 audioOnly = true;
-                checkSubscriberQuality(OT, session, credentials, onUpdate)
+                checkSubscriberQuality(OT, session, credentials, onUpdate, true)
                   .then((results: QualityTestResults) => {
                     resolve(results);
                   });
@@ -262,10 +267,12 @@ export default function testQuality(
   OT: OpenTok,
   credentials: SessionCredentials,
   otLogging: OTKAnalytics,
+  options?: NetworkTestOptions,
   onUpdate?: UpdateCallback<UpdateCallbackStats>,
   onComplete?: TestQualityCompletionCallback): Promise<QualityTestResults> {
   return new Promise((resolve, reject) => {
 
+    audioOnly = !!(options && options.audioOnly);
     const onSuccess = (results: QualityTestResults) => {
       onComplete && onComplete(undefined, results);
       otLogging.logEvent({ action: 'testQuality', variation: 'Success' });
