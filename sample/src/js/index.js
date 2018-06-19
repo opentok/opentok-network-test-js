@@ -1,4 +1,4 @@
-import { NetworkTest } from 'opentok-network-test-js';
+import NetworkTest from 'opentok-network-test-js';
 import createChart from './chart.js';
 import * as ConnectivityUI from './connectivity-ui.js';
 import otNetworkTestOptions from './config.js';

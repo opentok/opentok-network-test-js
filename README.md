@@ -30,20 +30,22 @@ $ npm install opentok-network-test-js
 
 Now load the OpenTok Network Test in your project. The module exports two objects:
 
-* OTNetworkTest -- The class containing methods for testing your OpenTok connectivity and quality
+* NetworkTest -- The class containing methods for testing your OpenTok connectivity and quality.
+  This is the default export.
 
 * ErrorNames -- An object enumerating error name values
 
 Using CommonJS:
 
 ```javascript
-const { OTNetworkTest, ErrorNames } = require('opentok-network-test-js');
+const NetworkTest = require('opentok-network-test-js');
+const ErrorNames = require('opentok-network-test-js').ErrorNames;
 ```
 
 ... or ES6 ...
 
 ```javascript
-import { OTNetworkTest, ErrorNames } from 'opentok-network-test-js';
+import NetworkTest, { ErrorNames } from 'opentok-network-test-js';
 ```
 
 Load the OpenTok.js library.
@@ -53,7 +55,7 @@ a configuration object. The configuration object contains an API key for your ap
 OpenTok project, a session ID for a test session, and a token for that session:
 
 ```javascript
-const otNetworkTest = new OTNetworkTest(OT, {
+const otNetworkTest = new NetworkTest(OT, {
   apiKey: '123456', // Add the API key for your OpenTok project here.
   sessionId: '1_MX40NzIwMzJ-fjE1MDElGQkJJfn4', // Add a test session ID for that project
   token: 'T1==cGFydG5lcXN0PQ==' // Add a token for that session here
@@ -174,7 +176,7 @@ the `ErrorNames` object (see [ErrorNames](#errornames)):
 
     ```javascript
     try {
-      const otNetworkTest = new OTNetworkTest(OT, configuration);
+      const otNetworkTest = new NetworkTest(OT, configuration);
     } catch (error) {
       switch (error.name) {
         case ErrorNames.MISSING_OPENTOK_INSTANCE:

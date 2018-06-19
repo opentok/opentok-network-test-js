@@ -22,7 +22,7 @@ import { getOr } from '../util';
 const OTKAnalytics = require('opentok-solutions-logging');
 /* tslint:enable */
 
-export class NetworkTest {
+export default class NetworkTest {
   credentials: SessionCredentials;
   OT: OpenTok;
   otLogging: OTKAnalytics;
