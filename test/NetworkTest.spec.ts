@@ -158,7 +158,7 @@ describe('Network Test', () => {
     describe('Quality Test', () => {
       it('validates its onUpdate and onComplete callbacks', () => {
         expect(() => networkTest.testQuality('callback').toThrow(new InvalidOnUpdateCallback()))
-        expect(() => networkTest.testQuality(null, validOnUpdateCallback, 'callback').toThrow(new InvalidOnCompleteCallback()))
+        expect(() => networkTest.testQuality(validOnUpdateCallback, 'callback').toThrow(new InvalidOnCompleteCallback()))
         expect(() => networkTest.testConnectivity(null, validOnUpdateCallback, validOnCompleteCallback).not.toThrowError(NetworkTestError))
       });
 
@@ -207,7 +207,7 @@ describe('Network Test', () => {
 
         const onUpdate = (stats: Stats) => console.info('Subscriber stats:', stats);
 
-        networkTest.testQuality(null, onUpdate)
+        networkTest.testQuality(onUpdate)
           .then(validateResults)
           .catch(validateError)
           .finally(done);
@@ -242,7 +242,7 @@ describe('Network Test', () => {
 
         const onUpdate = (stats: Stats) => console.info('Subscriber stats:', stats);
 
-        networkTest.testQuality(null, onUpdate)
+        networkTest.testQuality(onUpdate)
           .then(validateResults)
           .catch(validateError)
           .finally(() => {
