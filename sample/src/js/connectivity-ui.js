@@ -130,6 +130,9 @@ export function displayTestQualityResults(error, results) {
       statusIconEl.src = 'assets/icon_pass.svg';
     } else {
       statusIconEl.src = 'assets/icon_warning.svg';
+      var reasonEl = resultsEl.querySelector('#video-unsupported-reason');
+      reasonEl.style.display = 'block';
+      reasonEl.querySelector('span').textContent = results.video.reason;
     }
   } else if (!results.video.supported) {
     statusIconEl.src = 'assets/icon_error.svg';

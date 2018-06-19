@@ -99,6 +99,28 @@ otNetworkTest.testConnectivity().then((results) => {
 });
 ```
 
+You can also run the tests in audio-only mode by passing in an `options` object
+with `audioOnly` set to `true` into the constructor:
+
+```javascript
+const sessionInfo = {
+  apiKey: '123456', // Add the API key for your OpenTok project here.
+  sessionId: '1_MX40NzIwMzJ-fjE1MDElGQkJJfn4', // Add a test session ID for that project
+  token: 'T1==cGFydG5lcXN0PQ==' // Add a token for that session here
+}
+const options = {audioOnly: true};
+const otNetworkTest = new NetworkTest(OT, sessionInfo, options);
+
+otNetworkTest.testQuality(updateCallback(stats) {
+  const currentStats = stats[stats.length - 1];
+  console.log('testQuality stats', currentStats);
+}).then((results) => {
+  console.log('OpenTok quality results', results);
+).catch((error) => {
+  console.log('OpenTok quality test error', error);
+});
+````
+
 This code uses Promises returned by the `OTNetworkTest.testConnectivity()`
 and `OTNetworkTest.testQuality()` methods. Alternatively, you can pass completion
 handler functions into each of these methods.
@@ -127,7 +149,7 @@ The OTNetworkTest NPM module includes three public methods:
 
 ### OTNetworkTest() constructor
 
-The `OTNetworkTest()` constructor includes the following parameters (both required):
+The `OTNetworkTest()` constructor includes the following parameters:
 
 * `ot` -- A reference to the OpenTok.js `OT` object. You must load OpenTok.js into the
   web page and pass the OpenTok.js `OT` into the `OTNetworkTest()` constructor.
@@ -153,13 +175,28 @@ The `OTNetworkTest()` constructor includes the following parameters (both requir
      The test session must be a routed session -- one that uses the [OpenTok Media
      Router](https://tokbox.com/developer/guides/create-session/#media-mode).
 
-
      To test connectivity
      in a specific region, specify a location hint when [creating the test
      session](https://tokbox.com/developer/guides/create-session/).
 
   * `token` -- A token corresponding to the test session. The role of the token must be
     either `publisher` or `moderator`.
+
+    The `sessionInfo` parameter is optional.
+
+ * `options` --The `options` parameter is an object containing one property: `audioOnly`.
+    Set this property to `true` to run audio-only tests.
+
+    When this option is set to `false` (the default), the quality test will try to run
+    an audio-video quality test (using both the camera and microphone). If there is no
+    camera available, or if the results of the audio-video test do not support adequate
+    audio quality, the test continues in audio-only mode.
+
+    Setting the `audioOnly` to `true` will reduce the time of the quality test on systems that
+    have both a microphone and camera attached (since the audio-only test is shorter than the audio-video test).
+
+    This parameter is optional.
+
 
 ### OTNetworkTest.testConnectivity(callback)
 
@@ -212,7 +249,7 @@ The promise is resolved on success, and the `results` object is passed into the 
 callback method of the promise's `then()` function, or the `error` object is passed into the
 promise's `catch()` function.
 
-### OTNetworkTest.testQuality(options, updateCallback, completionCallback)
+### OTNetworkTest.testQuality(updateCallback, completionCallback)
 
 This function runs a test publisher (using the API key, session ID and token provided in the constructor). Based on the measured video bitrate, audio bitrate, and the audio packet loss for
 the published stream, it provides the following results:
@@ -256,7 +293,7 @@ video in the test stream. The object has the following data:
     timestamp: 1512679143897, // The timestamp of the sample
     phase: 'audio-video' // Either 'audio-video' or 'audio-only'
   }
-  ```
+  ````
 
 The `phase` property is set to 'audio-video' during the initial audio-video test. If a
 secondary audio-only test is required (because audio quality was not acceptable during the
@@ -282,25 +319,30 @@ is invoked when the connectivity check completes. This callback function takes t
       * `supported` (Boolean) -- Whether the results indicate that video is supported.
 
       * `recommendedFrameRate` (Number) -- The recommended video frame rate. However, if
-        video is unsupported, this is set to `null`.
+        video is unsupported, this is set to `null`. If the the test ran in audio-only mode
+        (for example, because no camera was found), this property is undefined.
 
       * `recommendedResolution` (String) -- The recommended video resolution. This will be
-        set to `'1280x720'`, `'640x480'`, or `'320x240`. However, if video is unsupported,
-        this is set to `null`.
+        set to `'1280x720'`, `'640x480'`, or `'320x240`'. However, if video is unsupported,
+        this is set to `null`. If the the test ran in audio-only mode (for example, because
+        no camera was found), this property is undefined.
 
       * `reason` (String) -- A string describing the reason for an unsupported video recommendation.
-        For example, `'No microphone was found.'`
+        For example, `'No camera was found.'`
 
       * `bitrate` (Number) -- The average number of video bits per second during the last
-        five seconds of the test.
+        five seconds of the test. If the the test ran in audio-only mode (for example, because
+        no camera was found), this property is undefined.
 
       * `frameRate` (Number) -- The average number of frames per second during the last five seconds
         of the test. Note that this is different than the `recommendedFrameRate`. The `frameRate`
         value is the actual frame rate observed during the test, and the `recommendedFrameRate`
-        is the recommended frame rate.
+        is the recommended frame rate. If the the test ran in audio-only mode (for example,
+        because no camera was found), this property is undefined.
 
       * `packetLossRatio` (Number) -- The audio packet loss ratio during the last five seconds
-        of the test.
+        of the test. If the the test ran in audio-only mode (for example, because no camera was
+        found), this property is undefined.
 
       * `mos` (Number) -- The MOS score for the test video quality. This will be in a range from
         1 to 4.5. See [MOS scores](#mos-scores) below for more information.

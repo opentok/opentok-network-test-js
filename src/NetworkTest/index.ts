@@ -25,17 +25,19 @@ export default class NetworkTest {
   credentials: SessionCredentials;
   OT: OpenTok;
   otLogging: OTKAnalytics;
+  options?: NetworkTestOptions;
 
   /**
    * Returns an instance of NetworkConnectivity. See the "API reference" section of the
    * README.md file in the root of the opentok-network-test-js project for details.
    */
-  constructor(OT: OpenTok, credentials: SessionCredentials) {
+  constructor(OT: OpenTok, credentials: SessionCredentials, options?: NetworkTestOptions) {
     this.validateOT(OT);
     this.validateCredentials(credentials);
     this.otLogging = this.startLoggingEngine(credentials.apiKey, credentials.sessionId);
     this.OT = OT;
     this.credentials = credentials;
+    this.options = options;
   }
 
   private validateOT(OT: OpenTok) {
@@ -92,7 +94,7 @@ export default class NetworkTest {
     onComplete?: CompletionCallback<ConnectivityTestResults>): Promise<ConnectivityTestResults> {
     this.otLogging.logEvent({ action: 'testConnectivity', variation: 'Attempt' });
     this.validateCallbacks('testConnectivity', undefined, onComplete);
-    return testConnectivity(this.OT, this.credentials, this.otLogging, onComplete);
+    return testConnectivity(this.OT, this.credentials, this.otLogging, this.options, onComplete);
   }
 
   /**
@@ -109,6 +111,6 @@ export default class NetworkTest {
     this.otLogging.logEvent({ action: 'testQuality', variation: 'Attempt' });
     this.validateCallbacks('testQuality', updateCallback, completionCallback);
     return testQuality(
-      this.OT, this.credentials, this.otLogging, updateCallback, completionCallback);
+      this.OT, this.credentials, this.otLogging, this.options, updateCallback, completionCallback);
   }
 }
