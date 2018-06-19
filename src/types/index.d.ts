@@ -24,7 +24,6 @@ interface NetworkTestOptions {
   audioOnly?: boolean
 }
 
-type CompletionCallback<A> = (error: Error | undefined, results: A | null) => void
 type UpdateCallback<A> = (stats: OT.SubscriberStats) => void
 type AV = 'audio' | 'video';
 type TestQualityResults = {
@@ -62,6 +61,9 @@ type UpdateCallbackStats = OT.SubscriberStats & { phase: string; };
  }
 
 interface QualityTestResults extends HasAudioVideo<AverageStats> {}
+
+type TestConnectivityCallback = (results: ConnectivityTestResults | null) => void
+type TestQualityCompletionCallback = (error: Error | undefined, results: QualityTestResults | null) => void
 
 interface AudioThreshold { bps: number, plr: number }
 interface VideoThreshold extends AudioThreshold { recommendedSetting: string }

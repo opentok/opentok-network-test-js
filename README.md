@@ -28,18 +28,24 @@ First, install the package:
 $ npm install opentok-network-test-js
 ```
 
-Now load the OpenTok Network Test in your project.
+Now load the OpenTok Network Test in your project. The module exports two objects:
+
+* NetworkTest -- The class containing methods for testing your OpenTok connectivity and quality.
+  This is the default export.
+
+* ErrorNames -- An object enumerating error name values
 
 Using CommonJS:
 
 ```javascript
-const OTNetworkTest = require('opentok-network-test-js');
+const NetworkTest = require('opentok-network-test-js');
+const ErrorNames = require('opentok-network-test-js').ErrorNames;
 ```
 
 ... or ES6 ...
 
 ```javascript
-import OTNetworkTest from 'opentok-network-test-js';
+import NetworkTest, { ErrorNames } from 'opentok-network-test-js';
 ```
 
 Load the OpenTok.js library.
@@ -49,7 +55,7 @@ a configuration object. The configuration object contains an API key for your ap
 OpenTok project, a session ID for a test session, and a token for that session:
 
 ```javascript
-const otNetworkTest = new OTNetworkTest(OT, {
+const otNetworkTest = new NetworkTest(OT, {
   apiKey: '123456', // Add the API key for your OpenTok project here.
   sessionId: '1_MX40NzIwMzJ-fjE1MDElGQkJJfn4', // Add a test session ID for that project
   token: 'T1==cGFydG5lcXN0PQ==' // Add a token for that session here
@@ -182,21 +188,46 @@ The `OTNetworkTest()` constructor includes the following parameters:
   * `token` -- A token corresponding to the test session. The role of the token must be
     either `publisher` or `moderator`.
 
-    The `sessionInfo` parameter is optional.
+    The `sessionInfo` parameter is required.
 
- * `options` --The `options` parameter is an object containing one property: `audioOnly`.
-    Set this property to `true` to run audio-only tests.
+* `options` --The `options` parameter is an object containing one property: `audioOnly`.
+  Set this property to `true` to run audio-only tests.
 
-    When this option is set to `false` (the default), the quality test will try to run
-    an audio-video quality test (using both the camera and microphone). If there is no
-    camera available, or if the results of the audio-video test do not support adequate
-    audio quality, the test continues in audio-only mode.
+  When this option is set to `false` (the default), the quality test will try to run
+  an audio-video quality test (using both the camera and microphone). If there is no
+  camera available, or if the results of the audio-video test do not support adequate
+  audio quality, the test continues in audio-only mode.
 
-    Setting the `audioOnly` to `true` will reduce the time of the quality test on systems that
-    have both a microphone and camera attached (since the audio-only test is shorter than the audio-video test).
+  Setting the `audioOnly` to `true` will reduce the time of the quality test on systems that
+  have both a microphone and camera attached (since the audio-only test is shorter than the audio-video test).
 
-    This parameter is optional.
+  The `options` parameter is optional.
 
+The constructor throws an Error object with a `message` property and a `name` property. The
+message property describes the error. You should check the `name` property to determine the
+type of error. The `name` property will be set to one of the values defined as properties of
+the `ErrorNames` object (see [ErrorNames](#errornames)):
+
+    For example:
+
+    ```javascript
+    try {
+      const otNetworkTest = new NetworkTest(OT, sessionInfo);
+    } catch (error) {
+      switch (error.name) {
+        case ErrorNames.MISSING_OPENTOK_INSTANCE:
+          console.error('Missing OT instance in constructor.');
+          break;
+        case ErrorNames.INCOMPLETE_SESSON_CREDENTIALS:
+        case ErrorNames.MISSING_SESSON_CREDENTIALS:
+        case ErrorNames.INVALID_SESSON_CREDENTIALS:
+          console.error('Missing or invalid OpenTok session credentials.');
+          break;
+        default:
+          console.error('Unknown error .');
+      }
+    }
+    ````
 
 ### OTNetworkTest.testConnectivity(callback)
 
@@ -204,45 +235,64 @@ This method checks to see if the client can connect to OpenTok servers.
 It includes one parameter: `callback`.
 
 The `callback` parameter is the function to be called when the connectivity check completes.
-This callback function takes two parameters:
+This callback function takes one `results` parameter, which is an object that has the following
+two properties:
 
-* `error` -- An Error object. The `name` Property of this object is set to `ConnectivityError`.
-  The `message` property describes the reason for the error. This will usually result from an
-  invalid API key, session ID, or token passed into the `OTNetworkTest()` constructor. This
-  is only set when the test could not run because of an error. If the connectivity can run
-  (even if it results in failed tests), this property is undefined.
+* `success` (Boolean) -- `true` if connectivity to OpenTok servers succeeded; `false` if
+  any connectivity test failed.
 
-* `results` -- An object that contains the following properties:
+* `failedTests` (Array) -- If connectivity failed, this array contains an object for each
+  failure type. The object has two properties, `type` and `errors`:
 
-  * `success` (Boolean) -- `true` if connectivity to OpenTok servers succeeded; `false` if
-    any connectivity test failed.
-
-  * `failedTests` (Array) -- If connectivity failed, this array contains a list of strings
-    defining the failure types: `'api'`, `'messaging'`, `'media'`, `'logging'`.
+  * `type` -- A sting defining the failure type. It will be set to one of the following values:
 
     * `'api'` -- The test could not connect to the OpenTok API server. Connection to this
-      server is required to connect to an OpenTok session.
+    server is required to connect to an OpenTok session.
 
     * `'messaging'` -- The test could not establish a connection to the OpenTok messaging WebSocket.
-      This connection is required to connect to an OpenTok session. In addition to other causes
-      for WebSocket connectivity failures, this failure type will occur if you pass an invalid
-      OpenTok API key, session ID, or token into the `OTNetworkTest()` constructor.
+    This connection is required to connect to an OpenTok session. In addition to other causes
+    for WebSocket connectivity failures, this failure type will occur if you pass an invalid
+    OpenTok API key, session ID, or token into the `OTNetworkTest()` constructor.
 
     * `'media'` -- The test could not connect to the OpenTok Media Router. If your app uses
-      a routed session, it will not succeed in using OpenTok. However, if your app uses
-      a relayed session, the client *may* still succeed in using the OpenTok session, although
-      it may fail if the relayed session requires use of a TURN server.
+    a routed session, it will not succeed in using OpenTok. However, if your app uses
+    a relayed session, the client *may* still succeed in using the OpenTok session, although
+    it may fail if the relayed session requires use of a TURN server.
 
     * `'logging'` -- The test could not connect to the OpenTok logging server. The OpenTok.js
-      library periodically logs data (such as video and audio quality) to this server. The client
-      can still connect to an OpenTok session, however TokBox will not collect data that may help
-      you debug issues with the session, using tools like [OpenTok
-      Inspector](https://tokbox.com/developer/tools/inspector/).
+    library periodically logs data (such as video and audio quality) to this server. The client
+    can still connect to an OpenTok session, however TokBox will not collect data that may help
+    you debug issues with the session, using tools like [OpenTok
+    Inspector](https://tokbox.com/developer/tools/inspector/).
 
-    If all connectivity tests succeed, this property is undefined.
+  * `error` -- An object defining the reason for the type of failure. This object includes
+  a `message` property and a `name` property. The message property describes the error.
+  You should check the `name` property to determine the type of error. The `name` property
+  will be set to one of the values defined as properties of the `ErrorNames`
+  object (see [ErrorNames](#errornames)):
 
-  `results` is undefined if there was an error in running the tests (and the `error` parameter
-  is unset).
+    For example:
+
+    ```javascript
+    otNetworkTest.testConnectivity(function(results) {
+      results.failedTests && results.failedTests.forEach(result) => {
+        switch (failedTest.error.name) {
+          case ErrorNames.FAILED_TO_OBTAIN_MEDIA_DEVICES:
+          // Display UI message about granting access to the microphone and camera
+            break;
+          case ErrorNames.NO_AUDIO_CAPTURE_DEVICES:
+          case ErrorNames.NO_VIDEO_CAPTURE_DEVICES:
+            // Display UI message about no available camera or microphone
+            break;
+          // Handle other errors, as needed
+          default:
+            console.error('Unknown error .');
+        }
+      }
+    });
+    ```
+
+  If all connectivity tests succeed, the `failedTests` property is undefined.
 
 The callback function is optional. The `testConnectivity()` method returns a JavaScript promise.
 The promise is resolved on success, and the `results` object is passed into the `success`
@@ -306,11 +356,41 @@ Pass in a `null` value if you do not want to register an `updateCallback` functi
 The `completionCallback` parameter of the `OTNetworkTest.testQuality()` method is a function that
 is invoked when the connectivity check completes. This callback function takes two parameters:
 
-* `error` -- An Error object. The `name` property of this object is set to `testQualityError`.
-  The `message` property describes the reason for the error. This may result from an
-  invalid API key, session ID, or token passed into the `OTNetworkTest()` constructor. This
-  is only set when the test could not run because of an error. If the connectivity can run
-  (even if it results in failed tests), this property is undefined.
+* `error` -- An Error object. This object has two properties: a `message` property and
+  a `name` property. The message property describes the error. You should check the `name`
+  property to determine the type of error. The `name` property will be set to one of the
+  values defined as properties of the `ErrorNames` object
+  (see [Error.name values](#errorname-values)).
+
+  ```javascript
+  otNetworkTest.testQuality(null, function updateCallback() {
+    // process intermediate results
+  }, function completionCallback(error, results) {
+    if (error) {
+      switch (error.name) {
+        case ErrorNames.UNSUPPORTED_BROWSER:
+          // Display UI message about unsupported browser
+          break;
+        case ErrorNames.CONNECT_TO_SESSION_NETWORK_ERROR:
+          // Display UI message about network error
+          break;
+        case ErrorNames.FAILED_TO_OBTAIN_MEDIA_DEVICES:
+          // Display UI message about granting access to the microphone and camera
+          break;
+        case ErrorNames.NO_AUDIO_CAPTURE_DEVICES:
+        case ErrorNames.NO_VIDEO_CAPTURE_DEVICES:
+          // Display UI message about no available camera or microphone
+          break;
+        default:
+          console.error('Unknown error .');
+      }
+      return;
+    }
+    // No error. Display UI based on results
+  });
+  ```
+
+  If the connectivity test can run successfully, this property is undefined.
 
 * `results` -- An object that contains the following properties:
 
@@ -377,6 +457,71 @@ promise's `catch()` function.
 The results, including the MOS score and the recommended video resolution and frame rate are
 subjective. You can adjust the values used in the source code, or you can use the data passed into
 the `updateCallback()` function and apply your own quality analysis algorithm.
+
+### ErrorNames
+
+The ErrorNames object includes properties that enumerate values used in the
+`name` property of OTNetworkTest error objects. You should check the `name` property of
+an error object (against the values defined in ErrorNames) to determine the type of error.
+
+#### Errors thrown by the OTNetworkTest() constructor
+
+| Error.name property set<br/>to this property of<br/>ErrorNames ... | Description |
+| ------------------------------------------------------------------------------------ | ----------- |
+|   `MISSING_OPENTOK_INSTANCE` | An instance of OT, the OpenTok.js client SDK, was not passed into the constructor. |
+|   `INCOMPLETE_SESSON_CREDENTIALS` | The sessionInfo object passed into the constructor did not include an `apiKey`, `sessionId`,  or `token` object. |
+|   `MISSING_SESSON_CREDENTIALS` | No sessionInfo object was passed into the constructor. | 
+
+#### testConnectivity() errors
+
+The `testConnectivity()` `callback` function includes a `results` parameter, and the `testConnectivity()` method returns a JavaScript promise that includes a `results` parameter.
+The `results` object contains a `failedTests` array, and each element of this array (if there are
+any elements) has an `error` property, which is error object has a `name` property set to one of
+the following:
+
+| Error.name property set to this property<br/>of ErrorNames ... | Description |
+| -------------------------------------------------------------------------------- | ----------- |
+|   `INVALID_ON_COMPLETE_CALLBACK` | The `callback` parameter is invalid. It must be a function that accepts error and results parameters. |
+|   `API_CONNECTIVITY_ERROR` | The test failed to connect to OpenTOK API Server. | 
+|   `CONNECT_TO_SESSION_ERROR` | The test failed to connect to the test OpenTok session due to a network error. | 
+|   `CONNECT_TO_SESSION_TOKEN_ERROR` | The test failed to connect to the test OpenTok session due to an invalid token. | 
+|   `CONNECT_TO_SESSION_ID_ERROR` | The test failed to connect to the test OpenTok session due to an invalid session ID. | 
+|   `CONNECT_TO_SESSION_NETWORK_ERROR` | The test failed to connect to the test OpenTok session due to a network error. | 
+|   `FAILED_TO_OBTAIN_MEDIA_DEVICES` | The test failed to obtain media devices (a camera or microphone). | 
+|   `NO_AUDIO_CAPTURE_DEVICES` | The browser cannot access a microphone. | 
+|   `NO_VIDEO_CAPTURE_DEVICES` | The browser cannot access a camera. | 
+|   `PUBLISH_TO_SESSION_ERROR` | Encountered an unknown error while attempting to publish to a session. | 
+|   `FAILED_MESSAGING_SERVER_TEST` | The test failed to connect to media server due to messaging server connection failure. | 
+|   `FAILED_TO_CREATE_LOCAL_PUBLISHER` | The test failed to create a local publisher object. | 
+|   `PUBLISH_TO_SESSION_NOT_CONNECTED` | The test failed to failed to publish to the test session because the client was not connected to the session. | 
+|   `PUBLISH_TO_SESSION_PERMISSION_OR_TIMEOUT_ERROR` | The test failed to failed to publish to the test session due a permissions error or timeout. | 
+|   `PUBLISH_TO_SESSION_NETWORK_ERROR` | The test failed to publish to the test session due a network error. | 
+|   `SUBSCRIBE_TO_SESSION_ERROR` | The test encountered an unknown error while attempting to subscribe to a test stream. | 
+|   `LOGGING_SERVER_CONNECTION_ERROR` | The test failed to connect to the OpenTok logging server. | 
+
+#### testQuality() errors
+
+The `testQuality()` `completionCallback error` parameter or the error passed into the `.catch()`
+method of the Promise returned by `testQuality()` has a `name` property set to one of the following:
+
+| Error.name property set to this<br/>property of ErrorNames ... | Description |
+| -------------------------------------------------------------------------------- | ----------- |
+|   `INVALID_ON_UPDATE_CALLBACK` | The `updateCallback` parameter is invalid. It must be a function that accepts a single parameter. |
+|   `INVALID_ON_COMPLETE_CALLBACK` | The `completionCallback` parameter is invalid. It must be a function that accepts error and results parameters. |
+|   `UNSUPPORTED_BROWSER`  | The test is running on an unsupported browser (see [Supported browsers](#supported-browsers)). | 
+|   `CONNECT_TO_SESSION_ERROR` | The test failed to connect to the test OpenTok session due to a network error. | 
+|   `CONNECT_TO_SESSION_TOKEN_ERROR` | The test failed to connect to the test OpenTok session due to an invalid token. | 
+|   `CONNECT_TO_SESSION_ID_ERROR` | The test failed to connect to the test OpenTok session due to an invalid session ID. | 
+|   `CONNECT_TO_SESSION_NETWORK_ERROR` | The test failed to connect to the test OpenTok session due to a network error. | 
+|   `FAILED_TO_OBTAIN_MEDIA_DEVICES` | The test failed to obtain media devices (a camera or microphone). | 
+|   `NO_AUDIO_CAPTURE_DEVICES` | The browser cannot access a microphone. | 
+|   `NO_VIDEO_CAPTURE_DEVICES` | The browser cannot access a camera. | 
+|   `PUBLISH_TO_SESSION_ERROR` | The test encountered an unknown error while attempting to publish to a session. | 
+|   `INIT_PUBLISHER_ERROR` | The test failed to initialize a publisher. | 
+|   `PUBLISH_TO_SESSION_NOT_CONNECTED` | The test failed to failed to publish to the test session because the client was not connected to the session. | 
+|   `PUBLISH_TO_SESSION_PERMISSION_OR_TIMEOUT_ERROR` | The test failed to failed to publish to the test session due a permissions error or timeout. | 
+|   `SUBSCRIBE_TO_SESSION_ERROR` | The test encountered an unknown error while attempting to subscribe to a test stream. | 
+|   `SUBSCRIBER_GET_STATS_ERROR` | The test failed to get audio and video statistics for the test stream. | 
 
 ## MOS scores
 

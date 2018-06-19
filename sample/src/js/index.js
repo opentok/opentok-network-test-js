@@ -1,4 +1,4 @@
-import OTNetworkTest from 'opentok-network-test-js';
+import NetworkTest from 'opentok-network-test-js';
 import createChart from './chart.js';
 import * as ConnectivityUI from './connectivity-ui.js';
 import sessionInfo from './config.js';
@@ -13,9 +13,9 @@ precallDiv.querySelector('#precall button').addEventListener('click', function()
 
 function startTest() {
   var options = {audioOnly: precallDiv.querySelector('#precall input').checked};
-  otNetworkTest = new OTNetworkTest(OT, sessionInfo, options);
-  otNetworkTest.testConnectivity(function(error, results) {
-    ConnectivityUI.displayTestConnectivityResults(error, results);
+  otNetworkTest = new NetworkTest(OT, sessionInfo, options);
+  otNetworkTest.testConnectivity(function(results) {
+    ConnectivityUI.displayTestConnectivityResults(results);
     testQuality();
   });
 }

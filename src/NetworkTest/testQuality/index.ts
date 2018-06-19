@@ -269,7 +269,7 @@ export default function testQuality(
   otLogging: OTKAnalytics,
   options?: NetworkTestOptions,
   onUpdate?: UpdateCallback<UpdateCallbackStats>,
-  onComplete?: CompletionCallback<QualityTestResults>): Promise<QualityTestResults> {
+  onComplete?: TestQualityCompletionCallback): Promise<QualityTestResults> {
   return new Promise((resolve, reject) => {
 
     audioOnly = !!(options && options.audioOnly);

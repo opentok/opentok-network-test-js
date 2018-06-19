@@ -28,18 +28,12 @@ function convertFailedTestsToString(failedTests) {
   return mappedFailures.join(', ');
 }
 
-export function displayTestConnectivityResults(error, results) {
+export function displayTestConnectivityResults(results) {
   var statusContainer = document.getElementById('connectivity_status_container');
   var statusMessageEl = statusContainer.querySelector('p');
   var statusIconEl = statusContainer.querySelector('img');
   statusMessageEl.style.display = 'block';
   
-  if (error) {
-    statusMessageEl.textContent = error.message;
-    statusIconEl.src = 'assets/icon_error.svg';
-    return;
-  }
-
   var statusText;
   if (results.success) {
     statusText = 'Passed';
