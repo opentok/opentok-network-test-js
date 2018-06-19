@@ -7,6 +7,14 @@
   </head>
   <body>
     <h1>OpenTok <small>Network test</small></h1>
+    <div id="precall" class="prettyBox">
+      <p>
+        Options:
+        <input id="checkBox" type="checkbox"> <label>Audio-only</label>
+      </p>
+      <button>Start test</button>
+    </div>
+
     <div id="connectivity_status_container" class="prettyBox">
       <h2>Testing connectivity</h2>
       <p>Test in progress.</p>
@@ -38,8 +46,10 @@
           <h3>Video</h3>
           <div>
             <div class="results">
-              <p>Video supported:
+              <p>Supported:
                 <span id="video-supported"></span>
+              <p id="video-unsupported-reason">Reason:
+                <span></span>
               </p>
               <p>Bitrate:
                 <span id="video-bitrate"></span>
