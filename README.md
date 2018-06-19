@@ -12,7 +12,7 @@ to use [OpenTok](https://tokbox.com). Run this on a web client to get the follow
 
 * Whether the client will be able to succeed in connecting to an OpenTok session
 
-* A [MOS estimate](https://en.wikipedia.org/wiki/Mean_opinion_score) for the session quality
+* [MOS estimates](https://en.wikipedia.org/wiki/Mean_opinion_score) for the audio and video quality
   the client will experience
 
 * A recommended frame rate and resolution to use for publishing to a session
@@ -254,7 +254,12 @@ promise's `catch()` function.
 This function runs a test publisher (using the API key, session ID and token provided in the constructor). Based on the measured video bitrate, audio bitrate, and the audio packet loss for
 the published stream, it provides the following results:
 
-* The MOS estimate (from 0 - 5) for the client participating in an OpenTok session.
+* Whether audio and video are supported and a reason why they aren't supported (if they aren't).
+
+* The MOS estimate (from 0 - 5) for the the audio and video published by the client.
+
+* Statistics for the test, including bitrate and packet loss ratio (for both audio and video),
+  as well as the video packet loss ratio.
 
 * The recommended supported publisher settings. These settings include the recommended video
   frame rate and resolution for a stream published by the client. Or, if the stats do not support
@@ -309,10 +314,6 @@ is invoked when the connectivity check completes. This callback function takes t
 
 * `results` -- An object that contains the following properties:
 
-  * `mos` (Number) -- The MOS for the call quality. This will be in a range from 0 to 5.
-    Values less than 1 indicate inadequate quality. Values greater than 4 are considered
-    excellent quality.
-
   * `video` (Object) -- Contains the following properties:
 
       * `supported` (Boolean) -- Whether the results indicate that video is supported.
@@ -343,6 +344,9 @@ is invoked when the connectivity check completes. This callback function takes t
         of the test. If the the test ran in audio-only mode (for example, because no camera was
         found), this property is undefined.
 
+      * `mos` (Number) -- The MOS score for the test video quality. This will be in a range from
+        1 to 4.5. See [MOS scores](#mos-scores) below for more information.
+
   * `audio` (Object) -- Contains the following properties:
 
     * `supported` (Boolean) -- Whether audio will be supported (`true`) or not (`false`).
@@ -356,8 +360,14 @@ is invoked when the connectivity check completes. This callback function takes t
     * `packetLossRatio` (Number) -- The video packet loss ratio during the last five seconds
       of the test.
 
+    * `mos` (Number) -- The MOS score for the test audio quality. This will be in a range from
+      1 to 4.5. See [MOS scores](#mos-scores) below for more information.
+
   `results` is undefined if there was an error in running the tests (and the `error` parameter
   is unset).
+
+  *Important:* v1 included a `results.mos` property (an overall MOS rating for the test). This
+  was removed in v2 and replaced with `results.audio.mos` and `results.video.mos` properties.
 
 The `completionCallback` function is optional. The `testConnectivity()` method returns a JavaScript
 promise. The promise is resolved on success, and the `results` object is passed into the `success`
@@ -367,6 +377,24 @@ promise's `catch()` function.
 The results, including the MOS score and the recommended video resolution and frame rate are
 subjective. You can adjust the values used in the source code, or you can use the data passed into
 the `updateCallback()` function and apply your own quality analysis algorithm.
+
+## MOS scores
+
+The `testQuality()` results include MOS scores for video (if supported) and audio (if supported).
+
+A MOS score is a rating of audio or video quality. In subjective scoring, a user is asked
+to rate quality from 1 (bad) to 5 (excellent). This module uses an objective test, calculating
+the MOS scores based on bitrate, packet loss ratio, and (for video) resolution. For example,
+the audio MOS calculation is based on the [ITU G.107 specification][itu-g107]. These algorithms
+limit the range of scores from 1.0 to 4.5.
+
+| MOS Score  | Meaning   |
+| ---------- | --------- |
+| 3.8 - 4.5  | Excellent |
+| 3.1 - 3.79 | Good      |
+| 2.4 - 3.09 | Fair      |
+| 1.7 - 2.39 | Poor      |
+| 1.0 - 1.69 | Bad       |
 
 ## Building the module
 
@@ -380,3 +408,6 @@ $ npm run build
 ## Sample app
 
 See the /sample subdirectory (and the /sample/README.md file) for a sample app.
+
+
+[itu-g107]: https://www.itu.int/rec/dologin_pub.asp?lang=s&id=T-REC-G.107-201402-S!!PDF-E

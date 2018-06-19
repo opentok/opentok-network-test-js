@@ -34,6 +34,7 @@ type TestQualityResults = {
     packetLoss: number,
     supported: boolean,
     reason?: string,
+    mos?: number,
   },
   video: {
     bitrate: number,
@@ -43,6 +44,7 @@ type TestQualityResults = {
     recommendedResolution?: string,
     supported: boolean,
     reason?: string,
+    mos?: number,
   },
 }
 
@@ -59,9 +61,7 @@ type UpdateCallbackStats = OT.SubscriberStats & { phase: string; };
    video: A;
  }
 
-interface QualityTestResults extends HasAudioVideo<AverageStats> {
-  mos: number;
-}
+interface QualityTestResults extends HasAudioVideo<AverageStats> {}
 
 interface AudioThreshold { bps: number, plr: number }
 interface VideoThreshold extends AudioThreshold { recommendedSetting: string }
@@ -84,6 +84,7 @@ interface AverageStats {
   frameRate?: number;
   recommendedFrameRate?: number;
   recommendedResolution?: string;
+  mos?: number;
 }
 
 type QualityEvaluationResults = {

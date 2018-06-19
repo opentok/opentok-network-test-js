@@ -158,7 +158,7 @@ describe('Network Test', () => {
     describe('Quality Test', () => {
       it('validates its onUpdate and onComplete callbacks', () => {
         expect(() => networkTest.testQuality('callback').toThrow(new InvalidOnUpdateCallback()))
-        expect(() => networkTest.testQuality(null, validOnUpdateCallback, 'callback').toThrow(new InvalidOnCompleteCallback()))
+        expect(() => networkTest.testQuality(validOnUpdateCallback, 'callback').toThrow(new InvalidOnCompleteCallback()))
         expect(() => networkTest.testConnectivity(null, validOnUpdateCallback, validOnCompleteCallback).not.toThrowError(NetworkTestError))
       });
 
@@ -177,16 +177,16 @@ describe('Network Test', () => {
           .finally(done);
       });
 
-      it('should return valid test results or an error', (done) => {
+      fit('should return valid test results or an error', (done) => {
         const validateResults = (results: QualityTestResults) => {
-          const { mos, audio, video } = results;
+          const { audio, video } = results;
 
-          expect(mos).toEqual(jasmine.any(Number));
 
           expect(audio.bitrate).toEqual(jasmine.any(Number));
           expect(audio.supported).toEqual(jasmine.any(Boolean));
           expect(audio.reason || '').toEqual(jasmine.any(String));
           expect(audio.packetLossRatio).toEqual(jasmine.any(Number));
+          expect(audio.mos).toEqual(jasmine.any(Number));
 
           expect(video.supported).toEqual(jasmine.any(Boolean));
           if (video.supported) {
@@ -195,6 +195,7 @@ describe('Network Test', () => {
             expect(video.frameRate).toEqual(jasmine.any(Number));
             expect(video.recommendedResolution).toEqual(jasmine.any(String));
             expect(video.recommendedFrameRate).toEqual(jasmine.any(Number));
+            expect(video.mos).toEqual(jasmine.any(Number));
           } else {
             expect(video.reason).toEqual(jasmine.any(String));
           }
@@ -206,7 +207,7 @@ describe('Network Test', () => {
 
         const onUpdate = (stats: Stats) => console.info('Subscriber stats:', stats);
 
-        networkTest.testQuality(null, onUpdate)
+        networkTest.testQuality(onUpdate)
           .then(validateResults)
           .catch(validateError)
           .finally(done);
@@ -241,7 +242,7 @@ describe('Network Test', () => {
 
         const onUpdate = (stats: Stats) => console.info('Subscriber stats:', stats);
 
-        networkTest.testQuality(null, onUpdate)
+        networkTest.testQuality(onUpdate)
           .then(validateResults)
           .catch(validateError)
           .finally(() => {
