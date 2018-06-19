@@ -169,50 +169,49 @@ It includes one parameter: `callback`.
 The `callback` parameter is the function to be called when the connectivity check completes.
 This callback function takes two parameters:
 
-* `error` -- An Error object. The `name` Property of this object is set to `ConnectivityError`.
-  The `message` property describes the reason for the error. This will usually result from an
-  invalid API key, session ID, or token passed into the `OTNetworkTest()` constructor. This
-  is only set when the test could not run because of an error. If the connectivity can run
-  (even if it results in failed tests), this property is undefined.
+* `error` -- This value is undefined. We will remove it in v2 of opentok-network-test.
+  See the description of the `failedTests` property of the `results` parameter, described below.
 
 * `results` -- An object that contains the following properties:
 
   * `success` (Boolean) -- `true` if connectivity to OpenTok servers succeeded; `false` if
     any connectivity test failed.
 
-  * `failedTests` (Array) -- If connectivity failed, this array contains a list of strings
-    defining the failure types: `'api'`, `'messaging'`, `'media'`, `'logging'`.
+  * `failedTests` (Array) -- If connectivity failed, this array contains an object for each
+    failure type. The object has two properties, `type` and `errors`:
+    
+    * `type` -- A sting defining the failure type. It will be set to one of the following values:
 
-    * `'api'` -- The test could not connect to the OpenTok API server. Connection to this
+      * `'api'` -- The test could not connect to the OpenTok API server. Connection to this
       server is required to connect to an OpenTok session.
 
-    * `'messaging'` -- The test could not establish a connection to the OpenTok messaging WebSocket.
+      * `'messaging'` -- The test could not establish a connection to the OpenTok messaging WebSocket.
       This connection is required to connect to an OpenTok session. In addition to other causes
       for WebSocket connectivity failures, this failure type will occur if you pass an invalid
       OpenTok API key, session ID, or token into the `OTNetworkTest()` constructor.
 
-    * `'media'` -- The test could not connect to the OpenTok Media Router. If your app uses
+      * `'media'` -- The test could not connect to the OpenTok Media Router. If your app uses
       a routed session, it will not succeed in using OpenTok. However, if your app uses
       a relayed session, the client *may* still succeed in using the OpenTok session, although
       it may fail if the relayed session requires use of a TURN server.
 
-    * `'logging'` -- The test could not connect to the OpenTok logging server. The OpenTok.js
+      * `'logging'` -- The test could not connect to the OpenTok logging server. The OpenTok.js
       library periodically logs data (such as video and audio quality) to this server. The client
       can still connect to an OpenTok session, however TokBox will not collect data that may help
       you debug issues with the session, using tools like [OpenTok
       Inspector](https://tokbox.com/developer/tools/inspector/).
 
-    If all connectivity tests succeed, this property is undefined.
-
-  `results` is undefined if there was an error in running the tests (and the `error` parameter
-  is unset).
+    * `error` -- An object defining the reason for the type of failure. The `name` property
+    and `message` property describe the reason for the error.
+ 
+    If all connectivity tests succeed, the `failedTests` property is undefined.
 
 The callback function is optional. The `testConnectivity()` method returns a JavaScript promise.
 The promise is resolved on success, and the `results` object is passed into the `success`
 callback method of the promise's `then()` function, or the `error` object is passed into the
 promise's `catch()` function.
 
-### OTNetworkTest.testQuality(options, updateCallback, completionCallback)
+### OTNetworkTest.testQuality(updateCallback, completionCallback)
 
 This function runs a test publisher (using the API key, session ID and token provided in the constructor). Based on the measured video bitrate, audio bitrate, and the audio packet loss for
 the published stream, it provides the following results:
@@ -264,11 +263,8 @@ Pass in a `null` value if you do not want to register an `updateCallback` functi
 The `completionCallback` parameter of the `OTNetworkTest.testQuality()` method is a function that
 is invoked when the connectivity check completes. This callback function takes two parameters:
 
-* `error` -- An Error object. The `name` property of this object is set to `testQualityError`.
-  The `message` property describes the reason for the error. This may result from an
-  invalid API key, session ID, or token passed into the `OTNetworkTest()` constructor. This
-  is only set when the test could not run because of an error. If the connectivity can run
-  (even if it results in failed tests), this property is undefined.
+* `error` -- An error object with a `name` property and a `message` property describing
+  the reason for the error. This parameter is undefined if there is no error.
 
 * `results` -- An object that contains the following properties:
 
