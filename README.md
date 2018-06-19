@@ -211,7 +211,7 @@ The promise is resolved on success, and the `results` object is passed into the 
 callback method of the promise's `then()` function, or the `error` object is passed into the
 promise's `catch()` function.
 
-### OTNetworkTest.testQuality(options, updateCallback, completionCallback)
+### OTNetworkTest.testQuality(updateCallback, completionCallback)
 
 This function runs a test publisher (using the API key, session ID and token provided in the constructor). Based on the measured video bitrate, audio bitrate, and the audio packet loss for
 the published stream, it provides the following results:
