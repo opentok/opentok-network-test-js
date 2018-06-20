@@ -18,6 +18,7 @@ import {
   MissingOpenTokInstanceError,
   MissingSessionCredentialsError,
 } from './errors';
+import { get } from './util';
 /* tslint:disable */
 import OTKAnalytics = require('opentok-solutions-logging');
 /* tslint:enable */
@@ -34,7 +35,13 @@ export default class NetworkTest {
   constructor(OT: OT.Client, credentials: OT.SessionCredentials) {
     this.validateOT(OT);
     this.validateCredentials(credentials);
-    this.otLogging = this.startLoggingEngine(credentials.apiKey, credentials.sessionId);
+    let loggingURL: string = get('properties.loggingURL', OT) || 'https://hlg.tokbox.com/prod';
+    loggingURL += '/logging/ClientEvent';
+    this.otLogging = this.startLoggingEngine(
+      credentials.apiKey,
+      credentials.sessionId,
+      loggingURL,
+    );
     this.OT = OT;
     this.credentials = credentials;
   }
@@ -71,7 +78,11 @@ export default class NetworkTest {
     }
   }
 
-  private startLoggingEngine(apiKey: string, sessionId: string): OTKAnalytics {
+  private startLoggingEngine(
+    apiKey: string,
+    sessionId: string,
+    url: string,
+  ): OTKAnalytics {
     return new OTKAnalytics({
       sessionId,
       partnerId: apiKey,
@@ -79,6 +90,8 @@ export default class NetworkTest {
       clientVersion: 'js-network-test-' + version,
       name: 'opentok-network-test',
       componentId: 'opentok-network-test',
+    }, {
+      url,
     });
   }
 
