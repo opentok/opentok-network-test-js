@@ -424,8 +424,8 @@ is invoked when the connectivity check completes. This callback function takes t
         of the test. If the the test ran in audio-only mode (for example, because no camera was
         found), this property is undefined.
 
-      * `mos` (Number) -- The MOS score for the test video quality. This will be in a range from
-        1 to 4.5. See [MOS scores](#mos-scores) below for more information.
+      * `mos` (Number) -- The MOS estimate for the test video quality. This will be in a range from
+        1 to 4.5. See [MOS estimates](#mos-estimates) below for more information.
 
   * `audio` (Object) -- Contains the following properties:
 
@@ -440,8 +440,8 @@ is invoked when the connectivity check completes. This callback function takes t
     * `packetLossRatio` (Number) -- The video packet loss ratio during the last five seconds
       of the test.
 
-    * `mos` (Number) -- The MOS score for the test audio quality. This will be in a range from
-      1 to 4.5. See [MOS scores](#mos-scores) below for more information.
+    * `mos` (Number) -- The MOS estimate for the test audio quality. This will be in a range from
+      1 to 4.5. See [MOS estimates](#mos-estimates) below for more information.
 
   `results` is undefined if there was an error in running the tests (and the `error` parameter
   is unset).
@@ -454,7 +454,7 @@ promise. The promise is resolved on success, and the `results` object is passed 
 callback method of the promise's `then()` function, or the `error` object is passed into the
 promise's `catch()` function.
 
-The results, including the MOS score and the recommended video resolution and frame rate are
+The results, including the MOS estimates and the recommended video resolution and frame rate are
 subjective. You can adjust the values used in the source code, or you can use the data passed into
 the `updateCallback()` function and apply your own quality analysis algorithm.
 
@@ -523,17 +523,17 @@ method of the Promise returned by `testQuality()` has a `name` property set to o
 |   `SUBSCRIBE_TO_SESSION_ERROR` | The test encountered an unknown error while attempting to subscribe to a test stream. | 
 |   `SUBSCRIBER_GET_STATS_ERROR` | The test failed to get audio and video statistics for the test stream. | 
 
-## MOS scores
+## MOS estimates
 
-The `testQuality()` results include MOS scores for video (if supported) and audio (if supported).
+The `testQuality()` results include MOS estimates for video (if supported) and audio (if supported).
 
-A MOS score is a rating of audio or video quality. In subjective scoring, a user is asked
+A MOS estimate is a rating of audio or video quality. In subjective scoring, a user is asked
 to rate quality from 1 (bad) to 5 (excellent). This module uses an objective test, calculating
-the MOS scores based on bitrate, packet loss ratio, and (for video) resolution. For example,
+the MOS value based on bitrate, packet loss ratio, and (for video) resolution. For example,
 the audio MOS calculation is based on the [ITU G.107 specification][itu-g107]. These algorithms
 limit the range of scores from 1.0 to 4.5.
 
-| MOS Score  | Meaning   |
+| MOS value  | Meaning   |
 | ---------- | --------- |
 | 3.8 - 4.5  | Excellent |
 | 3.1 - 3.79 | Good      |
