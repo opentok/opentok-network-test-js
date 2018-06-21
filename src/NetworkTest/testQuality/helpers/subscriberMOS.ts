@@ -1,8 +1,11 @@
 import isBitrateSteadyState from './isBitrateSteadyState';
 import calculateThroughput from './calculateThroughput';
 import MOSState from './MOSState';
-import { getOr, last, nth } from '../../../util';
-import { currentId } from 'async_hooks';
+import { OT } from '../../types/opentok';
+import { AV } from '../types/stats';
+import { getOr, last, nth } from '../../util';
+
+export type StatsListener = (error?: OT.OTError, stats?: OT.SubscriberStats) => void;
 
 const getPacketsLost = (ts: OT.TrackStats): number => getOr(0, 'packetsLost', ts);
 const getPacketsReceived = (ts: OT.TrackStats): number => getOr(0, 'packetsReceived', ts);
@@ -119,7 +122,8 @@ export default function subscriberMOS(
          * We know that we're receiving "faulty" stats when we see a negative
          * value for bytesReceived.
          */
-        if (stats.audio.bytesReceived < 0 || stats.video.bytesReceived < 0) {
+        const getPacketsLost = (ts: OT.TrackStats): number => getOr(0, 'packetsLost', ts);
+        if (stats.audio.bytesReceived < 0 || getOr(1, 'video.bytesReceived', stats) < 0) {
           mosState.clearInterval();
           return callback(mosState);
         }

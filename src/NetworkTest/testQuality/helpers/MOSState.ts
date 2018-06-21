@@ -1,3 +1,7 @@
+import { OT } from '../../types/opentok';
+
+import { AverageStats, Bandwidth, HasAudioVideo } from '../types/stats';
+
 export default class MOSState {
   statsLog: OT.SubscriberStats[];
   audioScoresLog: number[];
@@ -5,11 +9,13 @@ export default class MOSState {
   stats: HasAudioVideo<AverageStats> = { audio: {}, video: {} };
   bandwidth: Bandwidth = { audio: 0, video: 0 };
   intervalId?: number;
+  audioOnlyFallback: boolean;
 
-  constructor() {
+  constructor(audioOnly?: boolean) {
     this.statsLog = [];
     this.audioScoresLog = [];
     this.videoScoresLog = [];
+    this.audioOnlyFallback = !!audioOnly;
   }
 
   static readonly maxLogLength: number = 1000;
@@ -34,7 +40,7 @@ export default class MOSState {
   }
 
   private pruneAudioScores() {
-    const { audioScoresLog } = this;
+    const audioScoresLog = this.audioScoresLog;
     while (audioScoresLog.length > MOSState.maxLogLength) {
       audioScoresLog.shift();
     }
@@ -42,7 +48,7 @@ export default class MOSState {
   }
 
   private pruneVideoScores() {
-    const { videoScoresLog } = this;
+    const videoScoresLog = this.videoScoresLog;
     while (videoScoresLog.length > MOSState.maxLogLength) {
       videoScoresLog.shift();
     }
@@ -59,12 +65,13 @@ export default class MOSState {
     const hasVideoTrack = this.hasVideoTrack();
     if (hasAudioTrack && hasVideoTrack) {
       return Math.min(this.audioScore(), this.videoScore());
-    } else if (hasAudioTrack && !hasVideoTrack) {
-      return this.audioScore();
-    } else if (!hasAudioTrack && hasVideoTrack) {
-      return this.videoScore();
-    } else {
-      return 0;
     }
+    if (hasAudioTrack && !hasVideoTrack) {
+      return this.audioScore();
+    }
+    if (!hasAudioTrack && hasVideoTrack) {
+      return this.videoScore();
+    }
+    return 0;
   }
 }

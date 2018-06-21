@@ -71,3 +71,5 @@ sample/package-lock.json
 # test credentials
 /test/credentials.json
 
+# We're using npm (at least for now)
+yarn.lock

@@ -76,25 +76,14 @@ export class MediaDeviceError extends ConnectivityError {
     const defaultMessage = 'OpenTok failed to find media devices for this browser.';
     super(message || defaultMessage);
     Object.setPrototypeOf(this, MediaDeviceError.prototype);
-    this.name = this.constructor.name;
+    this.name = 'MediaDeviceError';
   }
 }
 
 export class FailedToObtainMediaDevices extends MediaDeviceError {
   constructor() {
     super('Failed to obtain media devices.');
-  }
-}
-
-export class NoVideoCaptureDevicesError extends MediaDeviceError {
-  constructor() {
-    super('This browser has no video capture devices');
-  }
-}
-
-export class NoAudioCaptureDevicesError extends MediaDeviceError {
-  constructor() {
-    super('This browser has no audio capture devices.');
+    this.name = 'FailedToObtainMediaDevices';
   }
 }
 
@@ -167,5 +156,3 @@ export class LoggingServerConnectionError extends ConnectivityError {
     this.name = this.constructor.name;
   }
 }
-
-

@@ -10,18 +10,26 @@
  */
 import axios from 'axios';
 import * as Promise from 'promise';
+/* tslint:disable */
+import OTKAnalytics = require('opentok-solutions-logging');
+/* tslint:enable */
+import { OT } from '../types/opentok';
+import { CompletionCallback } from '../types/callbacks';
 import * as e from './errors';
 import { OTErrorType, errorHasName } from '../errors/types';
 import { mapErrors, FailureCase } from './errors/mapping';
-import { get, getOr } from '../../util';
+import { getOr } from '../util';
+
+type AV = 'audio' | 'video';
 type CreateLocalPublisherResults = { publisher: OT.Publisher };
 type PublishToSessionResults = { session: OT.Session } & CreateLocalPublisherResults;
 type SubscribeToSessionResults = { subscriber: OT.Subscriber } & PublishToSessionResults;
+type DeviceMap = { [deviceId: string]: OT.Device };
+type AvailableDevices = { audio: DeviceMap, video: DeviceMap };
 export type ConnectivityTestResults = {
   success: boolean,
   failedTests: FailureCase[],
 };
-
 
 /**
  * Disconnect from a session. Once disconnected, remove all session
@@ -38,11 +46,11 @@ function disconnectFromSession(session: OT.Session) {
 }
 
 /**
- * Attempt to connect to the OpenTok session
+ * Attempt to connect to the OpenTok sessionope
  */
 function connectToSession(
-  OT: OpenTok,
-  { apiKey, sessionId, token }: SessionCredentials,
+  OT: OT.Client,
+  { apiKey, sessionId, token }: OT.SessionCredentials,
 ): Promise<OT.Session> {
   return new Promise((resolve, reject) => {
     const session = OT.initSession(apiKey, sessionId);
@@ -67,12 +75,8 @@ function connectToSession(
 /**
  * Ensure that audio and video devices are available
  */
-function validateDevices(OT: OpenTok): Promise<void> {
+function validateDevices(OT: OT.Client): Promise<AvailableDevices> {
   return new Promise((resolve, reject) => {
-
-    type DeviceMap = { [deviceId: string]: OT.Device };
-    type AvailableDevices = { audio: DeviceMap, video: DeviceMap };
-
     OT.getDevices((error?: OT.OTError, devices: OT.Device[] = []) => {
 
       if (error) {
@@ -87,12 +91,10 @@ function validateDevices(OT: OpenTok): Promise<void> {
           { audio: {}, video: {} },
         );
 
-        if (!Object.keys(availableDevices.audio).length) {
-          reject(new e.NoAudioCaptureDevicesError());
-        } else if (!Object.keys(availableDevices.video).length) {
-          reject(new e.NoVideoCaptureDevicesError());
+        if (!Object.keys(availableDevices.audio).length && !Object.keys(availableDevices.video).length) {
+          reject(new e.FailedToObtainMediaDevices());
         } else {
-          resolve();
+          resolve(availableDevices);
         }
       }
     });
@@ -102,10 +104,10 @@ function validateDevices(OT: OpenTok): Promise<void> {
 /**
  * Create a local publisher object using any specified device options
  */
-function checkCreateLocalPublisher(OT: OpenTok): Promise<CreateLocalPublisherResults> {
+function checkCreateLocalPublisher(OT: OT.Client): Promise<CreateLocalPublisherResults> {
   return new Promise((resolve, reject) => {
     validateDevices(OT)
-      .then(() => {
+      .then((availableDevices: AvailableDevices) => {
         const publisherDiv = document.createElement('div');
         publisherDiv.style.position = 'fixed';
         publisherDiv.style.bottom = '-1px';
@@ -119,6 +121,12 @@ function checkCreateLocalPublisher(OT: OpenTok): Promise<CreateLocalPublisherRes
           insertMode: 'append',
           showControls: false,
         };
+        if (!Object.keys(availableDevices.audio).length) {
+          publisherOptions.audioSource = null;
+        }
+        if (!Object.keys(availableDevices.video).length) {
+          publisherOptions.videoSource = null;
+        }
         const publisher = OT.initPublisher(publisherDiv, publisherOptions, (error?: OT.OTError) => {
           if (!error) {
             resolve({ publisher });
@@ -137,7 +145,7 @@ function checkCreateLocalPublisher(OT: OpenTok): Promise<CreateLocalPublisherRes
 /**
  * Attempt to publish to the session
  */
-function checkPublishToSession(OT: OpenTok, session: OT.Session): Promise<PublishToSessionResults> {
+function checkPublishToSession(OT: OT.Client, session: OT.Session): Promise<PublishToSessionResults> {
   return new Promise((resolve, reject) => {
     const disconnectAndReject = (rejectError: Error) => {
       disconnectFromSession(session).then(() => {
@@ -192,13 +200,12 @@ function checkSubscribeToSession({ session, publisher }: PublishToSessionResults
   });
 }
 
-
 /**
  * Attempt to connect to the tokbox client logging server
  */
-function checkLoggingServer(OT: OpenTok, input?: SubscribeToSessionResults): Promise<SubscribeToSessionResults> {
+function checkLoggingServer(OT: OT.Client, input?: SubscribeToSessionResults): Promise<SubscribeToSessionResults> {
   return new Promise((resolve, reject) => {
-    const url = `${OT.properties.loggingURL}/logging/ClientEvent`;
+    const url = `${getOr('', 'properties.loggingURL', OT)}/logging/ClientEvent`;
     const handleError = () => reject(new e.LoggingServerConnectionError());
 
     axios.post(url)
@@ -212,8 +219,8 @@ function checkLoggingServer(OT: OpenTok, input?: SubscribeToSessionResults): Pro
  * This method checks to see if the client can connect to TokBox servers required for using OpenTok
  */
 export function testConnectivity(
-  OT: OpenTok,
-  credentials: SessionCredentials,
+  OT: OT.Client,
+  credentials: OT.SessionCredentials,
   otLogging: OTKAnalytics,
   onComplete?: CompletionCallback<any>): Promise<ConnectivityTestResults> {
   return new Promise((resolve, reject) => {
