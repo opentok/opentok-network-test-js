@@ -1,4 +1,8 @@
-type QualityTestConfig = {
+
+export interface AudioThreshold { bps: number; plr: number; }
+export interface VideoThreshold extends AudioThreshold { recommendedSetting: string; }
+
+export type QualityTestConfig = {
   getStatsInterval: number,
   getStatsVideoAndAudioTestDuration: number,
   getStatsAudioOnlyDuration: number,

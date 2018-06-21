@@ -1,8 +1,6 @@
-/* tslint:disable */
-///<reference path="../src/types/index.d.ts"/>
+/* tslint: disable */
 
-import * as OT from '@opentok/client';
-import * as Promise from 'promise';
+import * as OTClient from '@opentok/client';
 import {
   primary as sessionCredentials,
   faultyLogging as badLoggingCredentials,
@@ -16,13 +14,11 @@ import {
   InvalidOnCompleteCallback,
   InvalidOnUpdateCallback,
 } from '../src/NetworkTest/errors';
-import { ConnectToSessionTokenError, ConnectToSessionSessionIdError, ConnectivityError, ConnectToSessionError, PublishToSessionError } from '../src/NetworkTest/testConnectivity/errors';
+import { ConnectivityError, ConnectToSessionError, PublishToSessionError } from '../src/NetworkTest/testConnectivity/errors';
 import { ConnectToSessionError as QualityTestSessionError } from '../src/NetworkTest/testQuality/errors';
-import { pick, head, nth } from '../src/util';
 import NetworkTest, { ErrorNames } from '../src/NetworkTest';
 import { ConnectivityTestResults } from '../src/NetworkTest/testConnectivity/index';
 import { QualityTestError } from '../src/NetworkTest/testQuality/errors/index';
-import { Stats } from 'fs-extra';
 
 type Util = jasmine.MatchersUtil;
 type CustomMatcher = jasmine.CustomMatcher;
@@ -30,8 +26,8 @@ type EqualityTesters = jasmine.CustomEqualityTester[];
 
 const malformedCredentials = { apiKey: '1234', invalidProp: '1234', token: '1234' };
 const badCredentials = { apiKey: '1234', sessionId: '1234', token: '1234' };
-const networkTest = new NetworkTest(OT, sessionCredentials);
-const badCredentialsNetworkTest = new NetworkTest(OT, badCredentials);
+const networkTest = new NetworkTest(OTClient, sessionCredentials);
+const badCredentialsNetworkTest = new NetworkTest(OTClient, badCredentials);
 const validOnUpdateCallback = (stats: OT.SubscriberStats) => stats;
 const validOnCompleteCallback = (error?: Error, results?: any) => results;
 
@@ -65,9 +61,9 @@ describe('NetworkTest', () => {
   it('its constructor requires OT and valid session credentials', () => {
     expect(() => new NetworkTest(sessionCredentials)).toThrow(new MissingOpenTokInstanceError());
     expect(() => new NetworkTest({}, sessionCredentials)).toThrow(new MissingOpenTokInstanceError());
-    expect(() => new NetworkTest(OT)).toThrow(new MissingSessionCredentialsError());
-    expect(() => new NetworkTest(OT, malformedCredentials)).toThrow(new IncompleteSessionCredentialsError());
-    expect(new NetworkTest(OT, sessionCredentials)).toBeInstanceOf(NetworkTest);
+    expect(() => new NetworkTest(OTClient)).toThrow(new MissingSessionCredentialsError());
+    expect(() => new NetworkTest(OTClient, malformedCredentials)).toThrow(new IncompleteSessionCredentialsError());
+    expect(new NetworkTest(OTClient, sessionCredentials)).toBeInstanceOf(NetworkTest);
   });
 
   fit('it contains a valid ErrorNames module', () => {
@@ -85,7 +81,7 @@ describe('NetworkTest', () => {
       it('should contain success and failedTests properties', (done) => {
         networkTest.testConnectivity()
           .then((results: ConnectivityTestResults) => {
-            expect(results.success).toBeABoolean
+            expect(results.success).toBeABoolean;
             expect(results.failedTests).toBeInstanceOf(Array);
             done();
           });
@@ -115,11 +111,11 @@ describe('NetworkTest', () => {
 
       it('should result in a failed test if the logging server cannot be reached', (done) => {
         const badLoggingOT = {
-          ...OT,
+          ...OTClient,
           ...{
             properties: {
-              ...OT.properties,
-              loggingURL: OT.properties.loggingURL.replace('tokbox', 'bad-tokbox')
+              ...OTClient.properties,
+              loggingURL: OTClient.properties.loggingURL.replace('tokbox', 'bad-tokbox')
             }
           }
         };
@@ -135,25 +131,25 @@ describe('NetworkTest', () => {
 
       it('should result in a failed test if the API server cannot be reached', (done) => {
         const badApiOT = {
-          ...OT,
+          ...OTClient,
           ...{
             properties: {
-              ...OT.properties,
-              apiURL: OT.properties.apiURL.replace('opentok', 'bad-opentok')
+              ...OTClient.properties,
+              apiURL: OTClient.properties.apiURL.replace('OTClient', 'bad-OTClient')
             }
           }
         };
         // Why is this necessary? (Is an old session still connected?)
-        OT.properties.apiURL = OT.properties.apiURL.replace('opentok', 'bad-opentok');
+        OTClient.properties.apiURL = OTClient.properties.apiURL.replace('OTClient', 'bad-OTClient');
         const badApiNetworkTest = new NetworkTest(badApiOT, badApiCredentials)
         badApiNetworkTest.testConnectivity()
           .then((results: ConnectivityTestResults) => {
             expect(results.failedTests).toBeInstanceOf(Array);
             if (results.failedTests.find(f => f.type === 'api')) {
-              done();
-              OT.properties.apiURL = OT.properties.apiURL.replace('bad-opentok', 'opentok');
+              OTClient.properties.apiURL = OTClient.properties.apiURL.replace('bad-OTClient', 'OTClient');
             }
-            OT.properties.apiURL = OT.properties.apiURL.replace('bad-opentok', 'opentok');
+            OTClient.properties.apiURL = OTClient.properties.apiURL.replace('bad-OTClient', 'OTClient');
+            done();
           });
       }, 10000);
     });

@@ -7,6 +7,15 @@
 */
 
 const version = require('../../package.json').version;
+import {
+  NetworkTestOptions,
+  SessionCredentials,
+  TestConnectivityCallback,
+  TestQualityCompletionCallback,
+  QualityTestResults,
+} from './types';
+import { OT } from './types/opentok';
+import { CompletionCallback, UpdateCallback, UpdateCallbackStats } from './types/callbacks';
 import { testConnectivity, ConnectivityTestResults } from './testConnectivity';
 import testQuality from './testQuality';
 import {
@@ -16,15 +25,13 @@ import {
   MissingOpenTokInstanceError,
   MissingSessionCredentialsError,
 } from './errors';
-import { getOr } from '../util';
-
 /* tslint:disable */
-const OTKAnalytics = require('opentok-solutions-logging');
+import OTKAnalytics = require('opentok-solutions-logging');
 /* tslint:enable */
 
 export default class NetworkTest {
-  credentials: SessionCredentials;
-  OT: OpenTok;
+  credentials: OT.SessionCredentials;
+  OT: OT.Client;
   otLogging: OTKAnalytics;
   options?: NetworkTestOptions;
 
@@ -32,7 +39,7 @@ export default class NetworkTest {
    * Returns an instance of NetworkConnectivity. See the "API reference" section of the
    * README.md file in the root of the opentok-network-test-js project for details.
    */
-  constructor(OT: OpenTok, credentials: SessionCredentials, options?: NetworkTestOptions) {
+  constructor(OT: OT.Client, credentials: SessionCredentials, options?: NetworkTestOptions) {
     this.validateOT(OT);
     this.validateCredentials(credentials);
     this.otLogging = this.startLoggingEngine(credentials.apiKey, credentials.sessionId);
@@ -41,13 +48,13 @@ export default class NetworkTest {
     this.options = options;
   }
 
-  private validateOT(OT: OpenTok) {
+  private validateOT(OT: OT.Client) {
     if (!OT || typeof OT !== 'object' || !OT.initSession) {
       throw new MissingOpenTokInstanceError();
     }
   }
 
-  private validateCredentials(credentials: SessionCredentials) {
+  private validateCredentials(credentials: OT.SessionCredentials) {
     if (!credentials) {
       throw new MissingSessionCredentialsError();
     }
@@ -94,7 +101,7 @@ export default class NetworkTest {
    */
   testQuality(
     updateCallback?: UpdateCallback<UpdateCallbackStats>,
-    completionCallback?: TestQualityCompletionCallback): Promise<any> {
+    completionCallback?: TestQualityCompletionCallback): Promise<QualityTestResults> {
     this.otLogging.logEvent({ action: 'testQuality', variation: 'Attempt' });
     if (updateCallback) {
       if (typeof updateCallback !== 'function' || updateCallback.length !== 1) {

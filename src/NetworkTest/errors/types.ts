@@ -6,7 +6,8 @@
  * Define errors returned by OpenTok.js
  */
 
-import { get } from '../../util';
+import { get } from '../util';
+import { OTError } from '../types/opentok/error';
 
 export enum ErrorNames {
   NETWORK_TEST_ERROR = 'NetworkTestError',
@@ -77,4 +78,4 @@ export enum OTErrorType {
 }
 
 export const errorHasName =
-  (error: OT.OTError | null = null, name: OTErrorType): boolean => get('name', error) === name;
+  (error: OTError | null = null, name: OTErrorType): boolean => get('name', error) === name;

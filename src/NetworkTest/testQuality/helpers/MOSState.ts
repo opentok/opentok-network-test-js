@@ -1,3 +1,7 @@
+import { OT } from '../../types/opentok';
+
+import { AverageStats, Bandwidth, HasAudioVideo } from '../types/stats';
+
 export default class MOSState {
   statsLog: OT.SubscriberStats[];
   audioScoresLog: number[];
@@ -36,7 +40,7 @@ export default class MOSState {
   }
 
   private pruneAudioScores() {
-    const { audioScoresLog } = this;
+    const audioScoresLog = this.audioScoresLog;
     while (audioScoresLog.length > MOSState.maxLogLength) {
       audioScoresLog.shift();
     }
@@ -44,7 +48,7 @@ export default class MOSState {
   }
 
   private pruneVideoScores() {
-    const { videoScoresLog } = this;
+    const videoScoresLog = this.videoScoresLog;
     while (videoScoresLog.length > MOSState.maxLogLength) {
       videoScoresLog.shift();
     }

@@ -2,12 +2,10 @@
  * @module Util
  */
 
-
 /**
  * Returns a copy of an object, setting or overriding the property with the provided value
  */
 export const assoc = (key: string, value: any, obj: Object): Object => ({ ...obj, [key]: value });
-
 
 /**
  * Returns a copy of an object, setting or overriding the property at the specified path
@@ -18,26 +16,33 @@ export const assocPath = (path: string, value: any, obj: Object): Object => {
   const key = keys[0];
   if (!keys.length) {
     return obj;
-  } else if (keys.length === 1) {
-    return assoc(key, value, obj);
-  } else {
-    const valForKey = get(key, obj);
-    const base: Object = (!!valForKey && typeof valForKey === 'object') ? valForKey : { ...obj, [key]: {} };
-    const update = assoc(key, assocPath(keys.slice(1).join('.'), value, get(key, base)), obj);
-    return { ...obj, ...update };
   }
+  if (keys.length === 1) {
+    return assoc(key, value, obj);
+  }
+
+  const valForKey = get(key, obj);
+  const base: Object = (!!valForKey && typeof valForKey === 'object') ? valForKey : { ...obj, [key]: {} };
+  const update = assoc(key, assocPath(keys.slice(1).join('.'), value, get(key, base)), obj);
+  return { ...obj, ...update };
+
 };
 
 /**
  * Returns a (nested) property from the provided object or undefined
  */
 export const get = <T>(props: string, obj: any): T => {
-  let result = Object.assign({}, obj);
-  const properties = typeof props === 'string' ? props.split('.') : props;
-  properties.some((p) => {
-    result = result[p];
-    return (result === undefined);
-  });
+  if (!obj) {
+    return obj;
+  }
+  const [current, ...rest] = props.split('.');
+  const result = obj[current];
+  if (result === undefined || result === null) {
+    return result;
+  }
+  if (rest.length) {
+    return get(rest.join('.'), result);
+  }
   return result;
 };
 
@@ -56,7 +61,7 @@ export const pick =
     props: K[],
     obj: T,
     all: boolean = false): Partial<T> => {
-    const update = (acc: object, prop: string): Partial<T> =>
+    const update = (acc: object, prop: K): Partial<T> =>
       obj[prop] !== undefined || all ? { ...acc, [prop]: obj[prop] } : acc;
     return props.reduce(update, {});
   };
@@ -67,7 +72,6 @@ export const pick =
  */
 export const pickAll = <T extends { [key: string]: any }, K extends keyof T>(props: K[], obj: T): Partial<T> =>
   pick(props, obj, true);
-
 
 /**
  * Returns the last element from an array
