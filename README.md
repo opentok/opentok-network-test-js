@@ -290,7 +290,7 @@ two properties:
         }
       }
     });
-    ```
+    ````
 
   If all connectivity tests succeed, the `failedTests` property is undefined.
 
