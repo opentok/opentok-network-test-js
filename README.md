@@ -125,7 +125,7 @@ otNetworkTest.testQuality(updateCallback(stats) {
 ).catch((error) => {
   console.log('OpenTok quality test error', error);
 });
-````
+```
 
 This code uses Promises returned by the `OTNetworkTest.testConnectivity()`
 and `OTNetworkTest.testQuality()` methods. Alternatively, you can pass completion
@@ -208,9 +208,9 @@ message property describes the error. You should check the `name` property to de
 type of error. The `name` property will be set to one of the values defined as properties of
 the `ErrorNames` object (see [ErrorNames](#errornames)):
 
-    For example:
+For example:
 
-    ```javascript
+  ```javascript
     try {
       const otNetworkTest = new NetworkTest(OT, sessionInfo);
     } catch (error) {
@@ -227,7 +227,7 @@ the `ErrorNames` object (see [ErrorNames](#errornames)):
           console.error('Unknown error .');
       }
     }
-    ````
+```
 
 ### OTNetworkTest.testConnectivity(callback)
 
@@ -343,7 +343,7 @@ video in the test stream. The object has the following data:
     timestamp: 1512679143897, // The timestamp of the sample
     phase: 'audio-video' // Either 'audio-video' or 'audio-only'
   }
-  ````
+  ```
 
 The `phase` property is set to 'audio-video' during the initial audio-video test. If a
 secondary audio-only test is required (because audio quality was not acceptable during the
