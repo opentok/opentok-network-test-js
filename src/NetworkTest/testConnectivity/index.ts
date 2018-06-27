@@ -15,9 +15,7 @@ import OTKAnalytics = require('opentok-solutions-logging');
 /* tslint:enable */
 import {
   NetworkTestOptions,
-  SessionCredentials,
-  TestConnectivityCallback,
-} from '../types';
+} from '../index';
 import { OT } from '../types/opentok';
 import { CompletionCallback } from '../types/callbacks';
 import * as e from './errors';
@@ -31,6 +29,8 @@ type PublishToSessionResults = { session: OT.Session } & CreateLocalPublisherRes
 type SubscribeToSessionResults = { subscriber: OT.Subscriber } & PublishToSessionResults;
 type DeviceMap = { [deviceId: string]: OT.Device };
 type AvailableDevices = { audio: DeviceMap, video: DeviceMap };
+
+export type TestConnectivityCallback = (results: ConnectivityTestResults | null) => void
 export type ConnectivityTestResults = {
   success: boolean,
   failedTests: FailureCase[],

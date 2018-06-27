@@ -15,10 +15,7 @@ import OTKAnalytics = require('opentok-solutions-logging');
 import * as Promise from 'promise';
 import {
   NetworkTestOptions,
-  SessionCredentials,
-  TestQualityCompletionCallback,
-  QualityTestResults,
-} from '../types';
+} from '../index';
 import { OT } from '../types/opentok';
 import { AverageStats, AV, Bandwidth, HasAudioVideo } from './types/stats';
 import { CompletionCallback, UpdateCallback, UpdateCallbackStats } from '../types/callbacks';
@@ -37,6 +34,13 @@ interface QualityTestResultsBuilder {
   mosScore?: number;
   bandwidth?: Bandwidth;
 }
+
+export interface QualityTestResults extends HasAudioVideo<AverageStats> {}
+
+export type TestQualityCompletionCallback = (
+  error: Error | undefined,
+  results: QualityTestResults | null,
+) => void;
 
 type MOSResultsCallback = (state: MOSState) => void;
 type DeviceMap = { [deviceId: string]: OT.Device };
@@ -275,7 +279,7 @@ function validateBrowser(): Promise<void> {
 /**
  * This method checks to see if the client can publish to an OpenTok session.
  */
-export default function testQuality(
+export function testQuality(
   OT: OT.Client,
   credentials: OT.SessionCredentials,
   otLogging: OTKAnalytics,
