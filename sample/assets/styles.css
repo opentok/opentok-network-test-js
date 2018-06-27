@@ -110,6 +110,7 @@ div.prettyBox img {
 
 #quality_status_container > div {
   display: flex;
+  justify-content: center;
 }
 
 #quality_status_container #audio, #quality_status_container #video {
@@ -122,7 +123,7 @@ div.prettyBox img {
 
 #quality_status_container .results {
   display: none;
-  min-height: 80px
+  min-height: 96px
 }
 
 #video-unsupported-reason {

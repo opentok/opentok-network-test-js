@@ -1,6 +1,7 @@
 // Utility functions to display test results in the sample app UI
 import createChart from './chart.js';
 var charts = {};
+var audioOnlyTest;
 var resultCount = {
   audio: 0,
   video: 0
@@ -26,6 +27,14 @@ function convertFailedTestsToString(failedTests) {
     mappedFailures.push('OpenTok logging server');
   }
   return mappedFailures.join(', ');
+}
+
+export function init(audioOnly) {
+  audioOnlyTest = audioOnly;
+  document.getElementById('quality_status_container').style.display = 'block';
+  if (audioOnlyTest) {
+    document.getElementById('video').style.display = 'none';
+  }
 }
 
 export function displayTestConnectivityResults(results) {
@@ -120,7 +129,7 @@ export function displayTestQualityResults(error, results) {
   resultsEl.querySelector('#video-recommendedFrameRate').textContent =
     results.video.recommendedFrameRate ? results.video.recommendedFrameRate + ' fps' : '--';
   if (results.audio.supported) {
-    if (results.video.supported) {
+    if (results.video.supported || audioOnlyTest) {
       statusIconEl.src = 'assets/icon_pass.svg';
     } else {
       statusIconEl.src = 'assets/icon_warning.svg';
