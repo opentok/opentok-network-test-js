@@ -85,7 +85,7 @@ export default class NetworkTest {
   testConnectivity(
     onComplete?: TestConnectivityCallback): Promise<ConnectivityTestResults> {
     this.otLogging.logEvent({ action: 'testConnectivity', variation: 'Attempt' });
-    if (typeof onComplete !== 'function' || onComplete.length !== 1) {
+    if (onComplete && (typeof onComplete !== 'function' || onComplete.length !== 1)) {
       this.otLogging.logEvent({ action: 'testConnectivity', variation: 'Failure' });
       throw new InvalidOnCompleteCallback();
     }

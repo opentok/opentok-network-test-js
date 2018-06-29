@@ -14,7 +14,7 @@ import {
   InvalidOnCompleteCallback,
   InvalidOnUpdateCallback,
 } from '../src/NetworkTest/errors';
-import { ConnectivityError, ConnectToSessionError, PublishToSessionError } from '../src/NetworkTest/testConnectivity/errors';
+import { ConnectivityError, ConnectToSessionTokenError, PublishToSessionError } from '../src/NetworkTest/testConnectivity/errors';
 import { ConnectToSessionError as QualityTestSessionError } from '../src/NetworkTest/testQuality/errors';
 import NetworkTest, { ErrorNames } from '../src/NetworkTest';
 import { ConnectivityTestResults } from '../src/NetworkTest/testConnectivity/index';
@@ -66,7 +66,7 @@ describe('NetworkTest', () => {
     expect(new NetworkTest(OTClient, sessionCredentials)).toBeInstanceOf(NetworkTest);
   });
 
-  fit('it contains a valid ErrorNames module', () => {
+  it('it contains a valid ErrorNames module', () => {
     expect(ErrorNames.MISSING_OPENTOK_INSTANCE).toBe('MissingOpenTokInstanceError');
   });
 
@@ -93,10 +93,9 @@ describe('NetworkTest', () => {
           expect(results.failedTests).toBeInstanceOf(Array);
           const [initialFailure, secondaryFailure] = results.failedTests;
           expect(initialFailure.type).toBe('messaging');
-          expect(initialFailure.error).toBeInstanceOf(ConnectToSessionError);
+          expect(initialFailure.error.name).toBe(ErrorNames.CONNECT_TO_SESSION_TOKEN_ERROR);
           expect(secondaryFailure.type).toBe('media');
-          expect(secondaryFailure.error).toBeInstanceOf(PublishToSessionError);
-
+          expect(secondaryFailure.error.name).toBe(ErrorNames.FAILED_MESSAGING_SERVER_TEST);
         };
 
         const validateError = (error?: ConnectivityError) => {
@@ -167,7 +166,7 @@ describe('NetworkTest', () => {
         };
 
         const validateError = (error?: QualityTestError) => {
-          expect(error).toBeInstanceOf(QualityTestSessionError);
+          expect(error.name).toBe(ErrorNames.CONNECT_TO_SESSION_ERROR);
         };
 
         badCredentialsNetworkTest.testQuality(null)
@@ -176,7 +175,7 @@ describe('NetworkTest', () => {
           .finally(done);
       });
 
-      fit('should return valid test results or an error', (done) => {
+      it('should return valid test results or an error', (done) => {
         const validateResults = (results: QualityTestResults) => {
           const { audio, video } = results;
 
@@ -201,7 +200,7 @@ describe('NetworkTest', () => {
         };
 
         const validateError = (error?: QualityTestError) => {
-          expect(error).toBe(QualityTestError);
+          expect(error.name).toBe(QUALITY_TEST_ERROR);
         };
 
         const onUpdate = (stats: Stats) => console.info('Subscriber stats:', stats);
@@ -224,12 +223,11 @@ describe('NetworkTest', () => {
         const validateResults = (results: QualityTestResults) => {
           const { mos, audio, video } = results;
 
-          expect(mos).toEqual(jasmine.any(Number));
-
           expect(audio.bitrate).toEqual(jasmine.any(Number));
           expect(audio.supported).toEqual(jasmine.any(Boolean));
           expect(audio.reason || '').toEqual(jasmine.any(String));
           expect(audio.packetLossRatio).toEqual(jasmine.any(Number));
+          expect(audio.mos).toEqual(jasmine.any(Number));
 
           expect(video.supported).toEqual(false);
           expect(video.reason).toEqual('No camera was found.');
