@@ -117,12 +117,12 @@ const sessionInfo = {
 const options = {audioOnly: true};
 const otNetworkTest = new NetworkTest(OT, sessionInfo, options);
 
-otNetworkTest.testQuality(updateCallback(stats) {
+otNetworkTest.testQuality(function updateCallback(stats) {
   const currentStats = stats[stats.length - 1];
   console.log('testQuality stats', currentStats);
 }).then((results) => {
   console.log('OpenTok quality results', results);
-).catch((error) => {
+}).catch((error) => {
   console.log('OpenTok quality test error', error);
 });
 ```
@@ -206,27 +206,25 @@ The `OTNetworkTest()` constructor includes the following parameters:
 The constructor throws an Error object with a `message` property and a `name` property. The
 message property describes the error. You should check the `name` property to determine the
 type of error. The `name` property will be set to one of the values defined as properties of
-the `ErrorNames` object (see [ErrorNames](#errornames)):
+the `ErrorNames` object (see [ErrorNames](#errornames)). For example:
 
-For example:
-
-  ```javascript
-    try {
-      const otNetworkTest = new NetworkTest(OT, sessionInfo);
-    } catch (error) {
-      switch (error.name) {
-        case ErrorNames.MISSING_OPENTOK_INSTANCE:
-          console.error('Missing OT instance in constructor.');
-          break;
-        case ErrorNames.INCOMPLETE_SESSON_CREDENTIALS:
-        case ErrorNames.MISSING_SESSON_CREDENTIALS:
-        case ErrorNames.INVALID_SESSON_CREDENTIALS:
-          console.error('Missing or invalid OpenTok session credentials.');
-          break;
-        default:
-          console.error('Unknown error .');
-      }
-    }
+```javascript
+try {
+  const otNetworkTest = new NetworkTest(OT, sessionInfo);
+} catch (error) {
+  switch (error.name) {
+    case ErrorNames.MISSING_OPENTOK_INSTANCE:
+      console.error('Missing OT instance in constructor.');
+      break;
+    case ErrorNames.INCOMPLETE_SESSON_CREDENTIALS:
+    case ErrorNames.MISSING_SESSON_CREDENTIALS:
+    case ErrorNames.INVALID_SESSON_CREDENTIALS:
+      console.error('Missing or invalid OpenTok session credentials.');
+      break;
+    default:
+      console.error('Unknown error .');
+  }
+}
 ```
 
 ### OTNetworkTest.testConnectivity(callback)
