@@ -128,29 +128,26 @@ describe('NetworkTest', () => {
           });
       }, 10000);
 
-      it('should result in a failed test if the API server cannot be reached', (done) => {
-        const badApiOT = {
-          ...OTClient,
-          ...{
-            properties: {
-              ...OTClient.properties,
-              apiURL: OTClient.properties.apiURL.replace('OTClient', 'bad-OTClient')
-            }
-          }
-        };
-        // Why is this necessary? (Is an old session still connected?)
-        OTClient.properties.apiURL = OTClient.properties.apiURL.replace('OTClient', 'bad-OTClient');
-        const badApiNetworkTest = new NetworkTest(badApiOT, badApiCredentials)
+      fit('should result in a failed test if the API server cannot be reached', (done) => {
+        const realInitSession = OT.initSession;
+        spyOn(OT, 'initSession').and.callFake((apiKey, sessionId) => {
+          const session = realInitSession(apiKey, sessionId);
+          spyOn(session, 'connect').and.callFake((token, callback) => {
+            const error = new Error();
+            error.name = 'OT_CONNECT_FAILED';
+            callback(error);
+          });
+          return session;
+        });
+        const badApiNetworkTest = new NetworkTest(OT, sessionCredentials);
         badApiNetworkTest.testConnectivity()
           .then((results: ConnectivityTestResults) => {
             expect(results.failedTests).toBeInstanceOf(Array);
             if (results.failedTests.find(f => f.type === 'api')) {
-              OTClient.properties.apiURL = OTClient.properties.apiURL.replace('bad-OTClient', 'OTClient');
+              done();
             }
-            OTClient.properties.apiURL = OTClient.properties.apiURL.replace('bad-OTClient', 'OTClient');
-            done();
           });
-      }, 10000);
+      }, 1000);
     });
 
     describe('Quality Test', () => {
