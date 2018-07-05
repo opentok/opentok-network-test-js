@@ -128,7 +128,7 @@ describe('NetworkTest', () => {
           });
       }, 10000);
 
-      fit('should result in a failed test if the API server cannot be reached', (done) => {
+      it('should result in a failed test if the API server cannot be reached', (done) => {
         const realInitSession = OT.initSession;
         spyOn(OT, 'initSession').and.callFake((apiKey, sessionId) => {
           const session = realInitSession(apiKey, sessionId);
