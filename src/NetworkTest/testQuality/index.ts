@@ -62,7 +62,7 @@ function connectToSession(session: OT.Session, token: string): Promise<OT.Sessio
             reject(new e.ConnectToSessionTokenError());
           } else if (errorHasName(error, OTErrorType.OT_INVALID_SESSION_ID)) {
             reject(new e.ConnectToSessionSessionIdError());
-          } else if (errorHasName(error, OTErrorType.CONNECT_FAILED)) {
+          } else if (errorHasName(error, OTErrorType.OT_CONNECT_FAILED)) {
             reject(new e.ConnectToSessionNetworkError());
           } else {
             reject(new e.ConnectToSessionError());
