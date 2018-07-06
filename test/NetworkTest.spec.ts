@@ -52,6 +52,29 @@ const customMatchers: jasmine.CustomMatcherFactories = {
   },
 };
 
+const testConnectFailure = (errorName, expectedType) => {
+  return new Promise((resolve, reject) => {
+    const realInitSession = OT.initSession;
+    spyOn(OT, 'initSession').and.callFake((apiKey, sessionId) => {
+      const session = realInitSession(apiKey, sessionId);
+      spyOn(session, 'connect').and.callFake((token, callback) => {
+        const error = new Error();
+        error.name = errorName;
+        callback(error);
+      });
+      return session;
+    });
+    const netTest = new NetworkTest(OT, sessionCredentials);
+    netTest.testConnectivity()
+      .then((results: ConnectivityTestResults) => {
+        expect(results.failedTests).toBeInstanceOf(Array);
+        if (results.failedTests.find(f => f.type === expectedType)) {
+          resolve();
+        }
+      });
+  });
+};
+
 describe('NetworkTest', () => {
 
   beforeAll(() => {
@@ -129,25 +152,42 @@ describe('NetworkTest', () => {
       }, 10000);
 
       it('should result in a failed test if the API server cannot be reached', (done) => {
-        const realInitSession = OT.initSession;
-        spyOn(OT, 'initSession').and.callFake((apiKey, sessionId) => {
-          const session = realInitSession(apiKey, sessionId);
-          spyOn(session, 'connect').and.callFake((token, callback) => {
-            const error = new Error();
-            error.name = 'OT_CONNECT_FAILED';
-            callback(error);
-          });
-          return session;
+        testConnectFailure('OT_CONNECT_FAILED', 'api').then(done);
+      }, 1000);
+
+      it('results in a failed test when session.connect() gets an invalid HTTP status', (done) => {
+        testConnectFailure('OT_INVALID_HTTP_STATUS', 'api').then(done);
+      }, 1000);
+
+      it('results in a failed test if session.connect() gets an authentication error', (done) => {
+        testConnectFailure('OT_AUTHENTICATION_ERROR', 'messaging').then(done);
+      }, 1000);
+      it('results in a failed test if OT.getDevices() returns an error', (done) => {
+        spyOn(OT, 'getDevices').and.callFake((callback) => {
+          callback(new Error());
         });
-        const badApiNetworkTest = new NetworkTest(OT, sessionCredentials);
-        badApiNetworkTest.testConnectivity()
+        networkTest.testConnectivity()
           .then((results: ConnectivityTestResults) => {
+            expect(results.success).toBe(false);
             expect(results.failedTests).toBeInstanceOf(Array);
-            if (results.failedTests.find(f => f.type === 'api')) {
+            if (results.failedTests.find(f => f.type === 'OpenTok.js')) {
               done();
             }
           });
-      }, 1000);
+      }, 10000);
+      it('results in a failed test if there are no cameras or mics', (done) => {
+        spyOn(OT, 'getDevices').and.callFake((callback) => {
+          callback(null, []);
+        });
+        networkTest.testConnectivity()
+          .then((results: ConnectivityTestResults) => {
+            expect(results.success).toBe(false);
+            expect(results.failedTests).toBeInstanceOf(Array);
+            if (results.failedTests.find(f => f.type === 'OpenTok.js')) {
+              done();
+            }
+          });
+      }, 10000);
     });
 
     describe('Quality Test', () => {
@@ -163,7 +203,7 @@ describe('NetworkTest', () => {
         };
 
         const validateError = (error?: QualityTestError) => {
-          expect(error.name).toBe(ErrorNames.CONNECT_TO_SESSION_ERROR);
+          expect(error.name).toBe(ErrorNames.CONNECT_TO_SESSION_TOKEN_ERROR);
         };
 
         badCredentialsNetworkTest.testQuality(null)
@@ -210,12 +250,12 @@ describe('NetworkTest', () => {
 
       it('should return valid test results or an error when there is no camera', (done) => {
         const realOTGetDevices = OT.getDevices;
-        OT.getDevices = (callbackFn) => {
+        spyOn(OT, 'getDevices').and.callFake((callbackFn) => {
           realOTGetDevices((error, devices) => {
-            devices = devices.filter(device => device.kind != 'videoInput');
-            callbackFn(error, devices);
+            const onlyAudioDevices = devices.filter(device => device.kind !== 'videoInput');
+            callbackFn(error, onlyAudioDevices);
           });
-        };
+        });
 
         const validateResults = (results: QualityTestResults) => {
           const { mos, audio, video } = results;
@@ -239,10 +279,7 @@ describe('NetworkTest', () => {
         networkTest.testQuality(onUpdate)
           .then(validateResults)
           .catch(validateError)
-          .finally(() => {
-            OT.getDevices = realOTGetDevices;
-            done();
-          });
+          .finally(done);
       }, 8000);
     });
   });
