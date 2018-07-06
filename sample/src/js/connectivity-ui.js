@@ -11,24 +11,6 @@ var prevBitsReceived = {
   video: 0
 };
 
-function convertFailedTestsToString(failedTests) {
-  var failureTypes = [];
-  for (var i = 0; i < failedTests.length; i++) {
-    failureTypes.push(failedTests[i].type);
-  }
-  var mappedFailures = [];
-  if (failureTypes.indexOf('api') > -1) {
-    mappedFailures.push('OpenTok API server');
-  }
-  if (failureTypes.indexOf('media') > -1) {
-    mappedFailures.push('OpenTok Media Router');
-  }
-  if (failureTypes.indexOf('logging') > -1) {
-    mappedFailures.push('OpenTok logging server');
-  }
-  return mappedFailures.join(', ');
-}
-
 export function init(audioOnly) {
   audioOnlyTest = audioOnly;
   document.getElementById('quality_status_container').style.display = 'block';
