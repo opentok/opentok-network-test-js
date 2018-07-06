@@ -62,7 +62,7 @@ function connectToSession(
     session.connect(token, (error?: OT.OTError) => {
       if (errorHasName(error, OTErrorType.OT_AUTHENTICATION_ERROR)) {
         reject(new e.ConnectToSessionTokenError());
-      } else if (errorHasName(error, OTErrorType.INVALID_SESSION_ID)) {
+      } else if (errorHasName(error, OTErrorType.OT_INVALID_SESSION_ID)) {
         reject(new e.ConnectToSessionSessionIdError());
       } else if (errorHasName(error, OTErrorType.OT_CONNECT_FAILED)) {
         reject(new e.ConnectToSessionNetworkError());

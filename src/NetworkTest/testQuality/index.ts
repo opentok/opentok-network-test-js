@@ -43,7 +43,7 @@ export type TestQualityCompletionCallback = (
 ) => void;
 
 type MOSResultsCallback = (state: MOSState) => void;
-type DeviceMap = { [deviceId: string]: OT.Device };
+type DeviceMap = { [deviceId: string]: OT.Device }
 type AvailableDevices = { audio: DeviceMap, video: DeviceMap };
 
 let audioOnly = false; // By default, the initial test is audio-video
@@ -58,9 +58,9 @@ function connectToSession(session: OT.Session, token: string): Promise<OT.Sessio
     } else {
       session.connect(token, (error?: OT.OTError) => {
         if (error) {
-          if (errorHasName(error, OTErrorType.AUTHENTICATION_ERROR)) {
+          if (errorHasName(error, OTErrorType.OT_AUTHENTICATION_ERROR)) {
             reject(new e.ConnectToSessionTokenError());
-          } else if (errorHasName(error, OTErrorType.INVALID_SESSION_ID)) {
+          } else if (errorHasName(error, OTErrorType.OT_INVALID_SESSION_ID)) {
             reject(new e.ConnectToSessionSessionIdError());
           } else if (errorHasName(error, OTErrorType.CONNECT_FAILED)) {
             reject(new e.ConnectToSessionNetworkError());
