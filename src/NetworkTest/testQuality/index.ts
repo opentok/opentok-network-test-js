@@ -43,7 +43,7 @@ export type TestQualityCompletionCallback = (
 ) => void;
 
 type MOSResultsCallback = (state: MOSState) => void;
-type DeviceMap = { [deviceId: string]: OT.Device }
+type DeviceMap = { [deviceId: string]: OT.Device };
 type AvailableDevices = { audio: DeviceMap, video: DeviceMap };
 
 let audioOnly = false; // By default, the initial test is audio-video

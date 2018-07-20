@@ -30,7 +30,7 @@ type SubscribeToSessionResults = { subscriber: OT.Subscriber } & PublishToSessio
 type DeviceMap = { [deviceId: string]: OT.Device };
 type AvailableDevices = { audio: DeviceMap, video: DeviceMap };
 
-export type TestConnectivityCallback = (results: ConnectivityTestResults | null) => void
+export type TestConnectivityCallback = (results: ConnectivityTestResults | null) => void;
 export type ConnectivityTestResults = {
   success: boolean,
   failedTests: FailureCase[],
@@ -123,7 +123,7 @@ function checkCreateLocalPublisher(
         publisherDiv.style.height = '1px';
         publisherDiv.style.opacity = '0.01';
         document.body.appendChild(publisherDiv);
-        let publisherOptions: OT.PublisherProperties = {
+        const publisherOptions: OT.PublisherProperties = {
           width: '100%',
           height: '100%',
           insertMode: 'append',
