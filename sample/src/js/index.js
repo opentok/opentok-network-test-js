@@ -1,7 +1,17 @@
 import NetworkTest from 'opentok-network-test-js';
 import createChart from './chart.js';
 import * as ConnectivityUI from './connectivity-ui.js';
-import sessionInfo from './config.js';
+import config from './config.js';
+var sessionInfo = config;
+
+var isSafari = /constructor/i.test(window.HTMLElement) || (function (p) { return p.toString() === "[object SafariRemoteNotification]"; })(!window['safari'] || (typeof safari !== 'undefined' && safari.pushNotification));
+
+if (isSafari) {
+  if (config.h264.apiKey) {
+    sessionInfo = config.h264;
+  }
+} 
+
 var otNetworkTest;
 var audioOnly;
 
@@ -15,6 +25,7 @@ precallDiv.querySelector('#precall button').addEventListener('click', function()
 function startTest() {
   audioOnly = precallDiv.querySelector('#precall input').checked;
   var options = {audioOnly: audioOnly};
+  console.log(sessionInfo)
   otNetworkTest = new NetworkTest(OT, sessionInfo, options);
   otNetworkTest.testConnectivity(function(results) {
     ConnectivityUI.displayTestConnectivityResults(results);
