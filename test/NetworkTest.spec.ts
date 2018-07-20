@@ -408,24 +408,6 @@ describe('NetworkTest', () => {
           });
       });
 
-      it('should return an unsupported browser error if the browser is Safari', () => {
-        const webkitRTCPeerConnection = window.webkitRTCPeerConnection;
-        delete window.webkitRTCPeerConnection;
-        const mozGetUserMedia = navigator.mozGetUserMedia;
-        navigator.mozGetUserMedia = undefined;
-        spyOn(window.navigator, 'webkitGetUserMedia').and.callFake(() => {
-          return undefined;
-        });
-        spyOnProperty(window.navigator, 'userAgent', 'get').and.returnValue('Version/11.1');
-        networkTest.testQuality(null)
-          .then(validateResultsUndefined)
-          .catch(validateUnsupportedBrowserError)
-          .finally(() => {
-            navigator.mozGetUserMedia = mozGetUserMedia;
-            window.webkitRTCPeerConnection = webkitRTCPeerConnection;
-          });
-      });
-
       it('results in a failed test if OT.initPublisher() returns an error', (done) => {
         spyOn(OT, 'initPublisher').and.callFake((target, options, callback) => {
           callback(new Error());

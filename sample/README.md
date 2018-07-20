@@ -25,9 +25,8 @@ Edit the properties in that file:
 
 If you also want to support Safari, go to your [OpenTok account](https://tokbox.com/account)
 and create a project with H.264 set as the preferred video codec. Obtain a test session ID
-and token for that project. Then make a copy of the /sample/src/js/configSample.js file,
-saving it to sample/src/js/configH264.js (Note "H264" in the file name). Edit the properties
-in that file to match the H.264 project API key, test session ID, and token.
+and token for that project. Then edit the `h264` property values in the sample/src/js/config.js
+file.
 
 For test purposes, you can obtain a test session ID an token from the [TokBox account
 page](https://tokbox.com/account). However, in a real application, use the [OpenTok server

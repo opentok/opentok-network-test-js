@@ -25,7 +25,6 @@ precallDiv.querySelector('#precall button').addEventListener('click', function()
 function startTest() {
   audioOnly = precallDiv.querySelector('#precall input').checked;
   var options = {audioOnly: audioOnly};
-  console.log(sessionInfo)
   otNetworkTest = new NetworkTest(OT, sessionInfo, options);
   otNetworkTest.testConnectivity(function(results) {
     ConnectivityUI.displayTestConnectivityResults(results);
