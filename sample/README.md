@@ -21,7 +21,12 @@ Edit the properties in that file:
    Router](https://tokbox.com/developer/guides/create-session/#media-mode).
 
 * `token` -- A token corresponding to the test session. Generate a test
-  token that has its role set to `publisher` or `moderator`. 
+  token that has its role set to `publisher` or `moderator`.
+
+If you also want to support Safari, go to your [OpenTok account](https://tokbox.com/account)
+and create a project with H.264 set as the preferred video codec. Obtain a test session ID
+and token for that project. Then edit the `h264` property values in the sample/src/js/config.js
+file.
 
 For test purposes, you can obtain a test session ID an token from the [TokBox account
 page](https://tokbox.com/account). However, in a real application, use the [OpenTok server
