@@ -15,9 +15,7 @@ import OTKAnalytics = require('opentok-solutions-logging');
 /* tslint:enable */
 import {
   NetworkTestOptions,
-  SessionCredentials,
-  TestConnectivityCallback,
-} from '../types';
+} from '../index';
 import { OT } from '../types/opentok';
 import { CompletionCallback } from '../types/callbacks';
 import * as e from './errors';
@@ -31,6 +29,8 @@ type PublishToSessionResults = { session: OT.Session } & CreateLocalPublisherRes
 type SubscribeToSessionResults = { subscriber: OT.Subscriber } & PublishToSessionResults;
 type DeviceMap = { [deviceId: string]: OT.Device };
 type AvailableDevices = { audio: DeviceMap, video: DeviceMap };
+
+export type TestConnectivityCallback = (results: ConnectivityTestResults | null) => void;
 export type ConnectivityTestResults = {
   success: boolean,
   failedTests: FailureCase[],
@@ -62,7 +62,7 @@ function connectToSession(
     session.connect(token, (error?: OT.OTError) => {
       if (errorHasName(error, OTErrorType.OT_AUTHENTICATION_ERROR)) {
         reject(new e.ConnectToSessionTokenError());
-      } else if (errorHasName(error, OTErrorType.INVALID_SESSION_ID)) {
+      } else if (errorHasName(error, OTErrorType.OT_INVALID_SESSION_ID)) {
         reject(new e.ConnectToSessionSessionIdError());
       } else if (errorHasName(error, OTErrorType.OT_CONNECT_FAILED)) {
         reject(new e.ConnectToSessionNetworkError());
@@ -123,7 +123,7 @@ function checkCreateLocalPublisher(
         publisherDiv.style.height = '1px';
         publisherDiv.style.opacity = '0.01';
         document.body.appendChild(publisherDiv);
-        let publisherOptions: OT.PublisherProperties = {
+        const publisherOptions: OT.PublisherProperties = {
           width: '100%',
           height: '100%',
           insertMode: 'append',

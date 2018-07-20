@@ -15,10 +15,7 @@ import OTKAnalytics = require('opentok-solutions-logging');
 import * as Promise from 'promise';
 import {
   NetworkTestOptions,
-  SessionCredentials,
-  TestQualityCompletionCallback,
-  QualityTestResults,
-} from '../types';
+} from '../index';
 import { OT } from '../types/opentok';
 import { AverageStats, AV, Bandwidth, HasAudioVideo } from './types/stats';
 import { CompletionCallback, UpdateCallback, UpdateCallbackStats } from '../types/callbacks';
@@ -38,6 +35,13 @@ interface QualityTestResultsBuilder {
   bandwidth?: Bandwidth;
 }
 
+export interface QualityTestResults extends HasAudioVideo<AverageStats> {}
+
+export type TestQualityCompletionCallback = (
+  error: Error | undefined,
+  results: QualityTestResults | null,
+) => void;
+
 type MOSResultsCallback = (state: MOSState) => void;
 type DeviceMap = { [deviceId: string]: OT.Device };
 type AvailableDevices = { audio: DeviceMap, video: DeviceMap };
@@ -54,11 +58,11 @@ function connectToSession(session: OT.Session, token: string): Promise<OT.Sessio
     } else {
       session.connect(token, (error?: OT.OTError) => {
         if (error) {
-          if (errorHasName(error, OTErrorType.AUTHENTICATION_ERROR)) {
+          if (errorHasName(error, OTErrorType.OT_AUTHENTICATION_ERROR)) {
             reject(new e.ConnectToSessionTokenError());
-          } else if (errorHasName(error, OTErrorType.INVALID_SESSION_ID)) {
+          } else if (errorHasName(error, OTErrorType.OT_INVALID_SESSION_ID)) {
             reject(new e.ConnectToSessionSessionIdError());
-          } else if (errorHasName(error, OTErrorType.CONNECT_FAILED)) {
+          } else if (errorHasName(error, OTErrorType.OT_CONNECT_FAILED)) {
             reject(new e.ConnectToSessionNetworkError());
           } else {
             reject(new e.ConnectToSessionError());
@@ -275,7 +279,7 @@ function validateBrowser(): Promise<void> {
 /**
  * This method checks to see if the client can publish to an OpenTok session.
  */
-export default function testQuality(
+export function testQuality(
   OT: OT.Client,
   credentials: OT.SessionCredentials,
   otLogging: OTKAnalytics,

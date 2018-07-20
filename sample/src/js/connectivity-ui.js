@@ -1,6 +1,7 @@
 // Utility functions to display test results in the sample app UI
 import createChart from './chart.js';
 var charts = {};
+var audioOnlyTest;
 var resultCount = {
   audio: 0,
   video: 0
@@ -10,22 +11,12 @@ var prevBitsReceived = {
   video: 0
 };
 
-function convertFailedTestsToString(failedTests) {
-  var failureTypes = [];
-  for (var i = 0; i < failedTests.length; i++) {
-    failureTypes.push(failedTests[i].type);
+export function init(audioOnly) {
+  audioOnlyTest = audioOnly;
+  document.getElementById('quality_status_container').style.display = 'block';
+  if (audioOnlyTest) {
+    document.getElementById('video').style.display = 'none';
   }
-  var mappedFailures = [];
-  if (failureTypes.indexOf('api') > -1) {
-    mappedFailures.push('OpenTok API server');
-  }
-  if (failureTypes.indexOf('media') > -1) {
-    mappedFailures.push('OpenTok Media Router');
-  }
-  if (failureTypes.indexOf('logging') > -1) {
-    mappedFailures.push('OpenTok logging server');
-  }
-  return mappedFailures.join(', ');
 }
 
 export function displayTestConnectivityResults(results) {
@@ -120,7 +111,7 @@ export function displayTestQualityResults(error, results) {
   resultsEl.querySelector('#video-recommendedFrameRate').textContent =
     results.video.recommendedFrameRate ? results.video.recommendedFrameRate + ' fps' : '--';
   if (results.audio.supported) {
-    if (results.video.supported) {
+    if (results.video.supported || audioOnlyTest) {
       statusIconEl.src = 'assets/icon_pass.svg';
     } else {
       statusIconEl.src = 'assets/icon_warning.svg';

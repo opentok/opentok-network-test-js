@@ -7,17 +7,14 @@
 */
 
 const version = require('../../package.json').version;
-import {
-  NetworkTestOptions,
-  SessionCredentials,
-  TestConnectivityCallback,
-  TestQualityCompletionCallback,
-  QualityTestResults,
-} from './types';
 import { OT } from './types/opentok';
 import { CompletionCallback, UpdateCallback, UpdateCallbackStats } from './types/callbacks';
-import { testConnectivity, ConnectivityTestResults } from './testConnectivity';
-import testQuality from './testQuality';
+import {
+  testConnectivity,
+  TestConnectivityCallback,
+  ConnectivityTestResults,
+} from './testConnectivity';
+import { testQuality, TestQualityCompletionCallback, QualityTestResults } from './testQuality';
 import {
   IncompleteSessionCredentialsError,
   InvalidOnCompleteCallback,
@@ -29,6 +26,10 @@ import {
 import OTKAnalytics = require('opentok-solutions-logging');
 /* tslint:enable */
 
+export interface NetworkTestOptions {
+  audioOnly?: boolean;
+}
+
 export default class NetworkTest {
   credentials: OT.SessionCredentials;
   OT: OT.Client;
@@ -39,7 +40,7 @@ export default class NetworkTest {
    * Returns an instance of NetworkConnectivity. See the "API reference" section of the
    * README.md file in the root of the opentok-network-test-js project for details.
    */
-  constructor(OT: OT.Client, credentials: SessionCredentials, options?: NetworkTestOptions) {
+  constructor(OT: OT.Client, credentials: OT.SessionCredentials, options?: NetworkTestOptions) {
     this.validateOT(OT);
     this.validateCredentials(credentials);
     this.otLogging = this.startLoggingEngine(credentials.apiKey, credentials.sessionId);
@@ -84,7 +85,7 @@ export default class NetworkTest {
   testConnectivity(
     onComplete?: TestConnectivityCallback): Promise<ConnectivityTestResults> {
     this.otLogging.logEvent({ action: 'testConnectivity', variation: 'Attempt' });
-    if (typeof onComplete !== 'function' || onComplete.length !== 1) {
+    if (onComplete && (typeof onComplete !== 'function' || onComplete.length !== 1)) {
       this.otLogging.logEvent({ action: 'testConnectivity', variation: 'Failure' });
       throw new InvalidOnCompleteCallback();
     }
