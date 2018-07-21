@@ -27,6 +27,10 @@ type EqualityTesters = jasmine.CustomEqualityTester[];
 const malformedCredentials = { apiKey: '1234', invalidProp: '1234', token: '1234' };
 const badCredentials = { apiKey: '1234', sessionId: '1234', token: '1234' };
 const networkTest = new NetworkTest(OTClient, sessionCredentials);
+const networkTestWithOptions = new NetworkTest(OTClient, sessionCredentials, {
+  audioOnly: true,
+  timeout: 5000,
+});
 const badCredentialsNetworkTest = new NetworkTest(OTClient, badCredentials);
 const validOnUpdateCallback = (stats: OT.SubscriberStats) => stats;
 const validOnCompleteCallback = (error?: Error, results?: any) => results;
@@ -351,6 +355,31 @@ describe('NetworkTest', () => {
           .catch(validateError)
           .finally(done);
       }, 40000);
+
+      it('should run a valid test or error when give audiOnly and timeout options', (done) => {
+        const validateResults = (results: QualityTestResults) => {
+          const { audio, video } = results;
+
+          expect(audio.bitrate).toEqual(jasmine.any(Number));
+          expect(audio.supported).toEqual(jasmine.any(Boolean));
+          expect(audio.reason || '').toEqual(jasmine.any(String));
+          expect(audio.packetLossRatio).toEqual(jasmine.any(Number));
+          expect(audio.mos).toEqual(jasmine.any(Number));
+
+          expect(video.supported).toEqual(false);
+        };
+
+        const validateError = (error?: QualityTestError) => {
+          expect(error.name).toBe(QUALITY_TEST_ERROR);
+        };
+
+        const onUpdate = (stats: Stats) => console.info('Subscriber stats:', stats);
+
+        networkTestWithOptions.testQuality(onUpdate)
+          .then(validateResults)
+          .catch(validateError)
+          .finally(done);
+      }, 10000);
 
       it('should return valid test results or an error when there is no camera', (done) => {
         const realOTGetDevices = OT.getDevices;

@@ -108,6 +108,20 @@ div.prettyBox img {
   display: block
 }
 
+#precall .options span {
+  margin-left: 24px;
+  font-size: 14px;
+}
+
+#precall .options {
+  margin: 20px;
+}
+
+#precall button {
+  font-family: "Helvetica Neu", Arial;
+  font-size: 12px;
+}
+
 #quality_status_container > div {
   display: flex;
   justify-content: center;

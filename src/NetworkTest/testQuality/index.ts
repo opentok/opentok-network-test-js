@@ -47,6 +47,7 @@ type DeviceMap = { [deviceId: string]: OT.Device };
 type AvailableDevices = { audio: DeviceMap, video: DeviceMap };
 
 let audioOnly = false; // By default, the initial test is audio-video
+let testTimeout: number;
 
 /**
  * If not already connected, connect to the OpenTok Session
@@ -254,8 +255,7 @@ function checkSubscriberQuality(
 
             subscriberMOS(builder.state, subscriber, getStatsListener, resultsCallback);
 
-            mosEstimatorTimeoutId = window.setTimeout(processResults, audioOnly ? config.getStatsAudioOnlyDuration
-              : config.getStatsVideoAndAudioTestDuration);
+            mosEstimatorTimeoutId = window.setTimeout(processResults, testTimeout);
 
           } catch (exception) {
             reject(new e.SubscriberGetStatsError());
@@ -289,6 +289,11 @@ export function testQuality(
   return new Promise((resolve, reject) => {
 
     audioOnly = !!(options && options.audioOnly);
+    testTimeout = audioOnly ? config.getStatsVideoAndAudioTestDuration :
+     config.getStatsAudioOnlyDuration;
+    if (options && options.timeout) {
+      testTimeout = Math.min(testTimeout, options.timeout, 30000);
+    }
     const onSuccess = (results: QualityTestResults) => {
       onComplete && onComplete(undefined, results);
       otLogging.logEvent({ action: 'testQuality', variation: 'Success' });

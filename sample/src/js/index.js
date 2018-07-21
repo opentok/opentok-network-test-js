@@ -24,7 +24,13 @@ precallDiv.querySelector('#precall button').addEventListener('click', function()
 
 function startTest() {
   audioOnly = precallDiv.querySelector('#precall input').checked;
-  var options = {audioOnly: audioOnly};
+  var timeoutSelect = precallDiv.querySelector('select');
+  var timeout = timeoutSelect.options[timeoutSelect.selectedIndex].text * 1000;
+  console.log(timeout)
+  var options = {
+    audioOnly: audioOnly,
+    timeout: timeout
+  };
   otNetworkTest = new NetworkTest(OT, sessionInfo, options);
   otNetworkTest.testConnectivity(function(results) {
     ConnectivityUI.displayTestConnectivityResults(results);
