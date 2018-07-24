@@ -262,6 +262,28 @@ describe('NetworkTest', () => {
           .catch(validateError);
       };
 
+      const validateStandardResults = (results: QualityTestResults) => {
+        const { audio, video } = results;
+
+        expect(audio.bitrate).toEqual(jasmine.any(Number));
+        expect(audio.supported).toEqual(jasmine.any(Boolean));
+        expect(audio.reason || '').toEqual(jasmine.any(String));
+        expect(audio.packetLossRatio).toEqual(jasmine.any(Number));
+        expect(audio.mos).toEqual(jasmine.any(Number));
+
+        expect(video.supported).toEqual(jasmine.any(Boolean));
+        if (video.supported) {
+          expect(video.bitrate).toEqual(jasmine.any(Number));
+          expect(video.packetLossRatio).toEqual(jasmine.any(Number));
+          expect(video.frameRate).toEqual(jasmine.any(Number));
+          expect(video.recommendedResolution).toEqual(jasmine.any(String));
+          expect(video.recommendedFrameRate).toEqual(jasmine.any(Number));
+          expect(video.mos).toEqual(jasmine.any(Number));
+        } else {
+          expect(video.reason).toEqual(jasmine.any(String));
+        }
+      };
+
       it('validates its onUpdate and onComplete callbacks', () => {
         expect(() => networkTest.testQuality('callback').toThrow(new InvalidOnUpdateCallback()))
         expect(() => networkTest.testQuality(validOnUpdateCallback, 'callback').toThrow(new InvalidOnCompleteCallback()))
@@ -322,28 +344,6 @@ describe('NetworkTest', () => {
       }, 10000);
 
       it('should return valid test results or an error', (done) => {
-        const validateResults = (results: QualityTestResults) => {
-          const { audio, video } = results;
-
-          expect(audio.bitrate).toEqual(jasmine.any(Number));
-          expect(audio.supported).toEqual(jasmine.any(Boolean));
-          expect(audio.reason || '').toEqual(jasmine.any(String));
-          expect(audio.packetLossRatio).toEqual(jasmine.any(Number));
-          expect(audio.mos).toEqual(jasmine.any(Number));
-
-          expect(video.supported).toEqual(jasmine.any(Boolean));
-          if (video.supported) {
-            expect(video.bitrate).toEqual(jasmine.any(Number));
-            expect(video.packetLossRatio).toEqual(jasmine.any(Number));
-            expect(video.frameRate).toEqual(jasmine.any(Number));
-            expect(video.recommendedResolution).toEqual(jasmine.any(String));
-            expect(video.recommendedFrameRate).toEqual(jasmine.any(Number));
-            expect(video.mos).toEqual(jasmine.any(Number));
-          } else {
-            expect(video.reason).toEqual(jasmine.any(String));
-          }
-        };
-
         const validateError = (error?: QualityTestError) => {
           expect(error.name).toBe(QUALITY_TEST_ERROR);
         };
@@ -351,7 +351,7 @@ describe('NetworkTest', () => {
         const onUpdate = (stats: Stats) => console.info('Subscriber stats:', stats);
 
         networkTest.testQuality(onUpdate)
-          .then(validateResults)
+          .then(validateStandardResults)
           .catch(validateError)
           .finally(done);
       }, 40000);
@@ -377,6 +377,22 @@ describe('NetworkTest', () => {
 
         networkTestWithOptions.testQuality(onUpdate)
           .then(validateResults)
+          .catch(validateError)
+          .finally(done);
+      }, 10000);
+
+      it('should stop the quality test when you call the stop() method', (done) => {
+        const validateError = (error?: QualityTestError) => {
+          expect(error.name).toBe(QUALITY_TEST_ERROR);
+        };
+
+        const onUpdate = (stats: Stats) => {
+          console.info('Subscriber stats:', stats);
+          networkTest.stop(); // The test will wait for adequate stats before stopping
+        };
+
+        networkTest.testQuality(onUpdate)
+          .then(validateStandardResults)
           .catch(validateError)
           .finally(done);
       }, 10000);

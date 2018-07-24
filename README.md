@@ -468,6 +468,12 @@ The results, including the MOS estimates and the recommended video resolution an
 subjective. You can adjust the values used in the source code, or you can use the data passed into
 the `updateCallback()` function and apply your own quality analysis algorithm.
 
+### OTNetworkTest.stop()
+
+Stops the `testConnectivity()` test if it is running. The test will end as soon as enough
+time has elapsed for it to gather results (up to 5 seconds) or until an error is encountered,
+and then the `completionCallback` function is invoked.
+
 ### ErrorNames
 
 The ErrorNames object includes properties that enumerate values used in the

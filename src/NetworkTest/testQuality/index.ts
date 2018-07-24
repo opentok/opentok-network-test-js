@@ -48,6 +48,10 @@ type AvailableDevices = { audio: DeviceMap, video: DeviceMap };
 
 let audioOnly = false; // By default, the initial test is audio-video
 let testTimeout: number;
+let stopTest: Function | undefined;
+let stopTestTimeoutId: number;
+let stopTestTimeoutCompleted = false;
+let stopTestCalled = false;
 
 /**
  * If not already connected, connect to the OpenTok Session
@@ -248,6 +252,10 @@ function checkSubscriberQuality(
               }
             };
 
+            stopTest = () => {
+              processResults();
+            };
+
             const resultsCallback: MOSResultsCallback = (state: MOSState) => {
               clearTimeout(mosEstimatorTimeoutId);
               processResults();
@@ -256,6 +264,14 @@ function checkSubscriberQuality(
             subscriberMOS(builder.state, subscriber, getStatsListener, resultsCallback);
 
             mosEstimatorTimeoutId = window.setTimeout(processResults, testTimeout);
+
+            window.clearTimeout(stopTestTimeoutId);
+            stopTestTimeoutId = window.setTimeout(() => {
+              stopTestTimeoutCompleted = true;
+              if (stopTestCalled && stopTest) {
+                stopTest();
+              }
+            }, 5000);
 
           } catch (exception) {
             reject(new e.SubscriberGetStatsError());
@@ -286,21 +302,25 @@ export function testQuality(
   options?: NetworkTestOptions,
   onUpdate?: UpdateCallback<UpdateCallbackStats>,
   onComplete?: TestQualityCompletionCallback): Promise<QualityTestResults> {
+  stopTestTimeoutCompleted = false;
+  stopTestCalled = false;
   return new Promise((resolve, reject) => {
 
     audioOnly = !!(options && options.audioOnly);
-    testTimeout = audioOnly ? config.getStatsVideoAndAudioTestDuration :
-     config.getStatsAudioOnlyDuration;
+    testTimeout = audioOnly ? config.getStatsAudioOnlyDuration :
+     config.getStatsVideoAndAudioTestDuration;
     if (options && options.timeout) {
       testTimeout = Math.min(testTimeout, options.timeout, 30000);
     }
     const onSuccess = (results: QualityTestResults) => {
+      stopTest = undefined;
       onComplete && onComplete(undefined, results);
       otLogging.logEvent({ action: 'testQuality', variation: 'Success' });
       resolve(results);
     };
 
     const onError = (error: Error) => {
+      stopTest = undefined;
       otLogging.logEvent({ action: 'testQuality', variation: 'Failure' });
       onComplete && onComplete(error, null);
       reject(error);
@@ -315,4 +335,11 @@ export function testQuality(
       })
       .catch(onError);
   });
+}
+
+export function stopQualityTest() {
+  stopTestCalled = true;
+  if (stopTestTimeoutCompleted && stopTest) {
+    stopTest();
+  }
 }

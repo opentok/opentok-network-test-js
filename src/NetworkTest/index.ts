@@ -14,7 +14,12 @@ import {
   TestConnectivityCallback,
   ConnectivityTestResults,
 } from './testConnectivity';
-import { testQuality, TestQualityCompletionCallback, QualityTestResults } from './testQuality';
+import {
+  testQuality,
+  stopQualityTest,
+  TestQualityCompletionCallback,
+  QualityTestResults,
+} from './testQuality';
 import {
   IncompleteSessionCredentialsError,
   InvalidOnCompleteCallback,
@@ -120,6 +125,16 @@ export default class NetworkTest {
 
     return testQuality(
       this.OT, this.credentials, this.otLogging, this.options, updateCallback, completionCallback);
+  }
+
+  /**
+   * Stops the currently running test.
+   *
+   * See the "API reference" section of the README.md file in the root of the
+   * opentok-network-test-js project for details.
+   */
+  stop() {
+    stopQualityTest();
   }
 }
 

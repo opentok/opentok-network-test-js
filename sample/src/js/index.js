@@ -26,7 +26,6 @@ function startTest() {
   audioOnly = precallDiv.querySelector('#precall input').checked;
   var timeoutSelect = precallDiv.querySelector('select');
   var timeout = timeoutSelect.options[timeoutSelect.selectedIndex].text * 1000;
-  console.log(timeout)
   var options = {
     audioOnly: audioOnly,
     timeout: timeout
@@ -42,7 +41,12 @@ function testQuality() {
   var audioChart = createChart('audio');
   var videoChart = createChart('video');
   ConnectivityUI.init(audioOnly);
+  document.getElementById('stop_test').addEventListener('click', function stopTestListener() {
+    ConnectivityUI.hideStopButton();
+    otNetworkTest.stop();
+  });
   otNetworkTest.testQuality(function updateCallback(stats) {
+    ConnectivityUI.checkToDisplayStopButton();
     ConnectivityUI.graphIntermediateStats('audio', stats);
     ConnectivityUI.graphIntermediateStats('video', stats);
   }, function resultsCallback(error, results) {

@@ -122,9 +122,24 @@ div.prettyBox img {
   font-size: 12px;
 }
 
+#quality_status_container {
+  display: none;
+  flex-direction: column;
+  align-items: center;
+}
+
+#stop_test {
+  margin-top: 8px;
+  display: none;
+}
 #quality_status_container > div {
   display: flex;
   justify-content: center;
+}
+
+#quality_header {
+  flex-direction: column;
+  align-items: center;
 }
 
 #quality_status_container #audio, #quality_status_container #video {
