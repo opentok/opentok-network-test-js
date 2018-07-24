@@ -88,6 +88,7 @@ function rateMosScore(mos) {
 }
 
 export function displayTestQualityResults(error, results) {
+  hideStopButton();
   var statusContainerEl = document.getElementById('quality_status_container');
   var statusEl = statusContainerEl.querySelector('p');
   var statusIconEl = statusContainerEl.querySelector('img');
