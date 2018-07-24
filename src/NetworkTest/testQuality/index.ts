@@ -18,7 +18,7 @@ import {
 } from '../index';
 import { OT } from '../types/opentok';
 import { AverageStats, AV, Bandwidth, HasAudioVideo } from './types/stats';
-import { CompletionCallback, UpdateCallback, UpdateCallbackStats } from '../types/callbacks';
+import { UpdateCallback, UpdateCallbackStats } from '../types/callbacks';
 import { pick } from '../util';
 import * as e from './errors/';
 import { OTErrorType, errorHasName } from '../errors/types';
@@ -36,11 +36,6 @@ interface QualityTestResultsBuilder {
 }
 
 export interface QualityTestResults extends HasAudioVideo<AverageStats> {}
-
-export type TestQualityCompletionCallback = (
-  error: Error | undefined,
-  results: QualityTestResults | null,
-) => void;
 
 type MOSResultsCallback = (state: MOSState) => void;
 type DeviceMap = { [deviceId: string]: OT.Device };
@@ -285,19 +280,17 @@ export function testQuality(
   otLogging: OTKAnalytics,
   options?: NetworkTestOptions,
   onUpdate?: UpdateCallback<UpdateCallbackStats>,
-  onComplete?: TestQualityCompletionCallback): Promise<QualityTestResults> {
+): Promise<QualityTestResults> {
   return new Promise((resolve, reject) => {
 
     audioOnly = !!(options && options.audioOnly);
     const onSuccess = (results: QualityTestResults) => {
-      onComplete && onComplete(undefined, results);
       otLogging.logEvent({ action: 'testQuality', variation: 'Success' });
       resolve(results);
     };
 
     const onError = (error: Error) => {
       otLogging.logEvent({ action: 'testQuality', variation: 'Failure' });
-      onComplete && onComplete(error, null);
       reject(error);
     };
 

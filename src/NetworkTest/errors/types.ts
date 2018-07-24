@@ -15,7 +15,6 @@ export enum ErrorNames {
   INCOMPLETE_SESSON_CREDENTIALS = 'IncompleteSessionCredentialsError',
   MISSING_SESSON_CREDENTIALS = 'MissingSessionCredentialsError',
   INVALID_ON_UPDATE_CALLBACK = 'InvalidOnUpdateCallback',
-  INVALID_ON_COMPLETE_CALLBACK = 'InvalidOnCompleteCallback',
   CONNECTIVITY_ERROR = 'ConnectivityError',
   API_CONNECTIVITY_ERROR = 'APIConnectivityError',
   CONNECT_TO_SESSION_ERROR = 'ConnectToSessionError',
