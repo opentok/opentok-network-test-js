@@ -470,9 +470,9 @@ the `updateCallback()` function and apply your own quality analysis algorithm.
 
 ### OTNetworkTest.stop()
 
-Stops the `testConnectivity()` test if it is running. The test will end as soon as enough
-time has elapsed for it to gather results (up to 5 seconds) or until an error is encountered,
-and then the `completionCallback` function is invoked.
+Stops the `testConnectivity()` test if it is running. The test will not stop until it has been
+running for at least 5 seconds (after the user has granted access to the camera and microphone).
+While you can call `stop()` prior to this, results will not be returned until the 5-second mark.
 
 ### ErrorNames
 
