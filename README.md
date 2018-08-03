@@ -153,6 +153,9 @@ The OTNetworkTest NPM module includes three public methods:
 
 * The `OTNetworkTest.testQuality()` method
 
+*Note:* Some API changes were introduced in v2. See the
+[releases page][releases-page] for details.
+
 ### OTNetworkTest() constructor
 
 The `OTNetworkTest()` constructor includes the following parameters:
@@ -537,3 +540,5 @@ See the /sample subdirectory (and the /sample/README.md file) for a sample app.
 
 
 [itu-g107]: https://www.itu.int/rec/dologin_pub.asp?lang=s&id=T-REC-G.107-201402-S!!PDF-E
+
+[releases-page]: https://github.com/opentok/opentok-network-test-js/releases
