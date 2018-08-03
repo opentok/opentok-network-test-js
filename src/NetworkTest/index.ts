@@ -11,13 +11,11 @@ import { OT } from './types/opentok';
 import { CompletionCallback, UpdateCallback, UpdateCallbackStats } from './types/callbacks';
 import {
   testConnectivity,
-  TestConnectivityCallback,
   ConnectivityTestResults,
 } from './testConnectivity';
-import { testQuality, TestQualityCompletionCallback, QualityTestResults } from './testQuality';
+import { testQuality, QualityTestResults } from './testQuality';
 import {
   IncompleteSessionCredentialsError,
-  InvalidOnCompleteCallback,
   InvalidOnUpdateCallback,
   MissingOpenTokInstanceError,
   MissingSessionCredentialsError,
@@ -82,14 +80,9 @@ export default class NetworkTest {
    * See the "API reference" section of the README.md file in the root of the
    * opentok-network-test-js project for details.
    */
-  testConnectivity(
-    onComplete?: TestConnectivityCallback): Promise<ConnectivityTestResults> {
+  testConnectivity(): Promise<ConnectivityTestResults> {
     this.otLogging.logEvent({ action: 'testConnectivity', variation: 'Attempt' });
-    if (onComplete && (typeof onComplete !== 'function' || onComplete.length !== 1)) {
-      this.otLogging.logEvent({ action: 'testConnectivity', variation: 'Failure' });
-      throw new InvalidOnCompleteCallback();
-    }
-    return testConnectivity(this.OT, this.credentials, this.otLogging, this.options, onComplete);
+    return testConnectivity(this.OT, this.credentials, this.otLogging, this.options);
   }
 
   /**
@@ -100,9 +93,7 @@ export default class NetworkTest {
    * See the "API reference" section of the README.md file in the root of the
    * opentok-network-test-js project for details.
    */
-  testQuality(
-    updateCallback?: UpdateCallback<UpdateCallbackStats>,
-    completionCallback?: TestQualityCompletionCallback): Promise<QualityTestResults> {
+  testQuality(updateCallback?: UpdateCallback<UpdateCallbackStats>): Promise<QualityTestResults> {
     this.otLogging.logEvent({ action: 'testQuality', variation: 'Attempt' });
     if (updateCallback) {
       if (typeof updateCallback !== 'function' || updateCallback.length !== 1) {
@@ -110,15 +101,9 @@ export default class NetworkTest {
         throw new InvalidOnUpdateCallback();
       }
     }
-    if (completionCallback) {
-      if (typeof completionCallback !== 'function' || completionCallback.length !== 2) {
-        this.otLogging.logEvent({ action: 'testQuality', variation: 'Failure' });
-        throw new InvalidOnCompleteCallback();
-      }
-    }
 
     return testQuality(
-      this.OT, this.credentials, this.otLogging, this.options, updateCallback, completionCallback);
+      this.OT, this.credentials, this.otLogging, this.options, updateCallback);
   }
 }
 

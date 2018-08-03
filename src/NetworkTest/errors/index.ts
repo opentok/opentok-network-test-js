@@ -43,10 +43,3 @@ export class InvalidOnUpdateCallback extends NetworkTestError {
       ErrorNames.INVALID_ON_UPDATE_CALLBACK);
   }
 }
-
-export class InvalidOnCompleteCallback extends NetworkTestError {
-  constructor() {
-    super('The onComplete callback must be a function that accepts error and results parameters',
-      ErrorNames.INVALID_ON_COMPLETE_CALLBACK);
-  }
-}
