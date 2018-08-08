@@ -8,12 +8,16 @@
 
 const version = require('../../package.json').version;
 import { OT } from './types/opentok';
-import { CompletionCallback, UpdateCallback, UpdateCallbackStats } from './types/callbacks';
+import { UpdateCallback, UpdateCallbackStats } from './types/callbacks';
 import {
   testConnectivity,
   ConnectivityTestResults,
 } from './testConnectivity';
-import { testQuality, QualityTestResults } from './testQuality';
+import {
+  testQuality,
+  stopQualityTest,
+  QualityTestResults,
+} from './testQuality';
 import {
   IncompleteSessionCredentialsError,
   InvalidOnUpdateCallback,
@@ -26,6 +30,7 @@ import OTKAnalytics = require('opentok-solutions-logging');
 
 export interface NetworkTestOptions {
   audioOnly?: boolean;
+  timeout?: number;
 }
 
 export default class NetworkTest {
@@ -104,6 +109,16 @@ export default class NetworkTest {
 
     return testQuality(
       this.OT, this.credentials, this.otLogging, this.options, updateCallback);
+  }
+
+  /**
+   * Stops the currently running test.
+   *
+   * See the "API reference" section of the README.md file in the root of the
+   * opentok-network-test-js project for details.
+   */
+  stop() {
+    stopQualityTest();
   }
 }
 

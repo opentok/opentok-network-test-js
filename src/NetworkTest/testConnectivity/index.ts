@@ -17,7 +17,6 @@ import {
   NetworkTestOptions,
 } from '../index';
 import { OT } from '../types/opentok';
-import { CompletionCallback } from '../types/callbacks';
 import * as e from './errors';
 import { OTErrorType, errorHasName } from '../errors/types';
 import { mapErrors, FailureCase } from './errors/mapping';

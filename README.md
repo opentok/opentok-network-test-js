@@ -193,16 +193,28 @@ The `OTNetworkTest()` constructor includes the following parameters:
 
     The `sessionInfo` parameter is required.
 
-* `options` --The `options` parameter is an object containing one property: `audioOnly`.
-  Set this property to `true` to run audio-only tests.
+* `options` --The `options` parameter is an object containing the following properties,
+  both of which are optional:
 
-  When this option is set to `false` (the default), the quality test will try to run
-  an audio-video quality test (using both the camera and microphone). If there is no
-  camera available, or if the results of the audio-video test do not support adequate
-  audio quality, the test continues in audio-only mode.
+   * `audioOnly` (Boolean) -- Set this property to `true` to run audio-only tests.
 
-  Setting the `audioOnly` to `true` will reduce the time of the quality test on systems that
-  have both a microphone and camera attached (since the audio-only test is shorter than the audio-video test).
+    When this option is set to `false` (the default), the quality test will try to run
+    an audio-video quality test (using both the camera and microphone). If there is no
+    camera available, or if the results of the audio-video test do not support adequate
+    audio quality, the test continues in audio-only mode.
+
+    Setting the `audioOnly` to `true` will reduce the time of the quality test on systems that
+    have both a microphone and camera attached (since the audio-only test is shorter than the audio-video test).
+
+  * `timeout` (Number) -- Set this property to the maximum duration of the `testQuality()`
+    test, in milliseconds. Set this to a value greater than 5000 (5 seconds) but less than
+    30000 (30 seconds). (Values outside of this range are ignored.) If you do not set this value,
+    the `testQuality()` test will run for approximately 30 seconds for an audio-video test or for 10 seconds for an audio-only test.
+
+    The timeout period begins when the quality test starts publishing (after the user grants
+    access to the camera and microphone).
+
+    Setting a lower timeout duration may result in less accurate results, including MOS ratings.
 
   The `options` parameter is optional.
 
@@ -442,6 +454,12 @@ otNetworkTest.testQuality(null, function updateCallback() {
 });
 ```
 
+### OTNetworkTest.stop()
+
+Stops the `testConnectivity()` test if it is running. The test will not stop until it has been
+running for at least 5 seconds (after the user has granted access to the camera and microphone).
+While you can call `stop()` prior to this, results will not be returned until the 5-second mark.
+
 ### ErrorNames
 
 The ErrorNames object includes properties that enumerate values used in the
@@ -465,7 +483,6 @@ the following:
 
 | Error.name property set to this property<br/>of ErrorNames ... | Description |
 | -------------------------------------------------------------- | ----------- |
-|   `INVALID_ON_COMPLETE_CALLBACK` | The `callback` parameter is invalid. It must be a function that accepts error and results parameters. |
 |   `API_CONNECTIVITY_ERROR` | The test failed to connect to OpenTOK API Server. | 
 |   `CONNECT_TO_SESSION_ERROR` | The test failed to connect to the test OpenTok session due to a network error. | 
 |   `CONNECT_TO_SESSION_TOKEN_ERROR` | The test failed to connect to the test OpenTok session due to an invalid token. | 
@@ -491,7 +508,6 @@ method has a `name` property set to one of the following:
 | Error.name property set to this<br/>property of ErrorNames ... | Description |
 | -------------------------------------------------------------- | ----------- |
 |   `INVALID_ON_UPDATE_CALLBACK` | The `updateCallback` parameter is invalid. It must be a function that accepts a single parameter. |
-|   `INVALID_ON_COMPLETE_CALLBACK` | The `completionCallback` parameter is invalid. It must be a function that accepts error and results parameters. |
 |   `UNSUPPORTED_BROWSER`  | The test is running on an unsupported browser (see [Supported browsers](#supported-browsers)). | 
 |   `CONNECT_TO_SESSION_ERROR` | The test failed to connect to the test OpenTok session due to a network error. | 
 |   `CONNECT_TO_SESSION_TOKEN_ERROR` | The test failed to connect to the test OpenTok session due to an invalid token. | 

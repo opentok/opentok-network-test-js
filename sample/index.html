@@ -8,10 +8,23 @@
   <body>
     <h1>OpenTok <small>Network test</small></h1>
     <div id="precall" class="prettyBox">
-      <p>
+      <div class="options">
         Options:
-        <input id="checkBox" type="checkbox"> <label>Audio-only</label>
-      </p>
+        <span>
+          <input id="checkBox" type="checkbox"> <label>Audio-only</label>
+        </span>
+        <span>
+          Maximum duration:
+          <select>
+            <option>30</option>
+            <option>25</option>
+            <option>20</option>
+            <option>15</option>
+            <option>10</option>
+            <option>5</option>
+          </select>
+        </span>
+      </div>
       <button>Start test</button>
     </div>
 
@@ -21,9 +34,12 @@
       <img src="assets/spinner.gif">
     </div>
     <div id="quality_status_container" class="prettyBox">
-      <h2>Testing quality</h2>
-      <p>Test in progress.</p>
-      <img src="assets/spinner.gif">
+      <div id="quality_header">
+        <h2>Testing quality</h2>
+        <p>Test in progress.</p>
+        <img src="assets/spinner.gif">
+        <button id="stop_test">Stop test</button>
+      </div>
       <div>
         <div id="audio">
           <h3>Audio</h3>

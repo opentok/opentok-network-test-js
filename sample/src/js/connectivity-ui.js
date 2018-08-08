@@ -10,6 +10,8 @@ const prevBitsReceived = {
   audio: 0,
   video: 0
 };
+var stopBtnTimeout;
+var stopTestBtn = document.getElementById('stop_test');
 
 export function init(audioOnly) {
   audioOnlyTest = audioOnly;
@@ -17,6 +19,18 @@ export function init(audioOnly) {
   if (audioOnlyTest) {
     document.getElementById('video').style.display = 'none';
   }
+}
+
+export function checkToDisplayStopButton() {
+  if (!stopBtnTimeout) {
+    stopBtnTimeout = setTimeout(function() {
+      stopTestBtn.style.display = 'block';
+    }, 4000);
+  }
+}
+
+export function hideStopButton() {
+  stopTestBtn.style.display = 'none';
 }
 
 export function displayTestConnectivityResults(results) {
@@ -74,6 +88,7 @@ function rateMosScore(mos) {
 }
 
 export function displayTestQualityResults(error, results) {
+  hideStopButton();
   const statusContainerEl = document.getElementById('quality_status_container');
   const statusEl = statusContainerEl.querySelector('p');
   const statusIconEl = statusContainerEl.querySelector('img');
