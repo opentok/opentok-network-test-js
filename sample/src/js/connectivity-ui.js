@@ -2,11 +2,11 @@
 import createChart from './chart.js';
 var charts = {};
 var audioOnlyTest;
-var resultCount = {
+const resultCount = {
   audio: 0,
   video: 0
 };
-var prevBitsReceived = {
+const prevBitsReceived = {
   audio: 0,
   video: 0
 };
@@ -34,12 +34,12 @@ export function hideStopButton() {
 }
 
 export function displayTestConnectivityResults(results) {
-  var statusContainer = document.getElementById('connectivity_status_container');
-  var statusMessageEl = statusContainer.querySelector('p');
-  var statusIconEl = statusContainer.querySelector('img');
+  const statusContainer = document.getElementById('connectivity_status_container');
+  const statusMessageEl = statusContainer.querySelector('p');
+  const statusIconEl = statusContainer.querySelector('img');
   statusMessageEl.style.display = 'block';
   
-  var statusText;
+  let statusText;
   if (results.success) {
     statusText = 'Passed';
     statusIconEl.src = 'assets/icon_pass.svg';
@@ -51,7 +51,7 @@ export function displayTestConnectivityResults(results) {
 }
 
 function convertFailedTestsToString(failedTests) {
-  var failureTypes = [];
+  const failureTypes = [];
   for (var i = 0; i < failedTests.length; i++) {
     failureTypes.push(failedTests[i].type);
   }
@@ -89,9 +89,9 @@ function rateMosScore(mos) {
 
 export function displayTestQualityResults(error, results) {
   hideStopButton();
-  var statusContainerEl = document.getElementById('quality_status_container');
-  var statusEl = statusContainerEl.querySelector('p');
-  var statusIconEl = statusContainerEl.querySelector('img');
+  const statusContainerEl = document.getElementById('quality_status_container');
+  const statusEl = statusContainerEl.querySelector('p');
+  const statusIconEl = statusContainerEl.querySelector('img');
   statusContainerEl.querySelector('#audio .results').style.display = 'block';
   statusContainerEl.querySelector('#video .results').style.display = 'block';
 
@@ -102,10 +102,10 @@ export function displayTestQualityResults(error, results) {
   }
 
   statusEl.textContent = 'Test complete.';
-  var resultsEl = statusContainerEl.querySelector('#audio .results');
+  let resultsEl = statusContainerEl.querySelector('#audio .results');
   resultsEl.style.display = 'block';
   resultsEl.querySelector('#audio-supported').textContent = results.audio.supported ? 'Yes' : 'No';
-  var audioMos = results.audio.mos;
+  const audioMos = results.audio.mos;
   resultsEl.querySelector('#audio-mos').textContent = audioMos.toFixed(2)
     + ' (' + rateMosScore(audioMos) + ')';
   resultsEl.querySelector('#audio-bitrate').textContent = results.audio.bitrate ?
@@ -114,7 +114,7 @@ export function displayTestQualityResults(error, results) {
     (results.audio.packetLossRatio / 100).toFixed(2) + '%' : '--';
   resultsEl = statusContainerEl.querySelector('#video .results');
   resultsEl.querySelector('#video-supported').textContent = results.video.supported ? 'Yes' : 'No';
-  var videoMos = results.video.mos;
+  const videoMos = results.video.mos;
   resultsEl.querySelector('#video-mos').textContent = videoMos.toFixed(2)
     + ' (' + rateMosScore(videoMos) + ')';
   resultsEl.querySelector('#video-bitrate').textContent = results.video.bitrate ?
@@ -140,17 +140,17 @@ export function displayTestQualityResults(error, results) {
 }
 
 export function graphIntermediateStats(mediaType, stats) {
-  var mediaStats = stats[mediaType];
+  const mediaStats = stats[mediaType];
   if (!charts[mediaType]) {
     charts[mediaType] = createChart(mediaType);
   }
-  var bitsReceived = mediaStats && mediaStats.bytesReceived ? mediaStats.bytesReceived * 8 : 0;
+  const bitsReceived = mediaStats && mediaStats.bytesReceived ? mediaStats.bytesReceived * 8 : 0;
   resultCount[mediaType]++;
   charts[mediaType].series[0].addPoint({
     x: resultCount[mediaType],
     y: bitsReceived - prevBitsReceived[mediaType]
   }, true, false);
-  var chartTitle = (stats.phase === 'audio-only') && (mediaType === 'video') ?
+  const chartTitle = (stats.phase === 'audio-only') && (mediaType === 'video') ?
    'Testing audio-only stream' :
    'Bitrate over ' + resultCount[mediaType] + 'sec';
   charts[mediaType].setTitle(null, { text: chartTitle});

@@ -11,7 +11,6 @@ import {
   MissingOpenTokInstanceError,
   MissingSessionCredentialsError,
   IncompleteSessionCredentialsError,
-  InvalidOnCompleteCallback,
   InvalidOnUpdateCallback,
 } from '../src/NetworkTest/errors';
 import { ConnectivityError, ConnectToSessionTokenError, PublishToSessionError } from '../src/NetworkTest/testConnectivity/errors';
@@ -33,7 +32,6 @@ const networkTestWithOptions = new NetworkTest(OTClient, sessionCredentials, {
 });
 const badCredentialsNetworkTest = new NetworkTest(OTClient, badCredentials);
 const validOnUpdateCallback = (stats: OT.SubscriberStats) => stats;
-const validOnCompleteCallback = (error?: Error, results?: any) => results;
 
 const customMatchers: jasmine.CustomMatcherFactories = {
   toBeInstanceOf: (util: Util, customEqualityTesters: EqualityTesters): CustomMatcher => {
@@ -97,11 +95,6 @@ describe('NetworkTest', () => {
           });
       });
     };
-
-    it('validates its onComplete callback', () => {
-      expect(() => networkTest.testConnectivity('callback').toThrow(new InvalidOnCompleteCallback()))
-      expect(() => networkTest.testConnectivity(validOnCompleteCallback).not.toThrowError(NetworkTestError))
-    });
 
     describe('Test Results', () => {
       it('should contain success and failedTests properties', (done) => {
@@ -284,10 +277,10 @@ describe('NetworkTest', () => {
         }
       };
 
-      it('validates its onUpdate and onComplete callbacks', () => {
+      it('validates its onUpdate callback', () => {
         expect(() => networkTest.testQuality('callback').toThrow(new InvalidOnUpdateCallback()))
-        expect(() => networkTest.testQuality(validOnUpdateCallback, 'callback').toThrow(new InvalidOnCompleteCallback()))
-        expect(() => networkTest.testConnectivity(null, validOnUpdateCallback, validOnCompleteCallback).not.toThrowError(NetworkTestError))
+        expect(() => networkTest.testConnectivity(validOnUpdateCallback)
+          .not.toThrowError(NetworkTestError))
       });
 
       it('should return an error if invalid session credentials are used', (done) => {

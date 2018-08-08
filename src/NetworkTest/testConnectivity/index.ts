@@ -17,7 +17,6 @@ import {
   NetworkTestOptions,
 } from '../index';
 import { OT } from '../types/opentok';
-import { CompletionCallback } from '../types/callbacks';
 import * as e from './errors';
 import { OTErrorType, errorHasName } from '../errors/types';
 import { mapErrors, FailureCase } from './errors/mapping';
@@ -30,7 +29,6 @@ type SubscribeToSessionResults = { subscriber: OT.Subscriber } & PublishToSessio
 type DeviceMap = { [deviceId: string]: OT.Device };
 type AvailableDevices = { audio: DeviceMap, video: DeviceMap };
 
-export type TestConnectivityCallback = (results: ConnectivityTestResults | null) => void;
 export type ConnectivityTestResults = {
   success: boolean,
   failedTests: FailureCase[],
@@ -237,7 +235,7 @@ export function testConnectivity(
   credentials: OT.SessionCredentials,
   otLogging: OTKAnalytics,
   options?: NetworkTestOptions,
-  onComplete?: TestConnectivityCallback): Promise<ConnectivityTestResults> {
+): Promise<ConnectivityTestResults> {
   return new Promise((resolve, reject) => {
 
     const onSuccess = (flowResults: SubscribeToSessionResults) => {
@@ -247,7 +245,6 @@ export function testConnectivity(
       };
       otLogging.logEvent({ action: 'testConnectivity', variation: 'Success' });
       return disconnectFromSession(flowResults.session).then(() => {
-        onComplete && onComplete(results);
         return resolve(results);
       });
     };
@@ -270,7 +267,6 @@ export function testConnectivity(
           failedTests,
           success: false,
         };
-        onComplete && onComplete(results);
         otLogging.logEvent({ action: 'testConnectivity', variation: 'Success' });
         resolve(results);
       };
@@ -294,6 +290,5 @@ export function testConnectivity(
       .then((results: SubscribeToSessionResults) => checkLoggingServer(OT, results))
       .then(onSuccess)
       .catch(onFailure);
-
   });
 }

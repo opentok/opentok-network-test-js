@@ -153,6 +153,9 @@ The OTNetworkTest NPM module includes three public methods:
 
 * The `OTNetworkTest.testQuality()` method
 
+*Note:* Some API changes were introduced in v2. See the
+[releases page][releases-page] for details.
+
 ### OTNetworkTest() constructor
 
 The `OTNetworkTest()` constructor includes the following parameters:
@@ -239,14 +242,11 @@ try {
 }
 ```
 
-### OTNetworkTest.testConnectivity(callback)
+### OTNetworkTest.testConnectivity()
 
-This method checks to see if the client can connect to OpenTok servers.
-It includes one parameter: `callback`.
-
-The `callback` parameter is the function to be called when the connectivity check completes.
-This callback function takes one `results` parameter, which is an object that has the following
-two properties:
+This method checks to see if the client can connect to OpenTok servers. The method returns
+a Promise that is resolved when the connectivity check completes. The promise is resolved
+with a `results` object that has the following two properties:
 
 * `success` (Boolean) -- `true` if connectivity to OpenTok servers succeeded; `false` if
   any connectivity test failed.
@@ -300,16 +300,11 @@ two properties:
         }
       }
     });
-    ````
+    ```
 
   If all connectivity tests succeed, the `failedTests` property is undefined.
 
-The callback function is optional. The `testConnectivity()` method returns a JavaScript promise.
-The promise is resolved on success, and the `results` object is passed into the `success`
-callback method of the promise's `then()` function, or the `error` object is passed into the
-promise's `catch()` function.
-
-### OTNetworkTest.testQuality(updateCallback, completionCallback)
+### OTNetworkTest.testQuality(updateCallback)
 
 This function runs a test publisher (using the API key, session ID and token provided in the constructor). Based on the measured video bitrate, audio bitrate, and the audio packet loss for
 the published stream, it provides the following results:
@@ -326,7 +321,7 @@ the published stream, it provides the following results:
   video, the results indicate whether an audio-only published is recommended or not, based on the
   measured audio bitrate and packet loss.
 
-This method includes two parameters: `updateCallback` and `completionCallback`.
+This method takes one parameter: `updateCallback`. The method returns a Promise.
 
 #### updateCallback
 
@@ -335,25 +330,25 @@ The `updateCallback` function is called periodically during the test (at a 1-sec
 The object passed into the `updateCallback` function includes statistics about the audio and
 video in the test stream. The object has the following data:
 
-  ```
-  {
-    audio: {
-      timestamp: 1509747314,
-      bytesReceived: 434349, // The total number of audio bytes received, cumulative
-      packetsReceived: 24234,  // The total number of audio packets received, cumulative
-      packetsLost: 0   // The total number of audio packets lost, cumulative
-    },
-    video: {
-      timestamp: 1509747314,
-      bytesReceived: 434349, // The total number of video bytes received, cumulative
-      frameRate: 15,   // The video frame rate
-      packetsReceived: 24234,  // The total number of video packets received, cumulative
-      packetsLost: 0   // The total number of video packets lost, cumulative
-    },
-    timestamp: 1512679143897, // The timestamp of the sample
-    phase: 'audio-video' // Either 'audio-video' or 'audio-only'
-  }
-  ```
+```
+{
+  audio: {
+    timestamp: 1509747314,
+    bytesReceived: 434349, // The total number of audio bytes received, cumulative
+    packetsReceived: 24234,  // The total number of audio packets received, cumulative
+    packetsLost: 0   // The total number of audio packets lost, cumulative
+  },
+  video: {
+    timestamp: 1509747314,
+    bytesReceived: 434349, // The total number of video bytes received, cumulative
+    frameRate: 15,   // The video frame rate
+    packetsReceived: 24234,  // The total number of video packets received, cumulative
+    packetsLost: 0   // The total number of video packets lost, cumulative
+  },
+  timestamp: 1512679143897, // The timestamp of the sample
+  phase: 'audio-video' // Either 'audio-video' or 'audio-only'
+}
+```
 
 The `phase` property is set to 'audio-video' during the initial audio-video test. If a
 secondary audio-only test is required (because audio quality was not acceptable during the
@@ -361,112 +356,103 @@ audio-video test), the property is set to 'audio-only'.
 
 Pass in a `null` value if you do not want to register an `updateCallback` function.
 
-#### completionCallback
+#### Promise returned
 
-The `completionCallback` parameter of the `OTNetworkTest.testQuality()` method is a function that
-is invoked when the connectivity check completes. This callback function takes two parameters:
+The Promise returned by the `OTNetworkTest.testQuality()` method is resolved when
+the connectivity check completes. The promise is resolved with a `results` object that has the
+following properties:
 
-* `error` -- An Error object. This object has two properties: a `message` property and
-  a `name` property. The message property describes the error. You should check the `name`
-  property to determine the type of error. The `name` property will be set to one of the
-  values defined as properties of the `ErrorNames` object
-  (see [Error.name values](#errorname-values)).
+* `video` (Object) -- Contains the following properties:
 
-  ```javascript
-  otNetworkTest.testQuality(null, function updateCallback() {
-    // process intermediate results
-  }, function completionCallback(error, results) {
-    if (error) {
-      switch (error.name) {
-        case ErrorNames.UNSUPPORTED_BROWSER:
-          // Display UI message about unsupported browser
-          break;
-        case ErrorNames.CONNECT_TO_SESSION_NETWORK_ERROR:
-          // Display UI message about network error
-          break;
-        case ErrorNames.FAILED_TO_OBTAIN_MEDIA_DEVICES:
-          // Display UI message about granting access to the microphone and camera
-          break;
-        case ErrorNames.NO_AUDIO_CAPTURE_DEVICES:
-        case ErrorNames.NO_VIDEO_CAPTURE_DEVICES:
-          // Display UI message about no available camera or microphone
-          break;
-        default:
-          console.error('Unknown error .');
-      }
-      return;
-    }
-    // No error. Display UI based on results
-  });
-  ````
+    * `supported` (Boolean) -- Whether the results indicate that video is supported.
 
-  If the connectivity test can run successfully, this property is undefined.
+    * `recommendedFrameRate` (Number) -- The recommended video frame rate. However, if
+      video is unsupported, this is set to `null`. If the the test ran in audio-only mode
+      (for example, because no camera was found), this property is undefined.
 
-* `results` -- An object that contains the following properties:
+    * `recommendedResolution` (String) -- The recommended video resolution. This will be
+      set to `'1280x720'`, `'640x480'`, or `'320x240'`. However, if video is unsupported,
+      this is set to `null`. If the the test ran in audio-only mode (for example, because
+      no camera was found), this property is undefined.
 
-  * `video` (Object) -- Contains the following properties:
+    * `reason` (String) -- A string describing the reason for an unsupported video recommendation.
+      For example, `'No camera was found.'`
 
-      * `supported` (Boolean) -- Whether the results indicate that video is supported.
+    * `bitrate` (Number) -- The average number of video bits per second during the last
+      five seconds of the test. If the the test ran in audio-only mode (for example, because
+      no camera was found), this property is undefined.
 
-      * `recommendedFrameRate` (Number) -- The recommended video frame rate. However, if
-        video is unsupported, this is set to `null`. If the the test ran in audio-only mode
-        (for example, because no camera was found), this property is undefined.
+    * `frameRate` (Number) -- The average number of frames per second during the last five seconds
+      of the test. Note that this is different than the `recommendedFrameRate`. The `frameRate`
+      value is the actual frame rate observed during the test, and the `recommendedFrameRate`
+      is the recommended frame rate. If the the test ran in audio-only mode (for example,
+      because no camera was found), this property is undefined.
 
-      * `recommendedResolution` (String) -- The recommended video resolution. This will be
-        set to `'1280x720'`, `'640x480'`, or `'320x240'`. However, if video is unsupported,
-        this is set to `null`. If the the test ran in audio-only mode (for example, because
-        no camera was found), this property is undefined.
+    * `packetLossRatio` (Number) -- The audio packet loss ratio during the last five seconds
+      of the test. If the the test ran in audio-only mode (for example, because no camera was
+      found), this property is undefined.
 
-      * `reason` (String) -- A string describing the reason for an unsupported video recommendation.
-        For example, `'No camera was found.'`
-
-      * `bitrate` (Number) -- The average number of video bits per second during the last
-        five seconds of the test. If the the test ran in audio-only mode (for example, because
-        no camera was found), this property is undefined.
-
-      * `frameRate` (Number) -- The average number of frames per second during the last five seconds
-        of the test. Note that this is different than the `recommendedFrameRate`. The `frameRate`
-        value is the actual frame rate observed during the test, and the `recommendedFrameRate`
-        is the recommended frame rate. If the the test ran in audio-only mode (for example,
-        because no camera was found), this property is undefined.
-
-      * `packetLossRatio` (Number) -- The audio packet loss ratio during the last five seconds
-        of the test. If the the test ran in audio-only mode (for example, because no camera was
-        found), this property is undefined.
-
-      * `mos` (Number) -- The MOS estimate for the test video quality. This will be in a range from
-        1 to 4.5. See [MOS estimates](#mos-estimates) below for more information.
-
-  * `audio` (Object) -- Contains the following properties:
-
-    * `supported` (Boolean) -- Whether audio will be supported (`true`) or not (`false`).
-
-    * `reason` (String) -- A string describing the reason for an unsupported audio recommendation.
-      For example, `'No microphone was found.'`
-
-    * `bitrate` (Number) -- The average number of audio bits per second during the last five seconds
-      of the test.
-
-    * `packetLossRatio` (Number) -- The video packet loss ratio during the last five seconds
-      of the test.
-
-    * `mos` (Number) -- The MOS estimate for the test audio quality. This will be in a range from
+    * `mos` (Number) -- The MOS estimate for the test video quality. This will be in a range from
       1 to 4.5. See [MOS estimates](#mos-estimates) below for more information.
 
-  `results` is undefined if there was an error in running the tests (and the `error` parameter
-  is unset).
+* `audio` (Object) -- Contains the following properties:
 
-  *Important:* v1 included a `results.mos` property (an overall MOS rating for the test). This
-  was removed in v2 and replaced with `results.audio.mos` and `results.video.mos` properties.
+  * `supported` (Boolean) -- Whether audio will be supported (`true`) or not (`false`).
 
-The `completionCallback` function is optional. The `testConnectivity()` method returns a JavaScript
-promise. The promise is resolved on success, and the `results` object is passed into the `success`
-callback method of the promise's `then()` function, or the `error` object is passed into the
-promise's `catch()` function.
+  * `reason` (String) -- A string describing the reason for an unsupported audio recommendation.
+    For example, `'No microphone was found.'`
+
+  * `bitrate` (Number) -- The average number of audio bits per second during the last five seconds
+    of the test.
+
+  * `packetLossRatio` (Number) -- The video packet loss ratio during the last five seconds
+    of the test.
+
+  * `mos` (Number) -- The MOS estimate for the test audio quality. This will be in a range from
+    1 to 4.5. See [MOS estimates](#mos-estimates) below for more information.
+
+`results` is undefined if there was an error in running the tests (and the `error` parameter
+is unset).
+
+*Important:* v1 included a `results.mos` property (an overall MOS rating for the test). This
+was removed in v2 and replaced with `results.audio.mos` and `results.video.mos` properties.
 
 The results, including the MOS estimates and the recommended video resolution and frame rate are
 subjective. You can adjust the values used in the source code, or you can use the data passed into
 the `updateCallback()` function and apply your own quality analysis algorithm.
+
+The Promise returned by the `OTNetworkTest.testQuality()` method is rejected when the connectivity
+check encounters an error. The promise is reject with an `error` object that has two properties:
+a `message` property and a `name` property. The message property describes the error.
+You should check the `name` property to determine the type of error. The `name` property
+will be set to one of the values defined as properties of the `ErrorNames` object
+(see [Error.name values](#errorname-values)).
+
+```javascript
+otNetworkTest.testQuality(null, function updateCallback() {
+  // process intermediate results
+}).then(results) {
+  // Display UI based on results
+}).catch(error, results) {
+    switch (error.name) {
+      case ErrorNames.UNSUPPORTED_BROWSER:
+        // Display UI message about unsupported browser
+        break;
+      case ErrorNames.CONNECT_TO_SESSION_NETWORK_ERROR:
+        // Display UI message about network error
+        break;
+      case ErrorNames.FAILED_TO_OBTAIN_MEDIA_DEVICES:
+        // Display UI message about granting access to the microphone and camera
+        break;
+      case ErrorNames.NO_AUDIO_CAPTURE_DEVICES:
+      case ErrorNames.NO_VIDEO_CAPTURE_DEVICES:
+        // Display UI message about no available camera or microphone
+        break;
+      default:
+        console.error('Unknown error .');
+    }
+});
+```
 
 ### OTNetworkTest.stop()
 
@@ -483,21 +469,20 @@ an error object (against the values defined in ErrorNames) to determine the type
 #### Errors thrown by the OTNetworkTest() constructor
 
 | Error.name property set<br/>to this property of<br/>ErrorNames ... | Description |
-| ------------------------------------------------------------------------------------ | ----------- |
+| ------------------------------------------------------------------ | ----------- |
 |   `MISSING_OPENTOK_INSTANCE` | An instance of OT, the OpenTok.js client SDK, was not passed into the constructor. |
 |   `INCOMPLETE_SESSON_CREDENTIALS` | The sessionInfo object passed into the constructor did not include an `apiKey`, `sessionId`,  or `token` object. |
 |   `MISSING_SESSON_CREDENTIALS` | No sessionInfo object was passed into the constructor. | 
 
 #### testConnectivity() errors
 
-The `testConnectivity()` `callback` function includes a `results` parameter, and the `testConnectivity()` method returns a JavaScript promise that includes a `results` parameter.
+The `testConnectivity()` returns a JavaScript promise that succeeds with a `results` object.
 The `results` object contains a `failedTests` array, and each element of this array (if there are
 any elements) has an `error` property, which is error object has a `name` property set to one of
 the following:
 
 | Error.name property set to this property<br/>of ErrorNames ... | Description |
-| -------------------------------------------------------------------------------- | ----------- |
-|   `INVALID_ON_COMPLETE_CALLBACK` | The `callback` parameter is invalid. It must be a function that accepts error and results parameters. |
+| -------------------------------------------------------------- | ----------- |
 |   `API_CONNECTIVITY_ERROR` | The test failed to connect to OpenTOK API Server. | 
 |   `CONNECT_TO_SESSION_ERROR` | The test failed to connect to the test OpenTok session due to a network error. | 
 |   `CONNECT_TO_SESSION_TOKEN_ERROR` | The test failed to connect to the test OpenTok session due to an invalid token. | 
@@ -517,13 +502,12 @@ the following:
 
 #### testQuality() errors
 
-The `testQuality()` `completionCallback error` parameter or the error passed into the `.catch()`
-method of the Promise returned by `testQuality()` has a `name` property set to one of the following:
+If the promised returned by the `testQuality()` is rejected, the error passed into the `.catch()`
+method has a `name` property set to one of the following:
 
 | Error.name property set to this<br/>property of ErrorNames ... | Description |
-| -------------------------------------------------------------------------------- | ----------- |
+| -------------------------------------------------------------- | ----------- |
 |   `INVALID_ON_UPDATE_CALLBACK` | The `updateCallback` parameter is invalid. It must be a function that accepts a single parameter. |
-|   `INVALID_ON_COMPLETE_CALLBACK` | The `completionCallback` parameter is invalid. It must be a function that accepts error and results parameters. |
 |   `UNSUPPORTED_BROWSER`  | The test is running on an unsupported browser (see [Supported browsers](#supported-browsers)). | 
 |   `CONNECT_TO_SESSION_ERROR` | The test failed to connect to the test OpenTok session due to a network error. | 
 |   `CONNECT_TO_SESSION_TOKEN_ERROR` | The test failed to connect to the test OpenTok session due to an invalid token. | 
@@ -572,3 +556,5 @@ See the /sample subdirectory (and the /sample/README.md file) for a sample app.
 
 
 [itu-g107]: https://www.itu.int/rec/dologin_pub.asp?lang=s&id=T-REC-G.107-201402-S!!PDF-E
+
+[releases-page]: https://github.com/opentok/opentok-network-test-js/releases
