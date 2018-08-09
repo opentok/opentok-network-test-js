@@ -21,6 +21,6 @@
   },
   "dependencies": {
     "highcharts": "^6.0.3",
-    "opentok-network-test-js": "*"
+    "opentok-network-test-js": "file://.."
   }
 }
