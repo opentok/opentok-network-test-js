@@ -8,11 +8,9 @@ let audioOnly;
 
 const isSafari = /constructor/i.test(window.HTMLElement) || (function (p) { return p.toString() === "[object SafariRemoteNotification]"; })(!window['safari'] || (typeof safari !== 'undefined' && safari.pushNotification));
 
-if (isSafari) {
-  if (config.h264.apiKey) {
-    sessionInfo = config.h264;
-  }
-} 
+if (isSafari && config.h264.apiKey) {
+  sessionInfo = config.h264;
+}
 
 const precallDiv = document.getElementById('precall');
 precallDiv.querySelector('#precall button').addEventListener('click', function() {
@@ -36,8 +34,8 @@ function startTest() {
 }
 
 function testQuality() {
-  var audioChart = createChart('audio');
-  var videoChart = createChart('video');
+  createChart('audio');
+  createChart('video');
   ConnectivityUI.init(audioOnly);
   document.getElementById('stop_test').addEventListener('click', function stopTestListener() {
     ConnectivityUI.hideStopButton();

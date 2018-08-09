@@ -23,7 +23,7 @@ export function init(audioOnly) {
 
 export function checkToDisplayStopButton() {
   if (!stopBtnTimeout) {
-    stopBtnTimeout = setTimeout(function() {
+    stopBtnTimeout = window.setTimeout(function() {
       stopTestBtn.style.display = 'block';
     }, 4000);
   }

@@ -1,0 +1,19 @@
+{
+  "env": {
+    "es6": true
+  },
+  "ecmaFeatures": {
+    "modules": true
+  },
+  "parserOptions": {
+    "sourceType": "module"
+  },
+  "globals": {
+    "document": true,
+    "module": true,
+    "safari": true,
+    "window": true,
+    "OT": true
+  },
+  "extends": "eslint:recommended",
+}
