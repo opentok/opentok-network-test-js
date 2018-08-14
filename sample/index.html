@@ -7,15 +7,39 @@
   </head>
   <body>
     <h1>OpenTok <small>Network test</small></h1>
+    <div id="precall" class="prettyBox">
+      <div class="options">
+        Options:
+        <span>
+          <input id="checkBox" type="checkbox"> <label>Audio-only</label>
+        </span>
+        <span>
+          Maximum duration:
+          <select>
+            <option>30</option>
+            <option>25</option>
+            <option>20</option>
+            <option>15</option>
+            <option>10</option>
+            <option>5</option>
+          </select>
+        </span>
+      </div>
+      <button>Start test</button>
+    </div>
+
     <div id="connectivity_status_container" class="prettyBox">
       <h2>Testing connectivity</h2>
       <p>Test in progress.</p>
       <img src="assets/spinner.gif">
     </div>
     <div id="quality_status_container" class="prettyBox">
-      <h2>Testing quality</h2>
-      <p>Test in progress.</p>
-      <img src="assets/spinner.gif">
+      <div id="quality_header">
+        <h2>Testing quality</h2>
+        <p>Test in progress.</p>
+        <img src="assets/spinner.gif">
+        <button id="stop_test">Stop test</button>
+      </div>
       <div>
         <div id="audio">
           <h3>Audio</h3>
@@ -23,6 +47,9 @@
             <div class="results">
               <p>Supported:
                 <span id="audio-supported"></span>
+              </p>
+              <p>Quality:
+                <span id="audio-mos"></span>
               </p>
               <p>Bitrate:
                 <span id="audio-bitrate"></span>
@@ -42,6 +69,9 @@
                 <span id="video-supported"></span>
               <p id="video-unsupported-reason">Reason:
                 <span></span>
+              </p>
+              <p>Quality:
+                <span id="video-mos"></span>
               </p>
               <p>Bitrate:
                 <span id="video-bitrate"></span>

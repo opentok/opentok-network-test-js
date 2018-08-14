@@ -23,6 +23,7 @@ export interface AverageStats {
   frameRate?: number;
   recommendedFrameRate?: number;
   recommendedResolution?: string;
+  mos?: number;
 }
 
 export interface AverageStatsBase {

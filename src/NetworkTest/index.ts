@@ -8,12 +8,18 @@
 
 const version = require('../../package.json').version;
 import { OT } from './types/opentok';
-import { CompletionCallback, UpdateCallback, UpdateCallbackStats } from './types/callbacks';
-import { testConnectivity, ConnectivityTestResults } from './testConnectivity';
-import testQuality, { QualityTestResults } from './testQuality';
+import { UpdateCallback, UpdateCallbackStats } from './types/callbacks';
+import {
+  testConnectivity,
+  ConnectivityTestResults,
+} from './testConnectivity';
+import {
+  testQuality,
+  stopQualityTest,
+  QualityTestResults,
+} from './testQuality';
 import {
   IncompleteSessionCredentialsError,
-  InvalidOnCompleteCallback,
   InvalidOnUpdateCallback,
   MissingOpenTokInstanceError,
   MissingSessionCredentialsError,
@@ -22,21 +28,28 @@ import {
 import OTKAnalytics = require('opentok-solutions-logging');
 /* tslint:enable */
 
+export interface NetworkTestOptions {
+  audioOnly?: boolean;
+  timeout?: number;
+}
+
 export default class NetworkTest {
   credentials: OT.SessionCredentials;
   OT: OT.Client;
   otLogging: OTKAnalytics;
+  options?: NetworkTestOptions;
 
   /**
    * Returns an instance of NetworkConnectivity. See the "API reference" section of the
    * README.md file in the root of the opentok-network-test-js project for details.
    */
-  constructor(OT: OT.Client, credentials: OT.SessionCredentials) {
+  constructor(OT: OT.Client, credentials: OT.SessionCredentials, options?: NetworkTestOptions) {
     this.validateOT(OT);
     this.validateCredentials(credentials);
     this.otLogging = this.startLoggingEngine(credentials.apiKey, credentials.sessionId);
     this.OT = OT;
     this.credentials = credentials;
+    this.options = options;
   }
 
   private validateOT(OT: OT.Client) {
@@ -51,23 +64,6 @@ export default class NetworkTest {
     }
     if (!credentials.apiKey || !credentials.sessionId || !credentials.token) {
       throw new IncompleteSessionCredentialsError();
-    }
-  }
-  private validateCallbacks(
-    action: string,
-    updateCallback?: UpdateCallback<any>,
-    onComplete?: CompletionCallback<any>) {
-    if (updateCallback) {
-      if (typeof updateCallback !== 'function' || updateCallback.length !== 1) {
-        this.otLogging.logEvent({ action, variation: 'Failure' });
-        throw new InvalidOnUpdateCallback();
-      }
-    }
-    if (onComplete) {
-      if (typeof onComplete !== 'function' || onComplete.length !== 2) {
-        this.otLogging.logEvent({ action, variation: 'Failure' });
-        throw new InvalidOnCompleteCallback();
-      }
     }
   }
 
@@ -89,11 +85,9 @@ export default class NetworkTest {
    * See the "API reference" section of the README.md file in the root of the
    * opentok-network-test-js project for details.
    */
-  testConnectivity(
-    onComplete?: CompletionCallback<ConnectivityTestResults>): Promise<ConnectivityTestResults> {
+  testConnectivity(): Promise<ConnectivityTestResults> {
     this.otLogging.logEvent({ action: 'testConnectivity', variation: 'Attempt' });
-    this.validateCallbacks('testConnectivity', undefined, onComplete);
-    return testConnectivity(this.OT, this.credentials, this.otLogging, onComplete);
+    return testConnectivity(this.OT, this.credentials, this.otLogging, this.options);
   }
 
   /**
@@ -104,12 +98,28 @@ export default class NetworkTest {
    * See the "API reference" section of the README.md file in the root of the
    * opentok-network-test-js project for details.
    */
-  testQuality(
-    updateCallback?: UpdateCallback<UpdateCallbackStats>,
-    completionCallback?: CompletionCallback<QualityTestResults>): Promise<QualityTestResults> {
+  testQuality(updateCallback?: UpdateCallback<UpdateCallbackStats>): Promise<QualityTestResults> {
     this.otLogging.logEvent({ action: 'testQuality', variation: 'Attempt' });
-    this.validateCallbacks('testQuality', updateCallback, completionCallback);
+    if (updateCallback) {
+      if (typeof updateCallback !== 'function' || updateCallback.length !== 1) {
+        this.otLogging.logEvent({ action: 'testQuality', variation: 'Failure' });
+        throw new InvalidOnUpdateCallback();
+      }
+    }
+
     return testQuality(
-      this.OT, this.credentials, this.otLogging, updateCallback, completionCallback);
+      this.OT, this.credentials, this.otLogging, this.options, updateCallback);
+  }
+
+  /**
+   * Stops the currently running test.
+   *
+   * See the "API reference" section of the README.md file in the root of the
+   * opentok-network-test-js project for details.
+   */
+  stop() {
+    stopQualityTest();
   }
 }
+
+export { ErrorNames } from './errors/types';

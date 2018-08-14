@@ -13,9 +13,12 @@
 import OTKAnalytics = require('opentok-solutions-logging');
 /* tslint:enable */
 import * as Promise from 'promise';
+import {
+  NetworkTestOptions,
+} from '../index';
 import { OT } from '../types/opentok';
 import { AverageStats, AV, Bandwidth, HasAudioVideo } from './types/stats';
-import { CompletionCallback, UpdateCallback, UpdateCallbackStats } from '../types/callbacks';
+import { UpdateCallback, UpdateCallbackStats } from '../types/callbacks';
 import { pick } from '../util';
 import * as e from './errors/';
 import { OTErrorType, errorHasName } from '../errors/types';
@@ -23,10 +26,6 @@ import subscriberMOS from './helpers/subscriberMOS';
 import MOSState from './helpers/MOSState';
 import config from './helpers/config';
 import isSupportedBrowser from './helpers/isSupportedBrowser';
-
-export interface QualityTestResults extends HasAudioVideo<AverageStats> {
-  mos: number;
-}
 
 interface QualityTestResultsBuilder {
   state: MOSState;
@@ -36,11 +35,18 @@ interface QualityTestResultsBuilder {
   bandwidth?: Bandwidth;
 }
 
+export interface QualityTestResults extends HasAudioVideo<AverageStats> {}
+
 type MOSResultsCallback = (state: MOSState) => void;
 type DeviceMap = { [deviceId: string]: OT.Device };
 type AvailableDevices = { audio: DeviceMap, video: DeviceMap };
 
-let audioOnly = false; // The initial test is audio-video
+let audioOnly = false; // By default, the initial test is audio-video
+let testTimeout: number;
+let stopTest: Function | undefined;
+let stopTestTimeoutId: number;
+let stopTestTimeoutCompleted = false;
+let stopTestCalled = false;
 
 /**
  * If not already connected, connect to the OpenTok Session
@@ -52,11 +58,11 @@ function connectToSession(session: OT.Session, token: string): Promise<OT.Sessio
     } else {
       session.connect(token, (error?: OT.OTError) => {
         if (error) {
-          if (errorHasName(error, OTErrorType.AUTHENTICATION_ERROR)) {
+          if (errorHasName(error, OTErrorType.OT_AUTHENTICATION_ERROR)) {
             reject(new e.ConnectToSessionTokenError());
-          } else if (errorHasName(error, OTErrorType.INVALID_SESSION_ID)) {
+          } else if (errorHasName(error, OTErrorType.OT_INVALID_SESSION_ID)) {
             reject(new e.ConnectToSessionSessionIdError());
-          } else if (errorHasName(error, OTErrorType.CONNECT_FAILED)) {
+          } else if (errorHasName(error, OTErrorType.OT_CONNECT_FAILED)) {
             reject(new e.ConnectToSessionNetworkError());
           } else {
             reject(new e.ConnectToSessionError());
@@ -112,18 +118,18 @@ function publishAndSubscribe(OT: OT.Client) {
       containerDiv.style.height = '1px';
       containerDiv.style.opacity = '0';
       document.body.appendChild(containerDiv);
-      publisherOptions = {
-        resolution: '1280x720',
-        width: '100%',
-        height: '100%',
-        insertMode: 'append',
-        showControls: false,
-      };
       validateDevices(OT)
         .then((availableDevices: AvailableDevices) => {
           if (!Object.keys(availableDevices.video).length) {
             audioOnly = true;
           }
+          let publisherOptions: OT.PublisherProperties = {
+            resolution: '1280x720',
+            width: '100%',
+            height: '100%',
+            insertMode: 'append',
+            showControls: false,
+          };
           if (audioOnly) {
             publisherOptions.videoSource = null;
           }
@@ -176,9 +182,10 @@ function subscribeToTestStream(
 }
 
 function buildResults(builder: QualityTestResultsBuilder): QualityTestResults {
-  const baseProps: (keyof AverageStats)[] = ['bitrate', 'packetLossRatio', 'supported', 'reason'];
+  const baseProps: (keyof AverageStats)[] = ['bitrate', 'packetLossRatio', 'supported', 'reason', 'mos'];
+  builder.state.stats.audio.mos = builder.state.audioQualityScore();
+  builder.state.stats.video.mos = builder.state.videoQualityScore();
   return {
-    mos: builder.state.qualityScore(),
     audio: pick(baseProps, builder.state.stats.audio),
     video: pick(baseProps.concat(['frameRate', 'recommendedResolution', 'recommendedFrameRate']),
       builder.state.stats.video),
@@ -240,6 +247,10 @@ function checkSubscriberQuality(
               }
             };
 
+            stopTest = () => {
+              processResults();
+            };
+
             const resultsCallback: MOSResultsCallback = (state: MOSState) => {
               clearTimeout(mosEstimatorTimeoutId);
               processResults();
@@ -247,8 +258,15 @@ function checkSubscriberQuality(
 
             subscriberMOS(builder.state, subscriber, getStatsListener, resultsCallback);
 
-            mosEstimatorTimeoutId = window.setTimeout(processResults, audioOnly ? config.getStatsAudioOnlyDuration
-              : config.getStatsVideoAndAudioTestDuration);
+            mosEstimatorTimeoutId = window.setTimeout(processResults, testTimeout);
+
+            window.clearTimeout(stopTestTimeoutId);
+            stopTestTimeoutId = window.setTimeout(() => {
+              stopTestTimeoutCompleted = true;
+              if (stopTestCalled && stopTest) {
+                stopTest();
+              }
+            }, 5000);
 
           } catch (exception) {
             reject(new e.SubscriberGetStatsError());
@@ -272,23 +290,32 @@ function validateBrowser(): Promise<void> {
 /**
  * This method checks to see if the client can publish to an OpenTok session.
  */
-export default function testQuality(
+export function testQuality(
   OT: OT.Client,
   credentials: OT.SessionCredentials,
   otLogging: OTKAnalytics,
+  options?: NetworkTestOptions,
   onUpdate?: UpdateCallback<UpdateCallbackStats>,
-  onComplete?: CompletionCallback<QualityTestResults>): Promise<QualityTestResults> {
+): Promise<QualityTestResults> {
+  stopTestTimeoutCompleted = false;
+  stopTestCalled = false;
   return new Promise((resolve, reject) => {
 
+    audioOnly = !!(options && options.audioOnly);
+    testTimeout = audioOnly ? config.getStatsAudioOnlyDuration :
+     config.getStatsVideoAndAudioTestDuration;
+    if (options && options.timeout) {
+      testTimeout = Math.min(testTimeout, options.timeout, 30000);
+    }
     const onSuccess = (results: QualityTestResults) => {
-      onComplete && onComplete(undefined, results);
+      stopTest = undefined;
       otLogging.logEvent({ action: 'testQuality', variation: 'Success' });
       resolve(results);
     };
 
     const onError = (error: Error) => {
+      stopTest = undefined;
       otLogging.logEvent({ action: 'testQuality', variation: 'Failure' });
-      onComplete && onComplete(error, null);
       reject(error);
     };
 
@@ -301,4 +328,11 @@ export default function testQuality(
       })
       .catch(onError);
   });
+}
+
+export function stopQualityTest() {
+  stopTestCalled = true;
+  if (stopTestTimeoutCompleted && stopTest) {
+    stopTest();
+  }
 }

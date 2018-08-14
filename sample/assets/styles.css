@@ -104,8 +104,42 @@ div.prettyBox img {
   width: 50px;
 }
 
+#precall {
+  display: block
+}
+
+#precall .options span {
+  margin-left: 24px;
+  font-size: 14px;
+}
+
+#precall .options {
+  margin: 20px;
+}
+
+#precall button {
+  font-family: "Helvetica Neu", Arial;
+  font-size: 12px;
+}
+
+#quality_status_container {
+  display: none;
+  flex-direction: column;
+  align-items: center;
+}
+
+#stop_test {
+  margin-top: 8px;
+  display: none;
+}
 #quality_status_container > div {
   display: flex;
+  justify-content: center;
+}
+
+#quality_header {
+  flex-direction: column;
+  align-items: center;
 }
 
 #quality_status_container #audio, #quality_status_container #video {
@@ -118,7 +152,7 @@ div.prettyBox img {
 
 #quality_status_container .results {
   display: none;
-  min-height: 80px
+  min-height: 96px
 }
 
 #video-unsupported-reason {

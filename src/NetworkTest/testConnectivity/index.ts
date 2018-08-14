@@ -13,8 +13,10 @@ import * as Promise from 'promise';
 /* tslint:disable */
 import OTKAnalytics = require('opentok-solutions-logging');
 /* tslint:enable */
+import {
+  NetworkTestOptions,
+} from '../index';
 import { OT } from '../types/opentok';
-import { CompletionCallback } from '../types/callbacks';
 import * as e from './errors';
 import { OTErrorType, errorHasName } from '../errors/types';
 import { mapErrors, FailureCase } from './errors/mapping';
@@ -26,6 +28,7 @@ type PublishToSessionResults = { session: OT.Session } & CreateLocalPublisherRes
 type SubscribeToSessionResults = { subscriber: OT.Subscriber } & PublishToSessionResults;
 type DeviceMap = { [deviceId: string]: OT.Device };
 type AvailableDevices = { audio: DeviceMap, video: DeviceMap };
+
 export type ConnectivityTestResults = {
   success: boolean,
   failedTests: FailureCase[],
@@ -57,7 +60,7 @@ function connectToSession(
     session.connect(token, (error?: OT.OTError) => {
       if (errorHasName(error, OTErrorType.OT_AUTHENTICATION_ERROR)) {
         reject(new e.ConnectToSessionTokenError());
-      } else if (errorHasName(error, OTErrorType.INVALID_SESSION_ID)) {
+      } else if (errorHasName(error, OTErrorType.OT_INVALID_SESSION_ID)) {
         reject(new e.ConnectToSessionSessionIdError());
       } else if (errorHasName(error, OTErrorType.OT_CONNECT_FAILED)) {
         reject(new e.ConnectToSessionNetworkError());
@@ -104,7 +107,10 @@ function validateDevices(OT: OT.Client): Promise<AvailableDevices> {
 /**
  * Create a local publisher object using any specified device options
  */
-function checkCreateLocalPublisher(OT: OT.Client): Promise<CreateLocalPublisherResults> {
+function checkCreateLocalPublisher(
+  OT: OT.Client,
+  options?: NetworkTestOptions,
+): Promise<CreateLocalPublisherResults> {
   return new Promise((resolve, reject) => {
     validateDevices(OT)
       .then((availableDevices: AvailableDevices) => {
@@ -121,6 +127,9 @@ function checkCreateLocalPublisher(OT: OT.Client): Promise<CreateLocalPublisherR
           insertMode: 'append',
           showControls: false,
         };
+        if (options && options.audioOnly) {
+          publisherOptions.videoSource = null;
+        }
         if (!Object.keys(availableDevices.audio).length) {
           publisherOptions.audioSource = null;
         }
@@ -145,14 +154,17 @@ function checkCreateLocalPublisher(OT: OT.Client): Promise<CreateLocalPublisherR
 /**
  * Attempt to publish to the session
  */
-function checkPublishToSession(OT: OT.Client, session: OT.Session): Promise<PublishToSessionResults> {
+function checkPublishToSession(
+  OT: OT.Client, session: OT.Session,
+  options?: NetworkTestOptions,
+): Promise<PublishToSessionResults> {
   return new Promise((resolve, reject) => {
     const disconnectAndReject = (rejectError: Error) => {
       disconnectFromSession(session).then(() => {
         reject(rejectError);
       });
     };
-    checkCreateLocalPublisher(OT)
+    checkCreateLocalPublisher(OT, options)
       .then(({ publisher }: CreateLocalPublisherResults) => {
         session.publish(publisher, (error?: OT.OTError) => {
           if (error) {
@@ -222,7 +234,8 @@ export function testConnectivity(
   OT: OT.Client,
   credentials: OT.SessionCredentials,
   otLogging: OTKAnalytics,
-  onComplete?: CompletionCallback<any>): Promise<ConnectivityTestResults> {
+  options?: NetworkTestOptions,
+): Promise<ConnectivityTestResults> {
   return new Promise((resolve, reject) => {
 
     const onSuccess = (flowResults: SubscribeToSessionResults) => {
@@ -232,7 +245,6 @@ export function testConnectivity(
       };
       otLogging.logEvent({ action: 'testConnectivity', variation: 'Success' });
       return disconnectFromSession(flowResults.session).then(() => {
-        onComplete && onComplete(undefined, results);
         return resolve(results);
       });
     };
@@ -255,7 +267,6 @@ export function testConnectivity(
           failedTests,
           success: false,
         };
-        onComplete && onComplete(undefined, results);
         otLogging.logEvent({ action: 'testConnectivity', variation: 'Success' });
         resolve(results);
       };
@@ -274,11 +285,10 @@ export function testConnectivity(
     };
 
     connectToSession(OT, credentials)
-      .then((session: OT.Session) => checkPublishToSession(OT, session))
+      .then((session: OT.Session) => checkPublishToSession(OT, session, options))
       .then(checkSubscribeToSession)
       .then((results: SubscribeToSessionResults) => checkLoggingServer(OT, results))
       .then(onSuccess)
       .catch(onFailure);
-
   });
 }

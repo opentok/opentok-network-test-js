@@ -31,7 +31,7 @@ function calculateVideoScore(subscriber: OT.Subscriber, stats: OT.SubscriberStat
   const lastStats = nth(-2, stats);
 
   if (!currentStats || !lastStats || !subscriber.stream) {
-    return 0;
+    return 1;
   }
 
   const totalPackets = calculateTotalPackets('video', currentStats, lastStats);
@@ -42,12 +42,13 @@ function calculateVideoScore(subscriber: OT.Subscriber, stats: OT.SubscriberStat
   const targetBitrate = targetBitrateForPixelCount(pixelCount);
 
   if (baseBitrate < MIN_VIDEO_BITRATE) {
-    return 0;
+    return 1;
   }
   const bitrate = Math.min(baseBitrate, targetBitrate);
 
-  const score =
+  let score =
     ((Math.log(bitrate / MIN_VIDEO_BITRATE) / Math.log(targetBitrate / MIN_VIDEO_BITRATE)) * 4) + 1;
+  score = Math.min(score, 4.5);
   return score;
 }
 

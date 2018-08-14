@@ -1,22 +1,50 @@
-import OTNetworkTest from 'opentok-network-test-js';
+import NetworkTest from 'opentok-network-test-js';
 import createChart from './chart.js';
 import * as ConnectivityUI from './connectivity-ui.js';
-import otNetworkTestOptions from './config.js';
-var otNetworkTest = new OTNetworkTest(OT, otNetworkTestOptions);
-document.getElementById('connectivity_status_container').style.display = 'block';
-otNetworkTest.testConnectivity(function(error, results) {
-  ConnectivityUI.displayTestConnectivityResults(error, results);
-  testQuality();
-});
+import config from './config.js';
+let sessionInfo = config;
+let otNetworkTest;
+let audioOnly;
+
+const isSafari = /constructor/i.test(window.HTMLElement) || (function (p) { return p.toString() === "[object SafariRemoteNotification]"; })(!window['safari'] || (typeof safari !== 'undefined' && safari.pushNotification));
+
+if (isSafari && config.h264.apiKey) {
+  sessionInfo = config.h264;
+}
+
+const precallDiv = document.getElementById('precall');
+precallDiv.querySelector('#precall button').addEventListener('click', function() {
+  document.getElementById('connectivity_status_container').style.display = 'block';
+  precallDiv.style.display = 'none';
+  startTest();
+})
+
+function startTest() {
+  audioOnly = precallDiv.querySelector('#precall input').checked;
+  var timeoutSelect = precallDiv.querySelector('select');
+  var timeout = timeoutSelect.options[timeoutSelect.selectedIndex].text * 1000;
+  var options = {
+    audioOnly: audioOnly,
+    timeout: timeout
+  };
+  otNetworkTest = new NetworkTest(OT, sessionInfo, options);
+  otNetworkTest.testConnectivity()
+    .then(results => ConnectivityUI.displayTestConnectivityResults(results))
+    .then(testQuality);
+}
 
 function testQuality() {
-  var audioChart = createChart('audio');
-  var videoChart = createChart('video');
-  document.getElementById('quality_status_container').style.display = 'block';
+  createChart('audio');
+  createChart('video');
+  ConnectivityUI.init(audioOnly);
+  document.getElementById('stop_test').addEventListener('click', function stopTestListener() {
+    ConnectivityUI.hideStopButton();
+    otNetworkTest.stop();
+  });
   otNetworkTest.testQuality(function updateCallback(stats) {
+    ConnectivityUI.checkToDisplayStopButton();
     ConnectivityUI.graphIntermediateStats('audio', stats);
     ConnectivityUI.graphIntermediateStats('video', stats);
-  }, function resultsCallback(error, results) {
-    ConnectivityUI.displayTestQualityResults(error, results);
-  });
+  }).then(results => ConnectivityUI.displayTestQualityResults(null, results))
+    .catch(error => ConnectivityUI.displayTestQualityResults(error));
 }
