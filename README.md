@@ -33,7 +33,7 @@ Now load the OpenTok Network Test in your project.
 Using CommonJS:
 
 ```javascript
-const OTNetworkTest = require('opentok-network-test-js');
+const NetworkTest = require('opentok-network-test-js').default;
 ```
 
 ... or ES6 ...
