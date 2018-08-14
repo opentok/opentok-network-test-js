@@ -38,7 +38,7 @@ Now load the OpenTok Network Test in your project. The module exports two object
 Using CommonJS:
 
 ```javascript
-const NetworkTest = require('opentok-network-test-js');
+const NetworkTest = require('opentok-network-test-js').default;
 const ErrorNames = require('opentok-network-test-js').ErrorNames;
 ```
 
