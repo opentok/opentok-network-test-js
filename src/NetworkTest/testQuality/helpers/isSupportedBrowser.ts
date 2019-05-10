@@ -25,7 +25,10 @@ function detectBrowser(): Browser {
   }
   if (get('webkitGetUserMedia', navigator)) {
     // Chrome, Chromium, Webview, Opera, all use the chrome shim for now
-    if (window.hasOwnProperty('webkitRTCPeerConnection')) {
+    if (window.hasOwnProperty('webkitRTCPeerConnection') &&
+      // Facebook has an RTC property, but fails to connect
+      !navigator.userAgent.match(/;fbav\/([\d.]+);/i)
+    ) {
       return 'Chrome';
     }
     if (navigator.userAgent.match(/Version\/(\d+).(\d+)/)) {
