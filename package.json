@@ -48,6 +48,7 @@
     "@types/webrtc": "0.0.22",
     "babel-core": "^6.26.3",
     "babel-loader": "^7.1.4",
+    "babel-preset-env": "^1.7.0",
     "dotenv": "^4.0.0",
     "fs-extra": "^4.0.3",
     "jasmine": "^2.99.0",
