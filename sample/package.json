@@ -1,6 +1,6 @@
 {
   "name": "opentok-network-test-sample",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "OpenTok Network Test Sample App",
   "scripts": {
     "build": "webpack --config webpack.config.js"
