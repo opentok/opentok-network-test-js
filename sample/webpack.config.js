@@ -4,8 +4,9 @@ module.exports = {
       fs: "empty",
       net: "empty"
     },
+    mode: "none",
     module: {
-      loaders: [
+      rules: [
           {
               loader: 'babel-loader',
               exclude: /node_modules/,
@@ -19,7 +20,7 @@ module.exports = {
                 ]
               }
           }
-      ]
+      ],
     },
     output: {
         path: __dirname,
