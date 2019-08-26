@@ -231,9 +231,9 @@ try {
     case ErrorNames.MISSING_OPENTOK_INSTANCE:
       console.error('Missing OT instance in constructor.');
       break;
-    case ErrorNames.INCOMPLETE_SESSON_CREDENTIALS:
-    case ErrorNames.MISSING_SESSON_CREDENTIALS:
-    case ErrorNames.INVALID_SESSON_CREDENTIALS:
+    case ErrorNames.INCOMPLETE_SESSION_CREDENTIALS:
+    case ErrorNames.MISSING_SESSION_CREDENTIALS:
+    case ErrorNames.INVALID_SESSION_CREDENTIALS:
       console.error('Missing or invalid OpenTok session credentials.');
       break;
     default:
@@ -471,9 +471,9 @@ an error object (against the values defined in ErrorNames) to determine the type
 | Error.name property set<br/>to this property of<br/>ErrorNames ... | Description |
 | ------------------------------------------------------------------ | ----------- |
 |   `MISSING_OPENTOK_INSTANCE` | An instance of OT, the OpenTok.js client SDK, was not passed into the constructor. |
-|   `INCOMPLETE_SESSON_CREDENTIALS` | The sessionInfo object passed into the constructor did not include an `apiKey`, `sessionId`,  or `token` object. |
-|   `MISSING_SESSON_CREDENTIALS` | No sessionInfo object was passed into the constructor. | 
-
+|   `INCOMPLETE_SESSION_CREDENTIALS` | The sessionInfo object passed into the constructor did not include an `apiKey`, `sessionId`,  or `token` object. |
+|   `MISSING_SESSION_CREDENTIALS` | No sessionInfo object was passed into the constructor. | 
+s
 #### testConnectivity() errors
 
 The `testConnectivity()` returns a JavaScript promise that succeeds with a `results` object.

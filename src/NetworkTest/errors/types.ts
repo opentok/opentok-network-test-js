@@ -12,8 +12,8 @@ import { OTError } from '../types/opentok/error';
 export enum ErrorNames {
   NETWORK_TEST_ERROR = 'NetworkTestError',
   MISSING_OPENTOK_INSTANCE = 'MissingOpenTokInstanceError',
-  INCOMPLETE_SESSON_CREDENTIALS = 'IncompleteSessionCredentialsError',
-  MISSING_SESSON_CREDENTIALS = 'MissingSessionCredentialsError',
+  INCOMPLETE_SESSION_CREDENTIALS = 'IncompleteSessionCredentialsError',
+  MISSING_SESSION_CREDENTIALS = 'MissingSessionCredentialsError',
   INVALID_ON_UPDATE_CALLBACK = 'InvalidOnUpdateCallback',
   CONNECTIVITY_ERROR = 'ConnectivityError',
   API_CONNECTIVITY_ERROR = 'APIConnectivityError',

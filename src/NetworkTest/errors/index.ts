@@ -26,14 +26,14 @@ export class MissingOpenTokInstanceError extends NetworkTestError {
 export class IncompleteSessionCredentialsError extends NetworkTestError {
   constructor() {
     super('NetworkConnectivity requires an apiKey, sessionId, and token.',
-      ErrorNames.INCOMPLETE_SESSON_CREDENTIALS);
+      ErrorNames.INCOMPLETE_SESSION_CREDENTIALS);
   }
 }
 
 export class MissingSessionCredentialsError extends NetworkTestError {
   constructor() {
     super('NetworkConnectivity requires OpenTok session credentials.',
-      ErrorNames.MISSING_SESSON_CREDENTIALS);
+      ErrorNames.MISSING_SESSION_CREDENTIALS);
   }
 }
 
