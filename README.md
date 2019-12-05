@@ -431,9 +431,9 @@ will be set to one of the values defined as properties of the `ErrorNames` objec
 ```javascript
 otNetworkTest.testQuality(null, function updateCallback() {
   // process intermediate results
-}).then(results) {
+}).then((results) => {
   // Display UI based on results
-}).catch(error, results) {
+}).catch((error) => {
     switch (error.name) {
       case ErrorNames.UNSUPPORTED_BROWSER:
         // Display UI message about unsupported browser
