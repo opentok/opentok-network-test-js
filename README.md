@@ -140,8 +140,8 @@ See the /sample subdirectory (and the /sample/README.md file) for a sample app.
 The `OTNetworkTest.testConnectivity()` method is supported in Chrome, Firefox, Safari,
 Internet Explorer, and Edge.
 
-The `OTNetworkTest.testQuality()` method is supported in Chrome, Firefox, and Internet Explorer.
-It is not supported in Edge.
+The `OTNetworkTest.testQuality()` method is supported in Chrome, Firefox, Safari,
+and Internet Explorer. It is not supported in Edge.
 
 ## API reference
 
