@@ -8,7 +8,8 @@ export type Browser =
   'WebKit browser without WebRTC support' |
   'Safari' |
   'Internet Explorer' |
-  'Edge';
+  'Edge' |
+  'Opera';
 
 function detectBrowser(): Browser {
 
@@ -24,8 +25,14 @@ function detectBrowser(): Browser {
     return 'Firefox';
   }
   if (get('webkitGetUserMedia', navigator)) {
-    // Chrome, Chromium, Webview, Opera, all use the chrome shim for now
+    // Chrome, Chromium, Webview, Opera, and Edge 79+ all use the chrome shim
     if (window.hasOwnProperty('webkitRTCPeerConnection')) {
+      if (navigator.userAgent.match(/Edg/)) {
+        return 'Edge';
+      }
+      if (navigator.userAgent.match(/Opera|OPR\//)) {
+        return 'Opera';
+      }
       return 'Chrome';
     }
     if (navigator.userAgent.match(/Version\/(\d+).(\d+)/)) {

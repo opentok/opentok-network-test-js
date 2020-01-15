@@ -431,7 +431,7 @@ describe('NetworkTest', () => {
         .catch(validateUnsupportedBrowserError)
       });
 
-      it('should return an unsupported browser error if the browser is Edge', () => {
+      it('should return an unsupported browser error if the browser is an older version of Edge', () => {
         const mozGetUserMedia = navigator.mozGetUserMedia;
         const webkitGetUserMedia = navigator.webkitGetUserMedia;
         navigator.mozGetUserMedia = undefined;
@@ -445,6 +445,20 @@ describe('NetworkTest', () => {
             navigator.webkitGetUserMedia = webkitGetUserMedia;
           });
       });
+
+      it('should run the test if the browser is a Chromium-based version of Edge', (done) => {
+        const mozGetUserMedia = navigator.mozGetUserMedia;
+        const webkitGetUserMedia = navigator.webkitGetUserMedia;
+        navigator.mozGetUserMedia = {};
+        navigator.webkitGetUserMedia = {};
+        spyOnProperty(window.navigator, 'userAgent', 'get').and.returnValue('Edg');
+        networkTestWithOptions.testQuality()
+          .then(() => {
+            navigator.mozGetUserMedia = mozGetUserMedia;
+            navigator.webkitGetUserMedia = webkitGetUserMedia;
+            done();
+        });
+      }, 10000);
 
       it('results in a failed test if OT.initPublisher() returns an error', (done) => {
         spyOn(OT, 'initPublisher').and.callFake((target, options, callback) => {
