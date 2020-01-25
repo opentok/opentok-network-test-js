@@ -432,9 +432,9 @@ will be set to one of the values defined as properties of the `ErrorNames` objec
 ```javascript
 otNetworkTest.testQuality(null, function updateCallback() {
   // process intermediate results
-}).then(results) {
+}).then((results) => {
   // Display UI based on results
-}).catch(error, results) {
+}).catch((error) => {
     switch (error.name) {
       case ErrorNames.UNSUPPORTED_BROWSER:
         // Display UI message about unsupported browser
@@ -495,8 +495,8 @@ the following:
 |   `PUBLISH_TO_SESSION_ERROR` | Encountered an unknown error while attempting to publish to a session. | 
 |   `FAILED_MESSAGING_SERVER_TEST` | The test failed to connect to media server due to messaging server connection failure. | 
 |   `FAILED_TO_CREATE_LOCAL_PUBLISHER` | The test failed to create a local publisher object. | 
-|   `PUBLISH_TO_SESSION_NOT_CONNECTED` | The test failed to failed to publish to the test session because the client was not connected to the session. | 
-|   `PUBLISH_TO_SESSION_PERMISSION_OR_TIMEOUT_ERROR` | The test failed to failed to publish to the test session due a permissions error or timeout. | 
+|   `PUBLISH_TO_SESSION_NOT_CONNECTED` | The test failed to publish to the test session because the client was not connected to the session. | 
+|   `PUBLISH_TO_SESSION_PERMISSION_OR_TIMEOUT_ERROR` | The test failed to publish to the test session due a permissions error or timeout. | 
 |   `PUBLISH_TO_SESSION_NETWORK_ERROR` | The test failed to publish to the test session due a network error. | 
 |   `SUBSCRIBE_TO_SESSION_ERROR` | The test encountered an unknown error while attempting to subscribe to a test stream. | 
 |   `LOGGING_SERVER_CONNECTION_ERROR` | The test failed to connect to the OpenTok logging server. | 
@@ -519,8 +519,8 @@ method has a `name` property set to one of the following:
 |   `NO_VIDEO_CAPTURE_DEVICES` | The browser cannot access a camera. | 
 |   `PUBLISH_TO_SESSION_ERROR` | The test encountered an unknown error while attempting to publish to a session. | 
 |   `INIT_PUBLISHER_ERROR` | The test failed to initialize a publisher. | 
-|   `PUBLISH_TO_SESSION_NOT_CONNECTED` | The test failed to failed to publish to the test session because the client was not connected to the session. | 
-|   `PUBLISH_TO_SESSION_PERMISSION_OR_TIMEOUT_ERROR` | The test failed to failed to publish to the test session due a permissions error or timeout. | 
+|   `PUBLISH_TO_SESSION_NOT_CONNECTED` | The test failed to publish to the test session because the client was not connected to the session. | 
+|   `PUBLISH_TO_SESSION_PERMISSION_OR_TIMEOUT_ERROR` | The test failed to publish to the test session due a permissions error or timeout. | 
 |   `SUBSCRIBE_TO_SESSION_ERROR` | The test encountered an unknown error while attempting to subscribe to a test stream. | 
 |   `SUBSCRIBER_GET_STATS_ERROR` | The test failed to get audio and video statistics for the test stream. | 
 

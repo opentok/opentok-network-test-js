@@ -1,6 +1,6 @@
 {
   "name": "opentok-network-test-sample",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "OpenTok Network Test Sample App",
   "scripts": {
     "build": "webpack --config webpack.config.js"
@@ -17,7 +17,7 @@
     "babel-loader": "^7.1.2",
     "babel-polyfill": "^6.26.0",
     "babel-preset-env": "^1.6.1",
-    "webpack": "^3.8.1"
+    "webpack": "^4.39.1"
   },
   "dependencies": {
     "highcharts": "^6.0.3",
