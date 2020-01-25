@@ -98,7 +98,7 @@ function calculateAudioScore(subscriber: OT.Subscriber, stats: OT.SubscriberStat
   if (totalAudioPackets === 0) {
     return 0;
   }
-  const packetLossRatio = getPacketsLost(currentStats.audio) - getPacketsLost(lastStats.audio) / totalAudioPackets;
+  const packetLossRatio = (getPacketsLost(currentStats.audio) - getPacketsLost(lastStats.audio))/ totalAudioPackets;
   return audioScore(0, packetLossRatio);
 }
 
