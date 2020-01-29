@@ -24,7 +24,7 @@ export class QualityTestError extends NetworkTestError {
 export class UnsupportedBrowserError extends QualityTestError {
   constructor(browser: string) {
     const message =
-      `Your current browser (${browser}) does not support the audio-video quality test. Please run the test in Chrome or Firefox.`;
+      `Your current browser (${browser}) does not support the audio-video quality test. Please run the test in a supported browser.`;
     super(message, ErrorNames.UNSUPPORTED_BROWSER);
   }
 }
