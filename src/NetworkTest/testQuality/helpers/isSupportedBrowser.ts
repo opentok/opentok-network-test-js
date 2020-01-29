@@ -9,6 +9,7 @@ export type Browser =
   'Safari' |
   'Internet Explorer' |
   'Edge' |
+  'non-Chromium Edge' |
   'Opera';
 
 function detectBrowser(): Browser {
@@ -41,8 +42,8 @@ function detectBrowser(): Browser {
     return 'WebKit browser without WebRTC support';
   }
 
-  if (navigator.mediaDevices && navigator.userAgent.match(/Edge\/(\d+).(\d+)$/)) { // Edge.
-    return 'Edge';
+  if (navigator.mediaDevices && navigator.userAgent.match(/edge\/(\d+).(\d+)$/)) { // Edge.
+    return 'non-Chromium Edge';
   }
 
   if (navigator.userAgent.indexOf('MSIE ') > 0 ||
@@ -59,7 +60,7 @@ function detectBrowser(): Browser {
 }
 
 export default function isSupportedBrowser(): { supported: boolean, browser: Browser } {
-  const supportedBrowsers = ['Chrome', 'Firefox', 'Internet Explorer', 'Safari'];
+  const supportedBrowsers = ['Chrome', 'Firefox', 'Internet Explorer', 'Safari', 'Edge'];
   const browser = detectBrowser();
   const supported = supportedBrowsers.indexOf(browser) > -1;
   return { browser, supported };
