@@ -1,6 +1,6 @@
 const path = require('path');
 const webpack = require('webpack');
-const UglifyJsPlugin = require('uglifyjs-webpack-plugin');
+const TerserPlugin = require('terser-webpack-plugin');
 
 module.exports = {
   entry: './src/NetworkTest/index.ts',
@@ -26,11 +26,11 @@ module.exports = {
     umdNamedDefine: true
   },
   optimization: {
+    minimize: true,
     minimizer: [
-      new UglifyJsPlugin({
-        cache: true,
+      new TerserPlugin({
         sourceMap: true,
       }),
     ],
-  }
+  },
 };
