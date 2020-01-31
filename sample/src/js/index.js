@@ -6,12 +6,6 @@ let sessionInfo = config;
 let otNetworkTest;
 let audioOnly;
 
-const isSafari = /constructor/i.test(window.HTMLElement) || (function (p) { return p.toString() === "[object SafariRemoteNotification]"; })(!window['safari'] || (typeof safari !== 'undefined' && safari.pushNotification));
-
-if (isSafari && config.h264.apiKey) {
-  sessionInfo = config.h264;
-}
-
 const precallDiv = document.getElementById('precall');
 precallDiv.querySelector('#precall button').addEventListener('click', function() {
   document.getElementById('connectivity_status_container').style.display = 'block';
