@@ -146,7 +146,6 @@ function checkCreateLocalPublisher(
           if (!error) {
             resolve({ publisher });
           } else {
-            console.error('OT.initPublisher', publisherOptions, error)
             reject(new e.FailedToCreateLocalPublisher());
           }
         });
