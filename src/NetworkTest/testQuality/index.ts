@@ -106,7 +106,7 @@ function validateDevices(OT: OT.Client): Promise<AvailableDevices> {
 /**
  * Create a test publisher and subscribe to the publihser's stream
  */
-function publishAndSubscribe(OT: OT.Client) {
+function publishAndSubscribe(OT: OT.Client, options?: NetworkTestOptions) {
   return (session: OT.Session): Promise<OT.Subscriber> =>
     new Promise((resolve, reject) => {
       let publisherOptions: OT.PublisherProperties;
@@ -130,6 +130,13 @@ function publishAndSubscribe(OT: OT.Client) {
             insertMode: 'append',
             showControls: false,
           };
+          if (options && options.audioSource) {
+            publisherOptions.audioSource = options.audioSource
+          }
+          if (options && options.videoSource) {
+            publisherOptions.videoSource = options.videoSource
+          }
+          console.log('AQUI test', publisherOptions)
           if (audioOnly) {
             publisherOptions.videoSource = null;
           }
@@ -172,10 +179,11 @@ function publishAndSubscribe(OT: OT.Client) {
 function subscribeToTestStream(
   OT: OT.Client,
   session: OT.Session,
-  credentials: OT.SessionCredentials): Promise<OT.Subscriber> {
+  credentials: OT.SessionCredentials,
+  options?: NetworkTestOptions): Promise<OT.Subscriber> {
   return new Promise((resolve, reject) => {
     connectToSession(session, credentials.token)
-      .then(publishAndSubscribe(OT))
+      .then(publishAndSubscribe(OT, options))
       .then(resolve)
       .catch(reject);
   });
@@ -203,6 +211,7 @@ function checkSubscriberQuality(
   OT: OT.Client,
   session: OT.Session,
   credentials: OT.SessionCredentials,
+  options?: NetworkTestOptions,
   onUpdate?: UpdateCallback<OT.SubscriberStats>,
   audioOnlyFallback?: boolean,
 ): Promise<QualityTestResults> {
@@ -210,7 +219,7 @@ function checkSubscriberQuality(
   let mosEstimatorTimeoutId: number;
 
   return new Promise((resolve, reject) => {
-    subscribeToTestStream(OT, session, credentials)
+    subscribeToTestStream(OT, session, credentials, options)
       .then((subscriber: OT.Subscriber) => {
         if (!subscriber) {
           reject(new e.MissingSubscriberError());
@@ -234,7 +243,7 @@ function checkSubscriberQuality(
               const audioVideoResults: QualityTestResults = buildResults(builder);
               if (!audioOnly && !isAudioQualityAcceptable(audioVideoResults)) {
                 audioOnly = true;
-                checkSubscriberQuality(OT, session, credentials, onUpdate, true)
+                checkSubscriberQuality(OT, session, credentials, options, onUpdate, true)
                   .then((results: QualityTestResults) => {
                     resolve(results);
                   });
@@ -322,7 +331,7 @@ export function testQuality(
     validateBrowser()
       .then(() => {
         const session = OT.initSession(credentials.apiKey, credentials.sessionId);
-        checkSubscriberQuality(OT, session, credentials, onUpdate)
+        checkSubscriberQuality(OT, session, credentials, options, onUpdate)
           .then(onSuccess)
           .catch(onError);
       })
