@@ -127,6 +127,12 @@ function checkCreateLocalPublisher(
           insertMode: 'append',
           showControls: false,
         };
+        if (options && options.audioSource) {
+          publisherOptions.audioSource = options.audioSource
+        }
+        if (options && options.videoSource) {
+          publisherOptions.videoSource = options.videoSource
+        }
         if (options && options.audioOnly) {
           publisherOptions.videoSource = null;
         }
