@@ -136,7 +136,6 @@ function publishAndSubscribe(OT: OT.Client, options?: NetworkTestOptions) {
           if (options && options.videoSource) {
             publisherOptions.videoSource = options.videoSource
           }
-          console.log('AQUI test', publisherOptions)
           if (audioOnly) {
             publisherOptions.videoSource = null;
           }

@@ -195,7 +195,7 @@ The `OTNetworkTest()` constructor includes the following parameters:
     The `sessionInfo` parameter is required.
 
 * `options` --The `options` parameter is an object containing the following properties,
-  both of which are optional:
+  each of which are optional:
 
    * `audioOnly` (Boolean) -- Set this property to `true` to run audio-only tests.
 
@@ -217,23 +217,23 @@ The `OTNetworkTest()` constructor includes the following parameters:
 
     Setting a lower timeout duration may result in less accurate results, including MOS ratings.
 
-    * `audioSource` (String) -- The ID of the audio input device (such as a microphone)
-      to be used by the test publisher. You can obtain a list of available devices,
-      including audio input devices, by calling the `OT.getDevices()` method.
+  * `audioSource` (String) -- The ID of the audio input device (such as a microphone)
+    to be used by the test publisher. You can obtain a list of available devices,
+    including audio input devices, by calling the `OT.getDevices()` method.
 
-      You may want to set this to have the OpenTok Network Test use the same device that
-      will be used in the real OpenTok session. This way, the test prompts the end user
-      to grant permission to the correct device. Note that changing the audio device may not
-      influence the quality test score.
+    You may want to set this to have the OpenTok Network Test use the same device that
+    will be used in the real OpenTok session. This way, the test prompts the end user
+    to grant permission to the correct device. Note that changing the audio device may not
+    influence the quality test score.
 
-    * `videoSource` (String) -- The ID of the video input device (such as a camera)
-      to be used by the test publisher. You can obtain a list of available devices,
-      including audio input devices, by calling the `OT.getDevices()` method.
+  * `videoSource` (String) -- The ID of the video input device (such as a camera)
+    to be used by the test publisher. You can obtain a list of available devices,
+    including audio input devices, by calling the `OT.getDevices()` method.
 
-      You may want to set this to have the OpenTok Network Test use the same device that
-      will be used in the real OpenTok session. This way, the test prompts the end user
-      to grant permission to the correct device. Note that changing the video device may not
-      influence the quality test score.
+    You may want to set this to have the OpenTok Network Test use the same device that
+    will be used in the real OpenTok session. This way, the test prompts the end user
+    to grant permission to the correct device. Note that changing the video device may not
+    influence the quality test score.
 
   The `options` parameter is optional.
 
