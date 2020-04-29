@@ -9,7 +9,7 @@
  * Connectivity Test Flow
  */
 import axios from 'axios';
-import * as Promise from 'promise';
+import { Promise } from '../util/promise';
 /* tslint:disable */
 import OTKAnalytics = require('opentok-solutions-logging');
 /* tslint:enable */
