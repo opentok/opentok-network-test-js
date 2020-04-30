@@ -49,6 +49,24 @@ function disconnectFromSession(session: OT.Session) {
 }
 
 /**
+ * Clean publisher and subscriber objects before disconnecting from the session
+ * @param session 
+ * @param publisher 
+ * @param subscriber 
+ */
+function cleanPublisherAndSubscriber(session: OT.Session, publisher: OT.Publisher, subscriber: OT.Subscriber) {
+    return new Promise((resolve, reject) => {
+      publisher.on('destroyed', () => {
+        resolve();
+      });
+      subscriber.on('destroyed', () => {
+        publisher.destroy();
+      });
+      session.unsubscribe(subscriber);
+    });
+}
+
+/**
  * Attempt to connect to the OpenTok sessionope
  */
 function connectToSession(
@@ -250,9 +268,9 @@ export function testConnectivity(
         failedTests: [],
       };
       otLogging.logEvent({ action: 'testConnectivity', variation: 'Success' });
-      return disconnectFromSession(flowResults.session).then(() => {
-        return resolve(results);
-      });
+      return cleanPublisherAndSubscriber(flowResults.session, flowResults.publisher, flowResults.subscriber)
+        .then(() => disconnectFromSession(flowResults.session))
+        .then(() => resolve(results))
     };
 
     const onFailure = (error: Error) => {
