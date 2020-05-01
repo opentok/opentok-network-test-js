@@ -35,7 +35,7 @@ interface QualityTestResultsBuilder {
   bandwidth?: Bandwidth;
 }
 
-export interface QualityTestResults extends HasAudioVideo<AverageStats> {}
+export interface QualityTestResults extends HasAudioVideo<AverageStats> { }
 
 type MOSResultsCallback = (state: MOSState) => void;
 type DeviceMap = { [deviceId: string]: OT.Device };
@@ -166,7 +166,7 @@ function publishAndSubscribe(OT: OT.Client, options?: NetworkTestOptions) {
                 (subscribeError?: OT.OTError) => {
                   return subscribeError ?
                     reject(new e.SubscribeToSessionError(subscribeError.message)) :
-                    resolve({publisher, subscriber});
+                    resolve({ publisher, subscriber });
                 });
           });
         })
@@ -213,15 +213,15 @@ function isAudioQualityAcceptable(results: QualityTestResults): boolean {
  * @param subscriber 
  */
 function cleanSubscriber(session: OT.Session, subscriber: OT.Subscriber) {
-    return new Promise((resolve, reject) => {
-        subscriber.on('destroyed', () => {
-            resolve();
-        });
-        if (!subscriber) {
-            resolve();
-        }
-        session.unsubscribe(subscriber);
+  return new Promise((resolve, reject) => {
+    subscriber.on('destroyed', () => {
+      resolve();
     });
+    if (!subscriber) {
+      resolve();
+    }
+    session.unsubscribe(subscriber);
+  });
 }
 
 /**
@@ -229,15 +229,15 @@ function cleanSubscriber(session: OT.Session, subscriber: OT.Subscriber) {
  * @param publisher 
  */
 function cleanPublisher(publisher: OT.Publisher) {
-    return new Promise((resolve, reject) => {
-        publisher.on('destroyed', () => {
-            resolve();
-        });
-        if (!publisher) {
-            resolve();
-        }
-        publisher.destroy();
+  return new Promise((resolve, reject) => {
+    publisher.on('destroyed', () => {
+      resolve();
     });
+    if (!publisher) {
+      resolve();
+    }
+    publisher.destroy();
+  });
 }
 
 function checkSubscriberQuality(
@@ -253,7 +253,7 @@ function checkSubscriberQuality(
 
   return new Promise((resolve, reject) => {
     subscribeToTestStream(OT, session, credentials, options)
-      .then(({publisher, subscriber} : PublisherSubscriber) => {
+      .then(({ publisher, subscriber }: PublisherSubscriber) => {
         if (!subscriber) {
           reject(new e.MissingSubscriberError());
         } else {
@@ -286,8 +286,8 @@ function checkSubscriberQuality(
                   session.off();
                 });
                 cleanSubscriber(session, subscriber)
-                  .then(()=> cleanPublisher(publisher))
-                  .then(()=> session.disconnect());
+                  .then(() => cleanPublisher(publisher))
+                  .then(() => session.disconnect());
               }
             };
 
@@ -347,7 +347,7 @@ export function testQuality(
 
     audioOnly = !!(options && options.audioOnly);
     testTimeout = audioOnly ? config.getStatsAudioOnlyDuration :
-     config.getStatsVideoAndAudioTestDuration;
+      config.getStatsVideoAndAudioTestDuration;
     if (options && options.timeout) {
       testTimeout = Math.min(testTimeout, options.timeout, 30000);
     }
