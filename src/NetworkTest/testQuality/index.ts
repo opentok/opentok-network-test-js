@@ -35,11 +35,12 @@ interface QualityTestResultsBuilder {
   bandwidth?: Bandwidth;
 }
 
-export interface QualityTestResults extends HasAudioVideo<AverageStats> {}
+export interface QualityTestResults extends HasAudioVideo<AverageStats> { }
 
 type MOSResultsCallback = (state: MOSState) => void;
 type DeviceMap = { [deviceId: string]: OT.Device };
 type AvailableDevices = { audio: DeviceMap, video: DeviceMap };
+type PublisherSubscriber = { publisher: OT.Publisher, subscriber: OT.Subscriber };
 
 let audioOnly = false; // By default, the initial test is audio-video
 let testTimeout: number;
@@ -107,7 +108,7 @@ function validateDevices(OT: OT.Client): Promise<AvailableDevices> {
  * Create a test publisher and subscribe to the publihser's stream
  */
 function publishAndSubscribe(OT: OT.Client, options?: NetworkTestOptions) {
-  return (session: OT.Session): Promise<OT.Subscriber> =>
+  return (session: OT.Session): Promise<PublisherSubscriber> =>
     new Promise((resolve, reject) => {
       let publisherOptions: OT.PublisherProperties;
       type StreamCreatedEvent = OT.Event<'streamCreated', OT.Publisher> & { stream: OT.Stream };
@@ -165,7 +166,7 @@ function publishAndSubscribe(OT: OT.Client, options?: NetworkTestOptions) {
                 (subscribeError?: OT.OTError) => {
                   return subscribeError ?
                     reject(new e.SubscribeToSessionError(subscribeError.message)) :
-                    resolve(subscriber);
+                    resolve({ publisher, subscriber });
                 });
           });
         })
@@ -179,7 +180,7 @@ function subscribeToTestStream(
   OT: OT.Client,
   session: OT.Session,
   credentials: OT.SessionCredentials,
-  options?: NetworkTestOptions): Promise<OT.Subscriber> {
+  options?: NetworkTestOptions): Promise<PublisherSubscriber> {
   return new Promise((resolve, reject) => {
     connectToSession(session, credentials.token)
       .then(publishAndSubscribe(OT, options))
@@ -206,6 +207,39 @@ function isAudioQualityAcceptable(results: QualityTestResults): boolean {
       || results.audio.packetLossRatio === 0);
 }
 
+/**
+ * Clean subscriber objects before disconnecting from the session
+ * @param session 
+ * @param subscriber 
+ */
+function cleanSubscriber(session: OT.Session, subscriber: OT.Subscriber) {
+  return new Promise((resolve, reject) => {
+    subscriber.on('destroyed', () => {
+      resolve();
+    });
+    if (!subscriber) {
+      resolve();
+    }
+    session.unsubscribe(subscriber);
+  });
+}
+
+/**
+ * Clean publisher objects before disconnecting from the session
+ * @param publisher 
+ */
+function cleanPublisher(publisher: OT.Publisher) {
+  return new Promise((resolve, reject) => {
+    publisher.on('destroyed', () => {
+      resolve();
+    });
+    if (!publisher) {
+      resolve();
+    }
+    publisher.destroy();
+  });
+}
+
 function checkSubscriberQuality(
   OT: OT.Client,
   session: OT.Session,
@@ -219,7 +253,7 @@ function checkSubscriberQuality(
 
   return new Promise((resolve, reject) => {
     subscribeToTestStream(OT, session, credentials, options)
-      .then((subscriber: OT.Subscriber) => {
+      .then(({ publisher, subscriber }: PublisherSubscriber) => {
         if (!subscriber) {
           reject(new e.MissingSubscriberError());
         } else {
@@ -251,7 +285,9 @@ function checkSubscriberQuality(
                   resolve(audioVideoResults);
                   session.off();
                 });
-                session.disconnect();
+                cleanSubscriber(session, subscriber)
+                  .then(() => cleanPublisher(publisher))
+                  .then(() => session.disconnect());
               }
             };
 
@@ -311,7 +347,7 @@ export function testQuality(
 
     audioOnly = !!(options && options.audioOnly);
     testTimeout = audioOnly ? config.getStatsAudioOnlyDuration :
-     config.getStatsVideoAndAudioTestDuration;
+      config.getStatsVideoAndAudioTestDuration;
     if (options && options.timeout) {
       testTimeout = Math.min(testTimeout, options.timeout, 30000);
     }
