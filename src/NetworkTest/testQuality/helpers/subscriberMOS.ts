@@ -34,9 +34,6 @@ function calculateVideoScore(subscriber: OT.Subscriber, stats: OT.SubscriberStat
     return 1;
   }
 
-  const totalPackets = calculateTotalPackets('video', currentStats, lastStats);
-  const packetLoss = getPacketsLost(currentStats.video) - getPacketsLost(lastStats.video) / totalPackets;
-  const interval = currentStats.timestamp - lastStats.timestamp;
   const baseBitrate = calculateBitRate('video', currentStats, lastStats);
   const pixelCount = subscriber.stream.videoDimensions.width * subscriber.stream.videoDimensions.height;
   const targetBitrate = targetBitrateForPixelCount(pixelCount);
@@ -123,7 +120,6 @@ export default function subscriberMOS(
          * We know that we're receiving "faulty" stats when we see a negative
          * value for bytesReceived.
          */
-        const getPacketsLost = (ts: OT.TrackStats): number => getOr(0, 'packetsLost', ts);
         if (stats.audio.bytesReceived < 0 || getOr(1, 'video.bytesReceived', stats) < 0) {
           mosState.clearInterval();
           return callback(mosState);
