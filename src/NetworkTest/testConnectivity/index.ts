@@ -57,7 +57,10 @@ function connectToSession(
   options?: NetworkTestOptions
 ): Promise<OT.Session> {
   return new Promise((resolve, reject) => {
-    const sessionOptions = options?.initSessionOptions || {};
+    let sessionOptions: OT.InitSessionOptions = {};
+    if (options && options.initSessionOptions) {
+        sessionOptions = options.initSessionOptions
+    }
     if (options && options.proxyServerUrl) {
         if (OT.setProxyUrl && typeof OT.setProxyUrl === 'function'){
             OT.setProxyUrl(options.proxyServerUrl);
