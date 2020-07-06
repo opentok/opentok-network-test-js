@@ -33,6 +33,8 @@ export interface NetworkTestOptions {
   timeout?: number;
   audioSource?: string;
   videoSource?: string;
+  initSessionOptions?: OT.InitSessionOptions
+  proxyServerUrl?: string;
 }
 
 export default class NetworkTest {

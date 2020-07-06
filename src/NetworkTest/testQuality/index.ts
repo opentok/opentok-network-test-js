@@ -329,7 +329,15 @@ export function testQuality(
 
     validateBrowser()
       .then(() => {
-        const session = OT.initSession(credentials.apiKey, credentials.sessionId);
+        const sessionOptions = options?.initSessionOptions || {};
+        if (options && options.proxyServerUrl) {
+            if (OT.setProxyUrl && typeof OT.setProxyUrl === 'function'){
+                OT.setProxyUrl(options.proxyServerUrl);
+            } else {
+                sessionOptions.proxyUrl = options.proxyServerUrl;
+            }
+        }
+        const session = OT.initSession(credentials.apiKey, credentials.sessionId, sessionOptions);
         checkSubscriberQuality(OT, session, credentials, options, onUpdate)
           .then(onSuccess)
           .catch(onError);

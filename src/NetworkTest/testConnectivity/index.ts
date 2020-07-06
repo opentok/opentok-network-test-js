@@ -54,9 +54,18 @@ function disconnectFromSession(session: OT.Session) {
 function connectToSession(
   OT: OT.Client,
   { apiKey, sessionId, token }: OT.SessionCredentials,
+  options?: NetworkTestOptions
 ): Promise<OT.Session> {
   return new Promise((resolve, reject) => {
-    const session = OT.initSession(apiKey, sessionId);
+    const sessionOptions = options?.initSessionOptions || {};
+    if (options && options.proxyServerUrl) {
+        if (OT.setProxyUrl && typeof OT.setProxyUrl === 'function'){
+            OT.setProxyUrl(options.proxyServerUrl);
+        } else {
+            sessionOptions.proxyUrl = options.proxyServerUrl;
+        }
+    }
+    const session = OT.initSession(apiKey, sessionId, sessionOptions);
     session.connect(token, (error?: OT.OTError) => {
       if (errorHasName(error, OTErrorType.OT_AUTHENTICATION_ERROR)) {
         reject(new e.ConnectToSessionTokenError());
@@ -290,7 +299,7 @@ export function testConnectivity(
       }
     };
 
-    connectToSession(OT, credentials)
+    connectToSession(OT, credentials, options)
       .then((session: OT.Session) => checkPublishToSession(OT, session, options))
       .then(checkSubscribeToSession)
       .then((results: SubscribeToSessionResults) => checkLoggingServer(OT, results))
