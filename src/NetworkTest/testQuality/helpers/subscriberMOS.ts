@@ -115,7 +115,7 @@ export default function subscriberMOS(
         }
 
         /**
-         * We occaisionally start to receive faulty stat during long-running
+         * We occasionally start to receive faulty stat during long-running
          * tests. If this occurs, let's end the test early and report the
          * results as they are, as we should have sufficient data to
          * calculate a score at this point.
