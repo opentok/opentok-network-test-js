@@ -49,6 +49,35 @@ function disconnectFromSession(session: OT.Session) {
 }
 
 /**
+ * Clean subscriber objects before disconnecting from the session
+ * @param session 
+ * @param subscriber 
+ */
+function cleanSubscriber(session: OT.Session, subscriber: OT.Subscriber) {
+  return new Promise((resolve, reject) => {
+    subscriber.on('destroyed', () => {
+      resolve();
+    });
+    if (!subscriber) {
+      resolve();
+    }
+    session.unsubscribe(subscriber);
+  });
+}
+
+function cleanPublisher(publisher: OT.Publisher) {
+  return new Promise((resolve, reject) => {
+    publisher.on('destroyed', () => {
+      resolve();
+    });
+    if (!publisher) {
+      resolve();
+    }
+    publisher.destroy();
+  });
+}
+
+/**
  * Attempt to connect to the OpenTok sessionope
  */
 function connectToSession(
@@ -211,9 +240,11 @@ function checkSubscribeToSession({ session, publisher }: PublishToSessionResults
   return new Promise((resolve, reject) => {
     const config = { testNetwork: true, audioVolume: 0 };
     const disconnectAndReject = (rejectError: Error) => {
-      disconnectFromSession(session).then(() => {
-        reject(rejectError);
-      });
+      cleanPublisher(publisher)
+        .then(() => disconnectFromSession(session))
+        .then(() => {
+          reject(rejectError);
+        });
     };
     if (!publisher.stream) {
       disconnectAndReject(new e.SubscribeToSessionError());
@@ -262,9 +293,10 @@ export function testConnectivity(
         failedTests: [],
       };
       otLogging.logEvent({ action: 'testConnectivity', variation: 'Success' });
-      return disconnectFromSession(flowResults.session).then(() => {
-        return resolve(results);
-      });
+      return cleanSubscriber(flowResults.session, flowResults.subscriber)
+        .then(() => cleanPublisher(flowResults.publisher))
+        .then(() => disconnectFromSession(flowResults.session))
+        .then(() => resolve(results))
     };
 
     const onFailure = (error: Error) => {
