@@ -400,8 +400,7 @@ describe('NetworkTest', () => {
         });
 
         const validateResults = (results: QualityTestResults) => {
-          const { mos, audio, video } = results;
-
+          const { audio, video } = results;
           expect(audio.bitrate).toEqual(jasmine.any(Number));
           expect(audio.supported).toEqual(jasmine.any(Boolean));
           expect(audio.reason || '').toEqual(jasmine.any(String));
@@ -422,7 +421,7 @@ describe('NetworkTest', () => {
           .then(validateResults)
           .catch(validateError)
           .finally(done);
-      }, 8000);
+      }, 10000);
 
       it('should return an error if the window.navigator is undefined', () => {
         spyOnProperty(window, 'navigator', 'get').and.returnValue(undefined);
