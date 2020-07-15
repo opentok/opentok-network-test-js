@@ -370,10 +370,10 @@ export function testQuality(
             sessionOptions = options.initSessionOptions
         }
         if (options && options.proxyServerUrl) {
-            if (OT.setProxyUrl && typeof OT.setProxyUrl === 'function'){
-                OT.setProxyUrl(options.proxyServerUrl);
-            } else {
-                sessionOptions.proxyUrl = options.proxyServerUrl;
+            if (options && options.proxyServerUrl) {
+                if (!OT.hasOwnProperty('setProxyUrl')) { // Fallback for OT.version < 2.17.4
+                  sessionOptions.proxyUrl = options.proxyServerUrl; 
+                }
             }
         }
         const session = OT.initSession(credentials.apiKey, credentials.sessionId, sessionOptions);

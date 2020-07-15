@@ -91,11 +91,9 @@ function connectToSession(
         sessionOptions = options.initSessionOptions
     }
     if (options && options.proxyServerUrl) {
-        if (OT.setProxyUrl && typeof OT.setProxyUrl === 'function'){
-            OT.setProxyUrl(options.proxyServerUrl);
-        } else {
-            sessionOptions.proxyUrl = options.proxyServerUrl;
-        }
+      if (!OT.hasOwnProperty('setProxyUrl')) { // Fallback for OT.version < 2.17.4
+        sessionOptions.proxyUrl = options.proxyServerUrl; 
+      }
     }
     const session = OT.initSession(apiKey, sessionId, sessionOptions);
     session.connect(token, (error?: OT.OTError) => {
@@ -264,9 +262,10 @@ function checkSubscribeToSession({ session, publisher }: PublishToSessionResults
 /**
  * Attempt to connect to the tokbox client logging server
  */
-function checkLoggingServer(OT: OT.Client, input?: SubscribeToSessionResults): Promise<SubscribeToSessionResults> {
+function checkLoggingServer(OT: OT.Client, options?: NetworkTestOptions, input?: SubscribeToSessionResults): Promise<SubscribeToSessionResults> {
   return new Promise((resolve, reject) => {
-    const url = `${getOr('', 'properties.loggingURL', OT)}/logging/ClientEvent`;
+    const loggingUrl = 'hlg.tokbox.com/prod/logging/ClientEvent';
+    const url = options && options.proxyServerUrl && `${options.proxyServerUrl}/${loggingUrl}` || `https://${loggingUrl}`;
     const handleError = () => reject(new e.LoggingServerConnectionError());
 
     axios.post(url)
@@ -328,7 +327,7 @@ export function testConnectivity(
       if (error.name === 'LoggingServerConnectionError') {
         handleResults(error);
       } else {
-        checkLoggingServer(OT)
+        checkLoggingServer(OT, options)
           .then(() => handleResults(error))
           .catch((loggingError: e.LoggingServerConnectionError) => handleResults(error, loggingError));
       }
@@ -337,7 +336,7 @@ export function testConnectivity(
     connectToSession(OT, credentials, options)
       .then((session: OT.Session) => checkPublishToSession(OT, session, options))
       .then(checkSubscribeToSession)
-      .then((results: SubscribeToSessionResults) => checkLoggingServer(OT, results))
+      .then((results: SubscribeToSessionResults) => checkLoggingServer(OT, options, results))
       .then(onSuccess)
       .catch(onFailure);
   });
