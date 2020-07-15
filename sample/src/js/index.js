@@ -19,8 +19,7 @@ function startTest() {
     var timeout = timeoutSelect.options[timeoutSelect.selectedIndex].text * 1000;
     var options = {
         audioOnly: audioOnly,
-        timeout: timeout,
-        proxyServerUrl: 'https://ip-proxy.opentok.cse.vonage.com'
+        timeout: timeout
     };
     otNetworkTest = new NetworkTest(OT, sessionInfo, options);
     otNetworkTest.testConnectivity()
