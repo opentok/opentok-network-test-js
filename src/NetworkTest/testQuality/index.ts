@@ -367,14 +367,12 @@ export function testQuality(
       .then(() => {
         let sessionOptions: OT.InitSessionOptions = {};
         if (options && options.initSessionOptions) {
-            sessionOptions = options.initSessionOptions
+          sessionOptions = options.initSessionOptions
         }
         if (options && options.proxyServerUrl) {
-            if (options && options.proxyServerUrl) {
-                if (!OT.hasOwnProperty('setProxyUrl')) { // Fallback for OT.version < 2.17.4
-                  sessionOptions.proxyUrl = options.proxyServerUrl; 
-                }
-            }
+          if (!OT.hasOwnProperty('setProxyUrl')) { // Fallback for OT.version < 2.17.4
+            sessionOptions.proxyUrl = options.proxyServerUrl;
+          }
         }
         const session = OT.initSession(credentials.apiKey, credentials.sessionId, sessionOptions);
         checkSubscriberQuality(OT, session, credentials, options, onUpdate)
