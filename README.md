@@ -245,7 +245,7 @@ The `OTNetworkTest()` constructor includes the following parameters:
 	  * `iceConfig ` (Object) -- This feature is part of the configurable TURN add-on feature.
 
   * `proxyServerUrl` (String) -- (Optional) Set this to the proxy server URL 
-    you use in the OpenTok client SDKs (for example, when calling OT.setProxyUrl()
+    you use in the OpenTok client SDKs (for example, when calling `OT.setProxyUrl()`
     in OpenTok.js). For more information, please check the 
     [IP Proxy Documentation](https://tokbox.com/developer/guides/ip-proxy/).
 
