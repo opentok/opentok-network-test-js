@@ -34,9 +34,6 @@ function calculateVideoScore(subscriber: OT.Subscriber, stats: OT.SubscriberStat
     return 1;
   }
 
-  const totalPackets = calculateTotalPackets('video', currentStats, lastStats);
-  const packetLoss = getPacketsLost(currentStats.video) - getPacketsLost(lastStats.video) / totalPackets;
-  const interval = currentStats.timestamp - lastStats.timestamp;
   const baseBitrate = calculateBitRate('video', currentStats, lastStats);
   const pixelCount = subscriber.stream.videoDimensions.width * subscriber.stream.videoDimensions.height;
   const targetBitrate = targetBitrateForPixelCount(pixelCount);
