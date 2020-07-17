@@ -120,7 +120,6 @@ export default function subscriberMOS(
          * We know that we're receiving "faulty" stats when we see a negative
          * value for bytesReceived.
          */
-        const getPacketsLost = (ts: OT.TrackStats): number => getOr(0, 'packetsLost', ts);
         if (stats.audio.bytesReceived < 0 || getOr(1, 'video.bytesReceived', stats) < 0) {
           mosState.clearInterval();
           return callback(mosState);
@@ -141,7 +140,6 @@ export default function subscriberMOS(
         mosState.videoScoresLog.push(videoScore);
         const audioScore = calculateAudioScore(subscriber, mosState.statsLog);
         mosState.audioScoresLog.push(audioScore);
-
         mosState.pruneScores();
 
         // If bandwidth has reached a steady state, end the test early
