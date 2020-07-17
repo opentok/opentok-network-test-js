@@ -276,8 +276,11 @@ function checkSubscriberQuality(
               const audioVideoResults: QualityTestResults = buildResults(builder);
               if (!audioOnly && !isAudioQualityAcceptable(audioVideoResults)) {
                 audioOnly = true;
+                // We don't want to lose the videoResults.
+                const videoResults = audioVideoResults.video;
                 checkSubscriberQuality(OT, session, credentials, options, onUpdate, true)
                   .then((results: QualityTestResults) => {
+                    results.video = videoResults;
                     resolve(results);
                   });
               } else {
