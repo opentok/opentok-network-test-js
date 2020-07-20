@@ -60,7 +60,7 @@ function detectBrowser(): Browser {
 }
 
 export default function isSupportedBrowser(): { supported: boolean, browser: Browser } {
-  const supportedBrowsers = ['Chrome', 'Firefox', 'Internet Explorer', 'Safari', 'Edge'];
+  const supportedBrowsers = ['Chrome', 'Firefox', 'Internet Explorer', 'Safari', 'Edge', 'Opera'];
   const browser = detectBrowser();
   const supported = supportedBrowsers.indexOf(browser) > -1;
   return { browser, supported };
