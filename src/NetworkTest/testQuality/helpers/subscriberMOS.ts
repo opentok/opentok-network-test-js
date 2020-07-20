@@ -140,6 +140,7 @@ export default function subscriberMOS(
         mosState.videoScoresLog.push(videoScore);
         const audioScore = calculateAudioScore(subscriber, mosState.statsLog);
         mosState.audioScoresLog.push(audioScore);
+
         mosState.pruneScores();
 
         // If bandwidth has reached a steady state, end the test early
