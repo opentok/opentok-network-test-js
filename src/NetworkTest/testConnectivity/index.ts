@@ -264,8 +264,8 @@ function checkSubscribeToSession({ session, publisher }: PublishToSessionResults
  */
 function checkLoggingServer(OT: OT.Client, options?: NetworkTestOptions, input?: SubscribeToSessionResults): Promise<SubscribeToSessionResults> {
   return new Promise((resolve, reject) => {
-    const loggingUrl = 'hlg.tokbox.com/prod/logging/ClientEvent';
-    const url = options && options.proxyServerUrl && `${options.proxyServerUrl}/${loggingUrl}` || `https://${loggingUrl}`;
+    const loggingUrl = `${getOr('', 'properties.loggingURL', OT)}/logging/ClientEvent`; //https://hlg.tokbox.com/prod
+    const url = options && options.proxyServerUrl && `${options.proxyServerUrl}/${loggingUrl.replace('https://', '')}` || loggingUrl;
     const handleError = () => reject(new e.LoggingServerConnectionError());
 
     axios.post(url)
