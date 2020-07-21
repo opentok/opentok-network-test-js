@@ -9,7 +9,8 @@
     "test-setup": "node test/setup/setup.js",
     "test-teardown": "rm test/credentials.json",
     "karma": "karma start",
-    "test": "npm run test-setup && npm run karma && npm run test-teardown"
+    "test": "npm run test-setup && npm run karma && npm run test-teardown",
+    "example": "npm run build && cd sample && npm run build && python -m SimpleHTTPServer"
   },
   "repository": {
     "type": "git",

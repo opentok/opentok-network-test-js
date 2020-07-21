@@ -101,4 +101,9 @@ export namespace OT {
   export type SubscriberProperties = OTSubscriber.SubscriberProperties;
   export type TrackStats = OTSubscriber.TrackStats;
   export type OTError = OTError.OTError;
+  export type PublisherRtcStatsReportArr = OTPublisher.PublisherRtcStatsReportArr;
+  export type PublisherRtcStatsReport = OTPublisher.PublisherRtcStatsReport;
+  export type RTCStatsReport = OTPublisher.RTCStatsReport;
+  export type RTCStatsResponse = OTPublisher.RTCStatsResponse;
+  
 }

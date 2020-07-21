@@ -303,7 +303,7 @@ function checkSubscriberQuality(
               processResults();
             };
 
-            subscriberMOS(builder.state, subscriber, getStatsListener, resultsCallback);
+            subscriberMOS(builder.state, subscriber, publisher, getStatsListener, resultsCallback);
 
             // We add +1 to the testTimeout value in order to consider the last stats snapshot.
             mosEstimatorTimeoutId = window.setTimeout(processResults, testTimeout + 1);

@@ -4,6 +4,7 @@ import MOSState from './MOSState';
 import { OT } from '../../types/opentok';
 import { AV } from '../types/stats';
 import { getOr, last, nth } from '../../util';
+import isRtcStatsReport from './isRtcStatsReport';
 
 export type StatsListener = (error?: OT.OTError, stats?: OT.SubscriberStats) => void;
 
@@ -35,29 +36,61 @@ function calculateVideoScore(subscriber: OT.Subscriber, stats: OT.SubscriberStat
   }
 
   const baseBitrate = calculateBitRate('video', currentStats, lastStats);
+  console.log('video baseBitrate ==> ', baseBitrate);
   const pixelCount = subscriber.stream.videoDimensions.width * subscriber.stream.videoDimensions.height;
-  const targetBitrate = targetBitrateForPixelCount(pixelCount);
-
+  console.log('video pixelCount ==> ', pixelCount, subscriber.stream.videoDimensions.width, subscriber.stream.videoDimensions.height);
+  const targetBitrate = targetBitrateForPixelCount(pixelCount); // 997619.179690790107787 para 640x480
+  console.log('video targetBitrate ==> ', targetBitrate);
   if (baseBitrate < MIN_VIDEO_BITRATE) {
     return 1;
   }
   const bitrate = Math.min(baseBitrate, targetBitrate);
-
+  console.log(' video bitrate ==>', bitrate)
   let score =
     ((Math.log(bitrate / MIN_VIDEO_BITRATE) / Math.log(targetBitrate / MIN_VIDEO_BITRATE)) * 4) + 1;
+  console.log(' video score ==>', score)
   score = Math.min(score, 4.5);
   return score;
 }
 
-function calculateAudioScore(subscriber: OT.Subscriber, stats: OT.SubscriberStats[]): number {
+async function calculateAudioScore(subscriber: OT.Subscriber, publisher: OT.Publisher, stats: OT.SubscriberStats[]): Promise<number> {
 
-  const audioScore = (roundTripTime: number, packetLossRatio: number) => {
+  /**
+   * Get publisher raw stats directly from the Peer Connection in order
+   * to get the roundTripTime on type=remote-inbound-rtp and kind=audio
+   */
+  const getRoundTripTime = () : Promise<number> => new Promise((resolve) => {
+    publisher.getRtcStatsReport((publisherStatsError?: OT.OTError, stats?: OT.PublisherRtcStatsReportArr ) => {
+      if (!stats || publisherStatsError) {
+        return resolve(0);
+      }
+      const { rtcStatsReport } = stats[0];
+      if (isRtcStatsReport(rtcStatsReport)) {
+        rtcStatsReport.forEach((stat: any) => {
+          if (stat.type === 'remote-inbound-rtp' &&
+            stat.kind === 'audio') {
+            return resolve(stat.roundTripTime);
+          }
+        });
+      } else {
+        rtcStatsReport.result().forEach((stat: any) => {
+          if (stat.type === 'remote-inbound-rtp' &&
+          stat.kind === 'audio') {
+            return resolve(stat.roundTripTime);
+          }
+        });
+      }
+    });
+  });
+
+  const audioScore = async (packetLossRatio: number) => {
     const LOCAL_DELAY = 20; // 20 msecs: typical frame duration
     const h = (x: number): number => x < 0 ? 0 : 1;
     const a = 0; // ILBC: a=10
     const b = 19.8;
     const c = 29.7;
-
+    const roundTripTime = await getRoundTripTime();
+    console.log('roundTripTime!!', roundTripTime);
     /**
      * Calculate the transmission rating factor, R
      */
@@ -86,27 +119,29 @@ function calculateAudioScore(subscriber: OT.Subscriber, stats: OT.SubscriberStat
 
   const currentStats = last(stats);
   const lastStats = nth(-2, stats);
-
+  console.log(currentStats, lastStats);
   if (!currentStats || !lastStats || !subscriber.stream) {
-    return 0;
+    return 1;
   }
 
   const totalAudioPackets = calculateTotalPackets('audio', currentStats, lastStats);
+  console.log(' audio calculateTotalPackets!!!', totalAudioPackets);
   if (totalAudioPackets === 0) {
-    return 0;
+    return 1;
   }
-  const packetLossRatio = (getPacketsLost(currentStats.audio) - getPacketsLost(lastStats.audio))/ totalAudioPackets;
-  return audioScore(0, packetLossRatio);
+  const packetLossRatio = (getPacketsLost(currentStats.audio) - getPacketsLost(lastStats.audio)) / totalAudioPackets;
+  return await audioScore(packetLossRatio);
 }
 
 export default function subscriberMOS(
   mosState: MOSState,
   subscriber: OT.Subscriber,
+  publisher: OT.Publisher,
   getStatsListener: StatsListener,
   callback: (state: MOSState) => void) {
   mosState.intervalId = window.setInterval(
     () => {
-      subscriber.getStats((error?: OT.OTError, stats?: OT.SubscriberStats) => {
+      subscriber.getStats(async (error?: OT.OTError, stats?: OT.SubscriberStats) => {
         if (!stats) {
           return null;
         }
@@ -138,7 +173,7 @@ export default function subscriberMOS(
         mosState.stats = calculateThroughput(mosState);
         const videoScore = calculateVideoScore(subscriber, mosState.statsLog);
         mosState.videoScoresLog.push(videoScore);
-        const audioScore = calculateAudioScore(subscriber, mosState.statsLog);
+        const audioScore = await calculateAudioScore(subscriber, publisher, mosState.statsLog);
         mosState.audioScoresLog.push(audioScore);
 
         mosState.pruneScores();
