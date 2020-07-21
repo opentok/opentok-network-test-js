@@ -110,8 +110,8 @@ export function displayTestQualityResults(error, results) {
     + ' (' + rateMosScore(audioMos) + ')';
   resultsEl.querySelector('#audio-bitrate').textContent = results.audio.bitrate ?
     (results.audio.bitrate / 1000).toFixed(2) + ' kbps' : '--';
-  resultsEl.querySelector('#audio-plr').textContent = results.audio.supported ?
-    (results.audio.packetLossRatio * 100).toFixed(2) + '%' : '--';
+  resultsEl.querySelector('#audio-plr').textContent = results.audio.packetLossRatio ?
+    (results.audio.packetLossRatio * 100).toFixed(2) + '%' : '0.00%';
   resultsEl = statusContainerEl.querySelector('#video .results');
   resultsEl.querySelector('#video-supported').textContent = results.video.supported ? 'Yes' : 'No';
   const videoMos = results.video.mos;
@@ -119,8 +119,8 @@ export function displayTestQualityResults(error, results) {
     + ' (' + rateMosScore(videoMos) + ')';
   resultsEl.querySelector('#video-bitrate').textContent = results.video.bitrate ?
     (results.video.bitrate / 1000).toFixed(2) + ' kbps' : '--';
-  resultsEl.querySelector('#video-plr').textContent = results.video.supported ?
-    (results.video.packetLossRatio * 100).toFixed(2) + '%' : '--';
+  resultsEl.querySelector('#video-plr').textContent = results.video.packetLossRatio ?
+    (results.video.packetLossRatio * 100).toFixed(2) + '%' : '0.00%';
   resultsEl.querySelector('#video-recommendedResolution').textContent =
     results.video.recommendedResolution || '--';
   resultsEl.querySelector('#video-recommendedFrameRate').textContent =
