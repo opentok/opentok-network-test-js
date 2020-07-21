@@ -48,6 +48,7 @@ export namespace OT {
     initSession(
       partnerId: string,
       sessionId: string,
+      options?: OTSession.initSessionOptions
     ): Session;
 
     registerScreenSharingExtension(
@@ -59,6 +60,8 @@ export namespace OT {
     reportIssue(callback: (error?: OTError, reportId?: string) => void): void;
 
     setLogLevel(level: number): void;
+
+    setProxyUrl(proxyUrl: string): void;
 
     upgradeSystemRequirements(): void;
   }
@@ -87,6 +90,7 @@ export namespace OT {
   }
 
   export type Session = OTSession.Session;
+  export type InitSessionOptions = OTSession.initSessionOptions;
   export type Event<Type, Target> = OTEvent.Event<Type, Target>;
   export type Connection  = OTConnection.Connection;
   export type Stream  = OTStream.Stream;

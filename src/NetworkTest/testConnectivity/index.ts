@@ -83,9 +83,19 @@ function cleanPublisher(publisher: OT.Publisher) {
 function connectToSession(
   OT: OT.Client,
   { apiKey, sessionId, token }: OT.SessionCredentials,
+  options?: NetworkTestOptions
 ): Promise<OT.Session> {
   return new Promise((resolve, reject) => {
-    const session = OT.initSession(apiKey, sessionId);
+    let sessionOptions: OT.InitSessionOptions = {};
+    if (options && options.initSessionOptions) {
+        sessionOptions = options.initSessionOptions
+    }
+    if (options && options.proxyServerUrl) {
+      if (!OT.hasOwnProperty('setProxyUrl')) { // Fallback for OT.version < 2.17.4
+        sessionOptions.proxyUrl = options.proxyServerUrl; 
+      }
+    }
+    const session = OT.initSession(apiKey, sessionId, sessionOptions);
     session.connect(token, (error?: OT.OTError) => {
       if (errorHasName(error, OTErrorType.OT_AUTHENTICATION_ERROR)) {
         reject(new e.ConnectToSessionTokenError());
@@ -252,9 +262,10 @@ function checkSubscribeToSession({ session, publisher }: PublishToSessionResults
 /**
  * Attempt to connect to the tokbox client logging server
  */
-function checkLoggingServer(OT: OT.Client, input?: SubscribeToSessionResults): Promise<SubscribeToSessionResults> {
+function checkLoggingServer(OT: OT.Client, options?: NetworkTestOptions, input?: SubscribeToSessionResults): Promise<SubscribeToSessionResults> {
   return new Promise((resolve, reject) => {
-    const url = `${getOr('', 'properties.loggingURL', OT)}/logging/ClientEvent`;
+    const loggingUrl = `${getOr('', 'properties.loggingURL', OT)}/logging/ClientEvent`; //https://hlg.tokbox.com/prod
+    const url = options && options.proxyServerUrl && `${options.proxyServerUrl}/${loggingUrl.replace('https://', '')}` || loggingUrl;
     const handleError = () => reject(new e.LoggingServerConnectionError());
 
     axios.post(url)
@@ -316,16 +327,16 @@ export function testConnectivity(
       if (error.name === 'LoggingServerConnectionError') {
         handleResults(error);
       } else {
-        checkLoggingServer(OT)
+        checkLoggingServer(OT, options)
           .then(() => handleResults(error))
           .catch((loggingError: e.LoggingServerConnectionError) => handleResults(error, loggingError));
       }
     };
 
-    connectToSession(OT, credentials)
+    connectToSession(OT, credentials, options)
       .then((session: OT.Session) => checkPublishToSession(OT, session, options))
       .then(checkSubscribeToSession)
-      .then((results: SubscribeToSessionResults) => checkLoggingServer(OT, results))
+      .then((results: SubscribeToSessionResults) => checkLoggingServer(OT, options, results))
       .then(onSuccess)
       .catch(onFailure);
   });
