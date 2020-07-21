@@ -36,19 +36,14 @@ function calculateVideoScore(subscriber: OT.Subscriber, stats: OT.SubscriberStat
   }
 
   const baseBitrate = calculateBitRate('video', currentStats, lastStats);
-  console.log('video baseBitrate ==> ', baseBitrate);
   const pixelCount = subscriber.stream.videoDimensions.width * subscriber.stream.videoDimensions.height;
-  console.log('video pixelCount ==> ', pixelCount, subscriber.stream.videoDimensions.width, subscriber.stream.videoDimensions.height);
-  const targetBitrate = targetBitrateForPixelCount(pixelCount); // 997619.179690790107787 para 640x480
-  console.log('video targetBitrate ==> ', targetBitrate);
+  const targetBitrate = targetBitrateForPixelCount(pixelCount);
   if (baseBitrate < MIN_VIDEO_BITRATE) {
     return 1;
   }
   const bitrate = Math.min(baseBitrate, targetBitrate);
-  console.log(' video bitrate ==>', bitrate)
   let score =
     ((Math.log(bitrate / MIN_VIDEO_BITRATE) / Math.log(targetBitrate / MIN_VIDEO_BITRATE)) * 4) + 1;
-  console.log(' video score ==>', score)
   score = Math.min(score, 4.5);
   return score;
 }
@@ -58,27 +53,26 @@ async function calculateAudioScore(subscriber: OT.Subscriber, publisher: OT.Publ
   /**
    * Get publisher raw stats directly from the Peer Connection in order
    * to get the roundTripTime on type=remote-inbound-rtp and kind=audio
+   * We can get this only using the standard getStats API. For legacy API
+   * we will return 0.
    */
   const getRoundTripTime = () : Promise<number> => new Promise((resolve) => {
     publisher.getRtcStatsReport((publisherStatsError?: OT.OTError, stats?: OT.PublisherRtcStatsReportArr ) => {
       if (!stats || publisherStatsError) {
-        return resolve(0);
+        resolve(0);
+        return;
       }
       const { rtcStatsReport } = stats[0];
       if (isRtcStatsReport(rtcStatsReport)) {
         rtcStatsReport.forEach((stat: any) => {
-          if (stat.type === 'remote-inbound-rtp' &&
-            stat.kind === 'audio') {
-            return resolve(stat.roundTripTime);
+          if (stat.type === 'remote-inbound-rtp' && stat.kind === 'audio') {
+            resolve(stat.roundTripTime);
+            return;
           }
         });
       } else {
-        rtcStatsReport.result().forEach((stat: any) => {
-          if (stat.type === 'remote-inbound-rtp' &&
-          stat.kind === 'audio') {
-            return resolve(stat.roundTripTime);
-          }
-        });
+        // Returning 0 if the browser doesn't support the standard getStats API
+        resolve(0);
       }
     });
   });
@@ -90,7 +84,6 @@ async function calculateAudioScore(subscriber: OT.Subscriber, publisher: OT.Publ
     const b = 19.8;
     const c = 29.7;
     const roundTripTime = await getRoundTripTime();
-    console.log('roundTripTime!!', roundTripTime);
     /**
      * Calculate the transmission rating factor, R
      */
@@ -119,13 +112,12 @@ async function calculateAudioScore(subscriber: OT.Subscriber, publisher: OT.Publ
 
   const currentStats = last(stats);
   const lastStats = nth(-2, stats);
-  console.log(currentStats, lastStats);
+
   if (!currentStats || !lastStats || !subscriber.stream) {
     return 1;
   }
 
   const totalAudioPackets = calculateTotalPackets('audio', currentStats, lastStats);
-  console.log(' audio calculateTotalPackets!!!', totalAudioPackets);
   if (totalAudioPackets === 0) {
     return 1;
   }
