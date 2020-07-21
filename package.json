@@ -1,6 +1,6 @@
 {
   "name": "opentok-network-test-js",
-  "version": "2.2.1",
+  "version": "2.3.0",
   "description": "Precall network test for applications using the OpenTok platform.",
   "main": "dist/NetworkTest/index.js",
   "types": "dist/NetworkTest/index.d.ts",
@@ -33,11 +33,11 @@
   "homepage": "https://github.com/opentok/network-connectivity-js#readme",
   "dependencies": {
     "axios": "^0.19.0",
-    "opentok-solutions-logging": "^1.0.15",
+    "opentok-solutions-logging": "^1.1.0",
     "promise": "^8.0.1"
   },
   "devDependencies": {
-    "@opentok/client": "^2.16.1",
+    "@opentok/client": "^2.17.5",
     "@types/expect.js": "^0.3.29",
     "@types/jasmine": "^2.8.8",
     "@types/jasmine-matchers": "^0.2.30",

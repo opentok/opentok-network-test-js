@@ -234,6 +234,20 @@ The `OTNetworkTest()` constructor includes the following parameters:
     will be used in the real OpenTok session. This way, the test prompts the end user
     to grant permission to the correct device. Note that changing the video device may not
     influence the quality test score.
+  
+  * `initSessionOptions` (Object) -- An object that includes optional options 
+    for initializing the session 
+    ([Session Options](https://tokbox.com/developer/sdks/js/reference/OT.html#initSession)). 
+    This object includes the following properties:
+	  * `ipWhitelist ` (Boolean) -- This is available as an add-on feature
+        for **enterprise accounts**. Set this to true if IP white listing 
+        is enabled for your project. The default value is false. 
+	  * `iceConfig ` (Object) -- This feature is part of the configurable TURN add-on feature.
+
+  * `proxyServerUrl` (String) -- (Optional) Set this to the proxy server URL 
+    you use in the OpenTok client SDKs (for example, when calling `OT.setProxyUrl()`
+    in OpenTok.js). For more information, please check the 
+    [IP Proxy Documentation](https://tokbox.com/developer/guides/ip-proxy/).
 
   The `options` parameter is optional.
 
