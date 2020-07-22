@@ -5,6 +5,7 @@ import { OT } from '../../types/opentok';
 import { AV } from '../types/stats';
 import { getOr, last, nth } from '../../util';
 import isRtcStatsReport from './isRtcStatsReport';
+import getPublisherRtcStatsReport from './getPublisherRtcStatsReport';
 
 export type StatsListener = (error?: OT.OTError, stats?: OT.SubscriberStats) => void;
 
@@ -130,7 +131,7 @@ export default function subscriberMOS(
   mosState.intervalId = window.setInterval(
     () => {
       subscriber.getStats((error?: OT.OTError, stats?: OT.SubscriberStats) => {
-        publisher.getRtcStatsReport((publisherStatsError?: OT.OTError, publisherStats?: OT.PublisherRtcStatsReportArr ) => {
+        getPublisherRtcStatsReport(publisher, (publisherStats?: OT.PublisherRtcStatsReportArr) => {
           if (!stats) {
             return null;
           }
