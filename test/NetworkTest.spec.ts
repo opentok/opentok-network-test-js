@@ -4,7 +4,6 @@ import * as OTClient from '@opentok/client';
 import {
   primary as sessionCredentials,
   faultyLogging as badLoggingCredentials,
-  faultyApi as badApiCredentials,
 } from './credentials.json';
 import {
   NetworkTestError,
@@ -13,8 +12,7 @@ import {
   IncompleteSessionCredentialsError,
   InvalidOnUpdateCallback,
 } from '../src/NetworkTest/errors';
-import { ConnectivityError, ConnectToSessionTokenError, PublishToSessionError } from '../src/NetworkTest/testConnectivity/errors';
-import { ConnectToSessionError as QualityTestSessionError } from '../src/NetworkTest/testQuality/errors';
+import { ConnectivityError } from '../src/NetworkTest/testConnectivity/errors';
 import NetworkTest, { ErrorNames } from '../src/NetworkTest';
 import { ConnectivityTestResults } from '../src/NetworkTest/testConnectivity/index';
 import { QualityTestError } from '../src/NetworkTest/testQuality/errors/index';
