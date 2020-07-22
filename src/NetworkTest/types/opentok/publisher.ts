@@ -90,16 +90,7 @@ export interface RTCStatsReport {
 }
 
 export type PublisherRtcStatsReport = {
-  rtcStatsReport: {
-    forEach(callbackfn: (value: any, key: string, parent: RTCStatsReport) => void, thisArg?: any): void;
-    type: string;
-    roundTripTime: number;
-    kind: string;
-  } |
-  {
-    result(): RTCLegacyStatsReport[];
-    namedItem(name: string): RTCLegacyStatsReport;
-  }
+  rtcStatsReport: RTCStatsReport | RTCStatsResponse
 }
 
 export type PublisherRtcStatsReportArr = PublisherRtcStatsReport[];
