@@ -193,6 +193,12 @@ function buildResults(builder: QualityTestResultsBuilder): QualityTestResults {
   const baseProps: (keyof AverageStats)[] = ['bitrate', 'packetLossRatio', 'supported', 'reason', 'mos'];
   builder.state.stats.audio.mos = builder.state.audioQualityScore();
   builder.state.stats.video.mos = builder.state.videoQualityScore();
+  if (builder.state.stats.audio.mos >= config.qualityThresholds.audio[0].minMos) {
+    builder.state.stats.audio.supported = true;
+  } else {
+    builder.state.stats.audio.supported = false;
+    builder.state.stats.audio.reason = config.strings.bandwidthLow;
+  }
   return {
     audio: pick(baseProps, builder.state.stats.audio),
     video: pick(baseProps.concat(['frameRate', 'recommendedResolution', 'recommendedFrameRate']),
@@ -201,10 +207,7 @@ function buildResults(builder: QualityTestResultsBuilder): QualityTestResults {
 }
 
 function isAudioQualityAcceptable(results: QualityTestResults): boolean {
-  return !!results.audio.bitrate && (results.audio.bitrate > config.qualityThresholds.audio[0].bps)
-    && (!!results.audio.packetLossRatio &&
-      (results.audio.packetLossRatio < config.qualityThresholds.audio[0].plr)
-      || results.audio.packetLossRatio === 0);
+  return !!results.audio.mos && (results.audio.mos >= config.qualityThresholds.audio[0].minMos)
 }
 
 /**

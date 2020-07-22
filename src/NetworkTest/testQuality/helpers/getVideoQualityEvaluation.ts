@@ -1,6 +1,6 @@
 import config from './config';
 import { get } from '../../util';
-import { AV, AverageStatsBase } from '../types/stats';
+import { AverageStatsBase } from '../types/stats';
 
 export interface QualityEvaluationResults{
   supported: boolean;
@@ -9,11 +9,10 @@ export interface QualityEvaluationResults{
   reason?: string;
 }
 
-export default function getQualityEvaluation(stats: AverageStatsBase, type: AV): QualityEvaluationResults {
-  const qualityThresholds = config.qualityThresholds;
+export default function getVideoQualityEvaluation(stats: AverageStatsBase): QualityEvaluationResults {
+  const thresholds = config.qualityThresholds.video;
   const bitrate = stats.bitrate;
   const packetLoss = stats.packetLossRatio;
-  const thresholds = qualityThresholds[type];
   let supported = false;
   let recommendedFrameRate : number = 30;
   let recommendedResolution : string = '';
@@ -23,14 +22,12 @@ export default function getQualityEvaluation(stats: AverageStatsBase, type: AV):
     const threshold = thresholds[i];
     if (bitrate >= threshold.bps && packetLoss <= threshold.plr) {
       supported = true;
-      if (type === 'video') {
-        recommendedSetting = get('recommendedSetting', threshold);
-        // recommendedSetting is of the form '640x480 @ 30FPS'
-        recommendedFrameRate = Number(recommendedSetting
-          .substring(recommendedSetting.indexOf('@') + 1).replace('FPS', ''));
-        recommendedResolution =
-          recommendedSetting.substring(0, recommendedSetting.indexOf('@') - 1);
-      }
+      recommendedSetting = get('recommendedSetting', threshold);
+      // recommendedSetting is of the form '640x480 @ 30FPS'
+      recommendedFrameRate = Number(recommendedSetting
+        .substring(recommendedSetting.indexOf('@') + 1).replace('FPS', ''));
+      recommendedResolution =
+        recommendedSetting.substring(0, recommendedSetting.indexOf('@') - 1);
       break;
     }
   }
@@ -43,7 +40,7 @@ export default function getQualityEvaluation(stats: AverageStatsBase, type: AV):
 
   if (!supported) {
     result.reason = config.strings.bandwidthLow;
-  } else if (supported && type === 'video') {
+  } else {
     result.recommendedFrameRate = recommendedFrameRate;
     result.recommendedResolution = recommendedResolution;
   }
