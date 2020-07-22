@@ -160,21 +160,6 @@ export default function subscriberMOS(
             return null;
           }
 
-<<<<<<< HEAD
-        mosState.stats = calculateThroughput(mosState);
-        const videoScore = calculateVideoScore(subscriber, mosState.statsLog);
-        mosState.videoScoresLog.push(videoScore);
-        const audioScore = await calculateAudioScore(subscriber, publisher, mosState.statsLog);
-        mosState.audioScoresLog.push(audioScore);
-
-        mosState.pruneScores();
-
-        // If bandwidth has reached a steady state, end the test early
-        if (isBitrateSteadyState(mosState.statsLog)) {
-          mosState.clearInterval();
-          return callback(mosState);
-        }
-=======
           mosState.stats = calculateThroughput(mosState);
           const videoScore = calculateVideoScore(subscriber, mosState.statsLog);
           mosState.videoScoresLog.push(videoScore);
@@ -188,7 +173,6 @@ export default function subscriberMOS(
             mosState.clearInterval();
             return callback(mosState);
           }
->>>>>>> 8d2b07f... Remove async/await
 
           return null;
         });
