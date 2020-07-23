@@ -4,7 +4,6 @@ import MOSState from './MOSState';
 import { OT } from '../../types/opentok';
 import { AV } from '../types/stats';
 import { getOr, last, nth } from '../../util';
-import isRtcStatsReport from './isRtcStatsReport';
 import getPublisherRtcStatsReport from './getPublisherRtcStatsReport';
 
 export type StatsListener = (error?: OT.OTError, stats?: OT.SubscriberStats) => void;
@@ -63,10 +62,10 @@ function calculateAudioScore(subscriber: OT.Subscriber, publisherStats: OT.Publi
     }
     const { rtcStatsReport } = publisherStats[0];
     let roundTripTime = 0;
-    if (isRtcStatsReport(rtcStatsReport)) {
+    if (typeof rtcStatsReport.forEach === 'function') {
       rtcStatsReport.forEach((stat: any) => {
         if (stat.type === 'remote-inbound-rtp' && stat.kind === 'audio') {
-          roundTripTime = stat.roundTripTime;
+          roundTripTime = !isNaN(stat.roundTripTime) ? stat.roundTripTime : 0;
         }
       });
     }

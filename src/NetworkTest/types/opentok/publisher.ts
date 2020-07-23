@@ -68,20 +68,6 @@ export interface PublisherProperties extends WidgetProperties, GetUserMediaPrope
   videoSource?: string | null;
 }
 
-export interface RTCLegacyStatsReport {
-  id: string;
-  timestamp: Date;
-  type: string;
-  stat(name: string): string;
-  names(): string[];
-  roundTripTime: number;
-}
-
-export interface RTCStatsResponse {
-  result(): RTCLegacyStatsReport[];
-  namedItem(name: string): RTCLegacyStatsReport;
-}
-
 export interface RTCStatsReport {
   forEach(callbackfn: (value: any, key: string, parent: RTCStatsReport) => void, thisArg?: any): void;
   type: string;
@@ -90,7 +76,7 @@ export interface RTCStatsReport {
 }
 
 export type PublisherRtcStatsReport = {
-  rtcStatsReport: RTCStatsReport | RTCStatsResponse
+  rtcStatsReport: RTCStatsReport
 }
 
 export type PublisherRtcStatsReportArr = PublisherRtcStatsReport[];

@@ -104,6 +104,5 @@ export namespace OT {
   export type PublisherRtcStatsReportArr = OTPublisher.PublisherRtcStatsReportArr;
   export type PublisherRtcStatsReport = OTPublisher.PublisherRtcStatsReport;
   export type RTCStatsReport = OTPublisher.RTCStatsReport;
-  export type RTCStatsResponse = OTPublisher.RTCStatsResponse;
   
 }
