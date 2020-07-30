@@ -8,4 +8,4 @@ export default (publisher: OT.Publisher, callback?: (publisherStats?: OT.Publish
   } else {
     callback && callback();
   }
-}
+};

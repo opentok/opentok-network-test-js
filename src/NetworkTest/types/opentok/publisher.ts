@@ -76,8 +76,8 @@ export interface RTCStatsReport {
 }
 
 export type PublisherRtcStatsReport = {
-  rtcStatsReport: RTCStatsReport
-}
+  rtcStatsReport: RTCStatsReport,
+};
 
 export type PublisherRtcStatsReportArr = PublisherRtcStatsReport[];
 

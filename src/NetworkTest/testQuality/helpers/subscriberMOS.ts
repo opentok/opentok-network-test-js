@@ -48,7 +48,8 @@ function calculateVideoScore(subscriber: OT.Subscriber, stats: OT.SubscriberStat
   return score;
 }
 
-function calculateAudioScore(subscriber: OT.Subscriber, publisherStats: OT.PublisherRtcStatsReportArr | undefined,
+function calculateAudioScore(
+  subscriber: OT.Subscriber, publisherStats: OT.PublisherRtcStatsReportArr | undefined,
   stats: OT.SubscriberStats[]): number {
 
   /**
@@ -163,7 +164,7 @@ export default function subscriberMOS(
           mosState.stats = calculateThroughput(mosState);
           const videoScore = calculateVideoScore(subscriber, mosState.statsLog);
           mosState.videoScoresLog.push(videoScore);
-        
+
           const audioScore = calculateAudioScore(subscriber, publisherStats, mosState.statsLog);
           mosState.audioScoresLog.push(audioScore);
           mosState.pruneScores();
