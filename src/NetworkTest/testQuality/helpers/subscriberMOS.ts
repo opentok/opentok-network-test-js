@@ -48,7 +48,8 @@ function calculateVideoScore(subscriber: OT.Subscriber, stats: OT.SubscriberStat
   return score;
 }
 
-function calculateAudioScore(subscriber: OT.Subscriber, publisherStats: OT.PublisherRtcStatsReportArr | undefined, stats: OT.SubscriberStats[]): number {
+function calculateAudioScore(subscriber: OT.Subscriber, publisherStats: OT.PublisherRtcStatsReportArr | undefined,
+  stats: OT.SubscriberStats[]): number {
 
   /**
    * Get publisher raw stats directly from the Peer Connection in order
