@@ -1,6 +1,6 @@
 import getLatestSampleWindow from './getLatestSampleWindow';
 import calculateQualityStats from './calculateQualityStats';
-import getQualityEvaluation from './getQualityEvaluation';
+import getVideoQualityEvaluation from './getVideoQualityEvaluation';
 import { AV, AverageStats, AverageStatsBase, HasAudioVideo, QualityStats } from '../types/stats';
 import config from './config';
 import MOSState from './MOSState';
@@ -23,16 +23,21 @@ function getAverageBitrateAndPlr(type: AV, statsList: QualityStats[]): AverageSt
     bitrate: sumBps / statsList.length,
     packetLossRatio: sumPlr / statsList.length,
   };
-  const { supported, reason, recommendedResolution, recommendedFrameRate } =
-    getQualityEvaluation(averageStats, type);
-  const videoStats =
-    type === 'video' ? {
-      recommendedResolution,
-      recommendedFrameRate,
-      frameRate: sumFrameRate / statsList.length,
-    } : {};
 
-  return { ...averageStats, supported, reason, ...videoStats };
+  if (type === 'video') {
+    const { supported, reason, recommendedResolution, recommendedFrameRate } =
+    getVideoQualityEvaluation(averageStats);
+
+    const videoStats =
+      type === 'video' ? {
+        recommendedResolution,
+        recommendedFrameRate,
+        frameRate: sumFrameRate / statsList.length,
+      } : {};
+    return { ...averageStats, supported, reason, ...videoStats };
+  } else {
+    return { ...averageStats };
+  }
 }
 
 export default function calculateThroughput(state: MOSState): HasAudioVideo<AverageStats> {
