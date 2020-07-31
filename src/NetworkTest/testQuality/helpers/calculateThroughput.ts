@@ -35,9 +35,8 @@ function getAverageBitrateAndPlr(type: AV, statsList: QualityStats[]): AverageSt
         frameRate: sumFrameRate / statsList.length,
       } : {};
     return { ...averageStats, supported, reason, ...videoStats };
-  } else {
-    return { ...averageStats };
   }
+  return { ...averageStats };
 }
 
 export default function calculateThroughput(state: MOSState): HasAudioVideo<AverageStats> {

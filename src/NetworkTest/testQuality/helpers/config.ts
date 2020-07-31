@@ -70,7 +70,7 @@ const config: QualityTestConfig = {
     ],
     audio: [
       {
-        minMos: 2.4 // Should greather than 2.4 which is Fair.
+        minMos: 2.4, // Should greather than 2.4 which is Fair.
       },
     ],
   },

@@ -206,7 +206,7 @@ function buildResults(builder: QualityTestResultsBuilder): QualityTestResults {
 }
 
 function isAudioQualityAcceptable(results: QualityTestResults): boolean {
-  return !!results.audio.mos && (results.audio.mos >= config.qualityThresholds.audio[0].minMos)
+  return !!results.audio.mos && (results.audio.mos >= config.qualityThresholds.audio[0].minMos);
 }
 
 /**
