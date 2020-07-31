@@ -40,7 +40,6 @@ export enum ErrorNames {
   MISSING_SUBSCRIBER_ERROR = 'MissingSubscriberError',
 }
 
-
 export enum OTErrorType {
   JS_EXCEPTION = 'JS_EXCEPTION',
   OT_AUTHENTICATION_ERROR = 'OT_AUTHENTICATION_ERROR',

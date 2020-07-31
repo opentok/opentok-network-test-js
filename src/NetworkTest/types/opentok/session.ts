@@ -94,16 +94,16 @@ export interface Session extends OTEventEmitter<{
   unsubscribe(subscriber: Subscriber): void;
 }
 
-export interface initSessionOptions {
-    ipWhitelist?: boolean;
-    iceConfig?: {
-      includeServers: 'all' | 'custom';
-      transportPolicy: 'all' | 'relay';
-      customServers: {
-        urls: string | string[];
-        username?: string;
-        credential?: string;
-      }[];
-    };
-    proxyUrl?: string;
+export interface InitSessionOptions {
+  ipWhitelist?: boolean;
+  iceConfig?: {
+    includeServers: 'all' | 'custom';
+    transportPolicy: 'all' | 'relay';
+    customServers: {
+      urls: string | string[];
+      username?: string;
+      credential?: string;
+    }[];
+  };
+  proxyUrl?: string;
 }

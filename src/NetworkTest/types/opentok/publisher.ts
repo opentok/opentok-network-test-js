@@ -68,6 +68,19 @@ export interface PublisherProperties extends WidgetProperties, GetUserMediaPrope
   videoSource?: string | null;
 }
 
+export interface RTCStatsReport {
+  forEach(callbackfn: (value: any, key: string, parent: RTCStatsReport) => void, thisArg?: any): void;
+  type: string;
+  roundTripTime: number;
+  kind: string;
+}
+
+export type PublisherRtcStatsReport = {
+  rtcStatsReport: RTCStatsReport,
+};
+
+export type PublisherRtcStatsReportArr = PublisherRtcStatsReport[];
+
 export interface Publisher extends OTEventEmitter<{
   accessAllowed: Event<'accessAllowed', Publisher>;
   accessDenied: Event<'accessDenied', Publisher>;
@@ -116,4 +129,6 @@ export interface Publisher extends OTEventEmitter<{
   setStyle<Style extends keyof PublisherStyle>(style: Style, value: PublisherStyle[Style]): void;
   videoWidth(): number | undefined;
   videoHeight(): number | undefined;
+
+  getRtcStatsReport(callback: (error?: Error, stats?: PublisherRtcStatsReportArr) => void): void;
 }

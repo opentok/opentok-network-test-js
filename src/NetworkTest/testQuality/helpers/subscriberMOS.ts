@@ -4,6 +4,7 @@ import MOSState from './MOSState';
 import { OT } from '../../types/opentok';
 import { AV } from '../types/stats';
 import { getOr, last, nth } from '../../util';
+import getPublisherRtcStatsReport from './getPublisherRtcStatsReport';
 
 export type StatsListener = (error?: OT.OTError, stats?: OT.SubscriberStats) => void;
 
@@ -37,26 +38,49 @@ function calculateVideoScore(subscriber: OT.Subscriber, stats: OT.SubscriberStat
   const baseBitrate = calculateBitRate('video', currentStats, lastStats);
   const pixelCount = subscriber.stream.videoDimensions.width * subscriber.stream.videoDimensions.height;
   const targetBitrate = targetBitrateForPixelCount(pixelCount);
-
   if (baseBitrate < MIN_VIDEO_BITRATE) {
     return 1;
   }
   const bitrate = Math.min(baseBitrate, targetBitrate);
-
   let score =
     ((Math.log(bitrate / MIN_VIDEO_BITRATE) / Math.log(targetBitrate / MIN_VIDEO_BITRATE)) * 4) + 1;
   score = Math.min(score, 4.5);
   return score;
 }
 
-function calculateAudioScore(subscriber: OT.Subscriber, stats: OT.SubscriberStats[]): number {
+function calculateAudioScore(
+  subscriber: OT.Subscriber, publisherStats: OT.PublisherRtcStatsReportArr | undefined,
+  stats: OT.SubscriberStats[]): number {
 
-  const audioScore = (roundTripTime: number, packetLossRatio: number) => {
+  /**
+   * Get publisher raw stats directly from the Peer Connection in order
+   * to get the roundTripTime on type=remote-inbound-rtp and kind=audio
+   * We can get this only using the standard getStats API. For legacy API
+   * we will return 0.
+   */
+  const getRoundTripTime = (): number => {
+    if (!publisherStats) {
+      return 0;
+    }
+    const { rtcStatsReport } = publisherStats[0];
+    let roundTripTime = 0;
+    if (typeof rtcStatsReport.forEach === 'function') {
+      rtcStatsReport.forEach((stat: any) => {
+        if (stat.type === 'remote-inbound-rtp' && stat.kind === 'audio') {
+          roundTripTime = !isNaN(stat.roundTripTime) ? stat.roundTripTime : 0;
+        }
+      });
+    }
+    return roundTripTime;
+  };
+
+  const audioScore = (packetLossRatio: number) => {
     const LOCAL_DELAY = 20; // 20 msecs: typical frame duration
     const h = (x: number): number => x < 0 ? 0 : 1;
     const a = 0; // ILBC: a=10
     const b = 19.8;
     const c = 29.7;
+    const roundTripTime = getRoundTripTime();
 
     /**
      * Calculate the transmission rating factor, R
@@ -88,68 +112,71 @@ function calculateAudioScore(subscriber: OT.Subscriber, stats: OT.SubscriberStat
   const lastStats = nth(-2, stats);
 
   if (!currentStats || !lastStats || !subscriber.stream) {
-    return 0;
+    return 1;
   }
 
   const totalAudioPackets = calculateTotalPackets('audio', currentStats, lastStats);
   if (totalAudioPackets === 0) {
-    return 0;
+    return 1;
   }
-  const packetLossRatio = (getPacketsLost(currentStats.audio) - getPacketsLost(lastStats.audio))/ totalAudioPackets;
-  return audioScore(0, packetLossRatio);
+  const packetLossRatio = (getPacketsLost(currentStats.audio) - getPacketsLost(lastStats.audio)) / totalAudioPackets;
+  return audioScore(packetLossRatio);
 }
 
 export default function subscriberMOS(
   mosState: MOSState,
   subscriber: OT.Subscriber,
+  publisher: OT.Publisher,
   getStatsListener: StatsListener,
   callback: (state: MOSState) => void) {
   mosState.intervalId = window.setInterval(
     () => {
       subscriber.getStats((error?: OT.OTError, stats?: OT.SubscriberStats) => {
-        if (!stats) {
+        getPublisherRtcStatsReport(publisher, (publisherStats?: OT.PublisherRtcStatsReportArr) => {
+          if (!stats) {
+            return null;
+          }
+
+          /**
+           * We occasionally start to receive faulty stat during long-running
+           * tests. If this occurs, let's end the test early and report the
+           * results as they are, as we should have sufficient data to
+           * calculate a score at this point.
+           *
+           * We know that we're receiving "faulty" stats when we see a negative
+           * value for bytesReceived.
+           */
+          if (stats.audio.bytesReceived < 0 || getOr(1, 'video.bytesReceived', stats) < 0) {
+            mosState.clearInterval();
+            return callback(mosState);
+          }
+
+          stats && mosState.statsLog.push(stats);
+
+          if (getStatsListener && typeof getStatsListener === 'function') {
+            getStatsListener(error, stats);
+          }
+
+          if (mosState.statsLog.length < 2) {
+            return null;
+          }
+
+          mosState.stats = calculateThroughput(mosState);
+          const videoScore = calculateVideoScore(subscriber, mosState.statsLog);
+          mosState.videoScoresLog.push(videoScore);
+
+          const audioScore = calculateAudioScore(subscriber, publisherStats, mosState.statsLog);
+          mosState.audioScoresLog.push(audioScore);
+          mosState.pruneScores();
+
+          // If bandwidth has reached a steady state, end the test early
+          if (isBitrateSteadyState(mosState.statsLog)) {
+            mosState.clearInterval();
+            return callback(mosState);
+          }
+
           return null;
-        }
-
-        /**
-         * We occasionally start to receive faulty stat during long-running
-         * tests. If this occurs, let's end the test early and report the
-         * results as they are, as we should have sufficient data to
-         * calculate a score at this point.
-         *
-         * We know that we're receiving "faulty" stats when we see a negative
-         * value for bytesReceived.
-         */
-        if (stats.audio.bytesReceived < 0 || getOr(1, 'video.bytesReceived', stats) < 0) {
-          mosState.clearInterval();
-          return callback(mosState);
-        }
-
-        stats && mosState.statsLog.push(stats);
-
-        if (getStatsListener && typeof getStatsListener === 'function') {
-          getStatsListener(error, stats);
-        }
-
-        if (mosState.statsLog.length < 2) {
-          return null;
-        }
-
-        mosState.stats = calculateThroughput(mosState);
-        const videoScore = calculateVideoScore(subscriber, mosState.statsLog);
-        mosState.videoScoresLog.push(videoScore);
-        const audioScore = calculateAudioScore(subscriber, mosState.statsLog);
-        mosState.audioScoresLog.push(audioScore);
-
-        mosState.pruneScores();
-
-        // If bandwidth has reached a steady state, end the test early
-        if (isBitrateSteadyState(mosState.statsLog)) {
-          mosState.clearInterval();
-          return callback(mosState);
-        }
-
-        return null;
+        });
       });
     }, MOSState.scoreInterval);
 
