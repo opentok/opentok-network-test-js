@@ -119,7 +119,10 @@ function calculateAudioScore(
   if (totalAudioPackets === 0) {
     return 1;
   }
-  const packetLossRatio = (getPacketsLost(currentStats.audio) - getPacketsLost(lastStats.audio)) / totalAudioPackets;
+  let packetLossRatio = (getPacketsLost(currentStats.audio) - getPacketsLost(lastStats.audio)) / totalAudioPackets;
+  if (packetLossRatio < 0) {
+    packetLossRatio = 0;
+  }
   return audioScore(packetLossRatio);
 }
 
