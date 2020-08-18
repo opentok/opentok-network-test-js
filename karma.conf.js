@@ -5,17 +5,6 @@ const nodeExternals = require('webpack-node-externals');
 
 module.exports = function (config) {
   let sauceLaunchers = {
-    ie: {
-      base: 'SauceLabs',
-      browserName: 'internet explorer',
-      platform: process.env.BVER === '10' ? 'Windows 8' : 'Windows 8.1',
-      version: process.env.BVER,
-      prerun: {
-        executable: 'http://localhost:5000/plugin-installer/SauceLabsInstaller.exe',
-        background: false,
-        timeout: 120,
-      }
-    },
     chrome: {
       base: 'Chrome',
       flags: ['--use-fake-ui-for-media-stream', '--use-fake-device-for-media-stream']
