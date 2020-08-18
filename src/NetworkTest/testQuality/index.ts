@@ -292,7 +292,7 @@ function checkSubscriberQuality(
                 });
                 cleanSubscriber(session, subscriber)
                   .then(() => {
-                    if (options?.skipPublisherCleaningOnSuccess) return;
+                    if (options && options.skipPublisherCleaningOnSuccess) return;
 
                     return cleanPublisher(publisher);
                   })

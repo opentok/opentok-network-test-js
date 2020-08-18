@@ -296,7 +296,7 @@ export function testConnectivity(
       otLogging.logEvent({ action: 'testConnectivity', variation: 'Success' });
       return cleanSubscriber(flowResults.session, flowResults.subscriber)
         .then(() => {
-          if (options?.skipPublisherCleaningOnSuccess) return;
+          if (options && options.skipPublisherCleaningOnSuccess) return;
 
           return cleanPublisher(flowResults.publisher);
         })
