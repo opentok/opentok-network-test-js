@@ -4,6 +4,7 @@
   "description": "Precall network test for applications using the OpenTok platform.",
   "main": "dist/NetworkTest/index.js",
   "types": "dist/NetworkTest/index.d.ts",
+  "files": ["dist"],
   "scripts": {
     "build": "rm -rf dist && webpack --config webpack.config.js",
     "test-setup": "node test/setup/setup.js",
