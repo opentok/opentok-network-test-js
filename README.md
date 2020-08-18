@@ -234,20 +234,24 @@ The `OTNetworkTest()` constructor includes the following parameters:
     will be used in the real OpenTok session. This way, the test prompts the end user
     to grant permission to the correct device. Note that changing the video device may not
     influence the quality test score.
-  
-  * `initSessionOptions` (Object) -- An object that includes optional options 
-    for initializing the session 
-    ([Session Options](https://tokbox.com/developer/sdks/js/reference/OT.html#initSession)). 
+
+  * `initSessionOptions` (Object) -- An object that includes optional options
+    for initializing the session
+    ([Session Options](https://tokbox.com/developer/sdks/js/reference/OT.html#initSession)).
     This object includes the following properties:
 	  * `ipWhitelist ` (Boolean) -- This is available as an add-on feature
-        for **enterprise accounts**. Set this to true if IP white listing 
-        is enabled for your project. The default value is false. 
+        for **enterprise accounts**. Set this to true if IP white listing
+        is enabled for your project. The default value is false.
 	  * `iceConfig ` (Object) -- This feature is part of the configurable TURN add-on feature.
 
-  * `proxyServerUrl` (String) -- (Optional) Set this to the proxy server URL 
+  * `proxyServerUrl` (String) -- (Optional) Set this to the proxy server URL
     you use in the OpenTok client SDKs (for example, when calling `OT.setProxyUrl()`
-    in OpenTok.js). For more information, please check the 
+    in OpenTok.js). For more information, please check the
     [IP Proxy Documentation](https://tokbox.com/developer/guides/ip-proxy/).
+
+  * `skipPublisherCleaningOnSuccess` (Boolean) -- (Optional) On iOS if a publisher is displayed
+    while the tests are running, the publisher turns black once the tests are done.
+    this switch allows you to skip cleaning the publisher in the normal publisher flow.
 
   The `options` parameter is optional.
 
@@ -505,7 +509,7 @@ an error object (against the values defined in ErrorNames) to determine the type
 | ------------------------------------------------------------------ | ----------- |
 |   `MISSING_OPENTOK_INSTANCE` | An instance of OT, the OpenTok.js client SDK, was not passed into the constructor. |
 |   `INCOMPLETE_SESSON_CREDENTIALS` | The sessionInfo object passed into the constructor did not include an `apiKey`, `sessionId`,  or `token` object. |
-|   `MISSING_SESSON_CREDENTIALS` | No sessionInfo object was passed into the constructor. | 
+|   `MISSING_SESSON_CREDENTIALS` | No sessionInfo object was passed into the constructor. |
 
 #### testConnectivity() errors
 
@@ -516,22 +520,22 @@ the following:
 
 | Error.name property set to this property<br/>of ErrorNames ... | Description |
 | -------------------------------------------------------------- | ----------- |
-|   `API_CONNECTIVITY_ERROR` | The test failed to connect to OpenTOK API Server. | 
-|   `CONNECT_TO_SESSION_ERROR` | The test failed to connect to the test OpenTok session due to a network error. | 
-|   `CONNECT_TO_SESSION_TOKEN_ERROR` | The test failed to connect to the test OpenTok session due to an invalid token. | 
-|   `CONNECT_TO_SESSION_ID_ERROR` | The test failed to connect to the test OpenTok session due to an invalid session ID. | 
-|   `CONNECT_TO_SESSION_NETWORK_ERROR` | The test failed to connect to the test OpenTok session due to a network error. | 
-|   `FAILED_TO_OBTAIN_MEDIA_DEVICES` | The test failed to obtain media devices (a camera or microphone). | 
-|   `NO_AUDIO_CAPTURE_DEVICES` | The browser cannot access a microphone. | 
-|   `NO_VIDEO_CAPTURE_DEVICES` | The browser cannot access a camera. | 
-|   `PUBLISH_TO_SESSION_ERROR` | Encountered an unknown error while attempting to publish to a session. | 
-|   `FAILED_MESSAGING_SERVER_TEST` | The test failed to connect to media server due to messaging server connection failure. | 
-|   `FAILED_TO_CREATE_LOCAL_PUBLISHER` | The test failed to create a local publisher object. | 
-|   `PUBLISH_TO_SESSION_NOT_CONNECTED` | The test failed to publish to the test session because the client was not connected to the session. | 
-|   `PUBLISH_TO_SESSION_PERMISSION_OR_TIMEOUT_ERROR` | The test failed to publish to the test session due a permissions error or timeout. | 
-|   `PUBLISH_TO_SESSION_NETWORK_ERROR` | The test failed to publish to the test session due a network error. | 
-|   `SUBSCRIBE_TO_SESSION_ERROR` | The test encountered an unknown error while attempting to subscribe to a test stream. | 
-|   `LOGGING_SERVER_CONNECTION_ERROR` | The test failed to connect to the OpenTok logging server. | 
+|   `API_CONNECTIVITY_ERROR` | The test failed to connect to OpenTOK API Server. |
+|   `CONNECT_TO_SESSION_ERROR` | The test failed to connect to the test OpenTok session due to a network error. |
+|   `CONNECT_TO_SESSION_TOKEN_ERROR` | The test failed to connect to the test OpenTok session due to an invalid token. |
+|   `CONNECT_TO_SESSION_ID_ERROR` | The test failed to connect to the test OpenTok session due to an invalid session ID. |
+|   `CONNECT_TO_SESSION_NETWORK_ERROR` | The test failed to connect to the test OpenTok session due to a network error. |
+|   `FAILED_TO_OBTAIN_MEDIA_DEVICES` | The test failed to obtain media devices (a camera or microphone). |
+|   `NO_AUDIO_CAPTURE_DEVICES` | The browser cannot access a microphone. |
+|   `NO_VIDEO_CAPTURE_DEVICES` | The browser cannot access a camera. |
+|   `PUBLISH_TO_SESSION_ERROR` | Encountered an unknown error while attempting to publish to a session. |
+|   `FAILED_MESSAGING_SERVER_TEST` | The test failed to connect to media server due to messaging server connection failure. |
+|   `FAILED_TO_CREATE_LOCAL_PUBLISHER` | The test failed to create a local publisher object. |
+|   `PUBLISH_TO_SESSION_NOT_CONNECTED` | The test failed to publish to the test session because the client was not connected to the session. |
+|   `PUBLISH_TO_SESSION_PERMISSION_OR_TIMEOUT_ERROR` | The test failed to publish to the test session due a permissions error or timeout. |
+|   `PUBLISH_TO_SESSION_NETWORK_ERROR` | The test failed to publish to the test session due a network error. |
+|   `SUBSCRIBE_TO_SESSION_ERROR` | The test encountered an unknown error while attempting to subscribe to a test stream. |
+|   `LOGGING_SERVER_CONNECTION_ERROR` | The test failed to connect to the OpenTok logging server. |
 
 #### testQuality() errors
 
@@ -541,20 +545,20 @@ method has a `name` property set to one of the following:
 | Error.name property set to this<br/>property of ErrorNames ... | Description |
 | -------------------------------------------------------------- | ----------- |
 |   `INVALID_ON_UPDATE_CALLBACK` | The `updateCallback` parameter is invalid. It must be a function that accepts a single parameter. |
-|   `UNSUPPORTED_BROWSER`  | The test is running on an unsupported browser (see [Supported browsers](#supported-browsers)). | 
-|   `CONNECT_TO_SESSION_ERROR` | The test failed to connect to the test OpenTok session due to a network error. | 
-|   `CONNECT_TO_SESSION_TOKEN_ERROR` | The test failed to connect to the test OpenTok session due to an invalid token. | 
-|   `CONNECT_TO_SESSION_ID_ERROR` | The test failed to connect to the test OpenTok session due to an invalid session ID. | 
-|   `CONNECT_TO_SESSION_NETWORK_ERROR` | The test failed to connect to the test OpenTok session due to a network error. | 
-|   `FAILED_TO_OBTAIN_MEDIA_DEVICES` | The test failed to obtain media devices (a camera or microphone). | 
-|   `NO_AUDIO_CAPTURE_DEVICES` | The browser cannot access a microphone. | 
-|   `NO_VIDEO_CAPTURE_DEVICES` | The browser cannot access a camera. | 
-|   `PUBLISH_TO_SESSION_ERROR` | The test encountered an unknown error while attempting to publish to a session. | 
-|   `INIT_PUBLISHER_ERROR` | The test failed to initialize a publisher. | 
-|   `PUBLISH_TO_SESSION_NOT_CONNECTED` | The test failed to publish to the test session because the client was not connected to the session. | 
-|   `PUBLISH_TO_SESSION_PERMISSION_OR_TIMEOUT_ERROR` | The test failed to publish to the test session due a permissions error or timeout. | 
-|   `SUBSCRIBE_TO_SESSION_ERROR` | The test encountered an unknown error while attempting to subscribe to a test stream. | 
-|   `SUBSCRIBER_GET_STATS_ERROR` | The test failed to get audio and video statistics for the test stream. | 
+|   `UNSUPPORTED_BROWSER`  | The test is running on an unsupported browser (see [Supported browsers](#supported-browsers)). |
+|   `CONNECT_TO_SESSION_ERROR` | The test failed to connect to the test OpenTok session due to a network error. |
+|   `CONNECT_TO_SESSION_TOKEN_ERROR` | The test failed to connect to the test OpenTok session due to an invalid token. |
+|   `CONNECT_TO_SESSION_ID_ERROR` | The test failed to connect to the test OpenTok session due to an invalid session ID. |
+|   `CONNECT_TO_SESSION_NETWORK_ERROR` | The test failed to connect to the test OpenTok session due to a network error. |
+|   `FAILED_TO_OBTAIN_MEDIA_DEVICES` | The test failed to obtain media devices (a camera or microphone). |
+|   `NO_AUDIO_CAPTURE_DEVICES` | The browser cannot access a microphone. |
+|   `NO_VIDEO_CAPTURE_DEVICES` | The browser cannot access a camera. |
+|   `PUBLISH_TO_SESSION_ERROR` | The test encountered an unknown error while attempting to publish to a session. |
+|   `INIT_PUBLISHER_ERROR` | The test failed to initialize a publisher. |
+|   `PUBLISH_TO_SESSION_NOT_CONNECTED` | The test failed to publish to the test session because the client was not connected to the session. |
+|   `PUBLISH_TO_SESSION_PERMISSION_OR_TIMEOUT_ERROR` | The test failed to publish to the test session due a permissions error or timeout. |
+|   `SUBSCRIBE_TO_SESSION_ERROR` | The test encountered an unknown error while attempting to subscribe to a test stream. |
+|   `SUBSCRIBER_GET_STATS_ERROR` | The test failed to get audio and video statistics for the test stream. |
 
 ## MOS estimates
 

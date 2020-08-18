@@ -291,7 +291,11 @@ function checkSubscriberQuality(
                   session.off();
                 });
                 cleanSubscriber(session, subscriber)
-                  .then(() => cleanPublisher(publisher))
+                  .then(() => {
+                    if (options?.skipPublisherCleaningOnSuccess) return;
+
+                    return cleanPublisher(publisher);
+                  })
                   .then(() => session.disconnect());
               }
             };

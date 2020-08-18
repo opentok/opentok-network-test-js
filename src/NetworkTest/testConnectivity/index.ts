@@ -295,7 +295,11 @@ export function testConnectivity(
       };
       otLogging.logEvent({ action: 'testConnectivity', variation: 'Success' });
       return cleanSubscriber(flowResults.session, flowResults.subscriber)
-        .then(() => cleanPublisher(flowResults.publisher))
+        .then(() => {
+          if (options?.skipPublisherCleaningOnSuccess) return;
+
+          return cleanPublisher(flowResults.publisher);
+        })
         .then(() => disconnectFromSession(flowResults.session))
         .then(() => resolve(results));
     };
