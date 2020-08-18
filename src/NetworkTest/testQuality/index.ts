@@ -110,7 +110,6 @@ function validateDevices(OT: OT.Client): Promise<AvailableDevices> {
 function publishAndSubscribe(OT: OT.Client, options?: NetworkTestOptions) {
   return (session: OT.Session): Promise<PublisherSubscriber> =>
     new Promise((resolve, reject) => {
-      let publisherOptions: OT.PublisherProperties;
       type StreamCreatedEvent = OT.Event<'streamCreated', OT.Publisher> & { stream: OT.Stream };
       const containerDiv = document.createElement('div');
       containerDiv.style.position = 'fixed';
@@ -124,7 +123,7 @@ function publishAndSubscribe(OT: OT.Client, options?: NetworkTestOptions) {
           if (!Object.keys(availableDevices.video).length) {
             audioOnly = true;
           }
-          let publisherOptions: OT.PublisherProperties = {
+          const publisherOptions: OT.PublisherProperties = {
             resolution: '1280x720',
             width: '100%',
             height: '100%',
@@ -132,10 +131,10 @@ function publishAndSubscribe(OT: OT.Client, options?: NetworkTestOptions) {
             showControls: false,
           };
           if (options && options.audioSource) {
-            publisherOptions.audioSource = options.audioSource
+            publisherOptions.audioSource = options.audioSource;
           }
           if (options && options.videoSource) {
-            publisherOptions.videoSource = options.videoSource
+            publisherOptions.videoSource = options.videoSource;
           }
           if (audioOnly) {
             publisherOptions.videoSource = null;
@@ -209,8 +208,8 @@ function isAudioQualityAcceptable(results: QualityTestResults): boolean {
 
 /**
  * Clean subscriber objects before disconnecting from the session
- * @param session 
- * @param subscriber 
+ * @param session
+ * @param subscriber
  */
 function cleanSubscriber(session: OT.Session, subscriber: OT.Subscriber) {
   return new Promise((resolve, reject) => {
@@ -226,7 +225,7 @@ function cleanSubscriber(session: OT.Session, subscriber: OT.Subscriber) {
 
 /**
  * Clean publisher objects before disconnecting from the session
- * @param publisher 
+ * @param publisher
  */
 function cleanPublisher(publisher: OT.Publisher) {
   return new Promise((resolve, reject) => {
@@ -286,7 +285,11 @@ function checkSubscriberQuality(
                   session.off();
                 });
                 cleanSubscriber(session, subscriber)
-                  .then(() => cleanPublisher(publisher))
+                  .then(() => {
+                    if (options?.skipPublisherCleaningOnSuccess) return;
+
+                    return cleanPublisher(publisher);
+                  })
                   .then(() => session.disconnect());
               }
             };
@@ -367,7 +370,7 @@ export function testQuality(
       .then(() => {
         let sessionOptions: OT.InitSessionOptions = {};
         if (options && options.initSessionOptions) {
-          sessionOptions = options.initSessionOptions
+          sessionOptions = options.initSessionOptions;
         }
         if (options && options.proxyServerUrl) {
           if (!OT.hasOwnProperty('setProxyUrl')) { // Fallback for OT.version < 2.17.4
