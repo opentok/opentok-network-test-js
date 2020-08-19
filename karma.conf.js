@@ -42,7 +42,6 @@ module.exports = function (config) {
         rules: [{
           test: /\.tsx?$/,
           use: [
-            { loader: 'babel-loader' },
             {
               loader: 'ts-loader',
               options: {
