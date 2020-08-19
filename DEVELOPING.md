@@ -4,7 +4,7 @@ This document describes tools, tasks and workflow that one needs to be familiar 
 
 ## Tools
 
-This project is developed with [TypeScript](https://www.typescriptlang.org/) and uses [Webpack](https://webpack.js.org/) in conjunction with [Babel](https://babeljs.io/) to compile and bundle code into a browser-friendly UMD module.  To install the dependencies required for development, simply run:
+This project is developed with [TypeScript](https://www.typescriptlang.org/) and uses [Webpack](https://webpack.js.org/) to compile and bundle code into a browser-friendly UMD module.  To install the dependencies required for development, simply run:
 ```
 $ npm install
 ```
