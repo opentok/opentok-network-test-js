@@ -1,69 +1,6 @@
 import Highcharts from 'highcharts';
 
 export default function createChart(mediaType) {
-  var plotBands = {
-    audio: [{
-      'from': 30000,
-      'to': 35000,
-      'color': 'rgba(68, 170, 213, 0.1)',
-      'label': {
-        'text': 'Adequate',
-        'style': {
-          'color': '#606060',
-          'fontSize': '8px'
-        }
-      }
-    },
-    {
-      'from': 35000,
-      'to': 40000,
-      'color': 'rgba(0, 0, 0, 0)',
-      'label': {
-        'text': 'Excellent',
-        'style': {
-          'color': '#606060',
-          'fontSize': '8px'
-        }
-      }
-    }],
-    video: [{
-      'from': 200000,
-      'to': 350000,
-      'color': 'rgba(68, 170, 213, 0.1)',
-      'label': {
-        'text': 'Adequate',
-        'style': {
-          'color': '#606060',
-          'fontSize': '8px'
-        }
-      }
-    },
-    {
-      'from': 350000,
-      'to': 600000,
-      'color': 'rgba(0, 0, 0, 0)',
-      'label': {
-        'text': 'Good',
-        'style': {
-          'color': '#606060',
-          'fontSize': '8px'
-        }
-      }
-    },
-    {
-      'from': 600000,
-      'to': 2000000,
-      'color': 'rgba(68, 170, 213, 0.1)',
-      'label': {
-        'text': 'Excellent',
-        'style': {
-          'color': '#606060',
-          'fontSize': '8px'
-        }
-      }
-    }]
-  };
-
   return new Highcharts.Chart({
     chart: {
       type: 'spline',
@@ -105,7 +42,7 @@ export default function createChart(mediaType) {
       minorGridLineWidth: 0,
       gridLineWidth: 0,
       alternateGridColor: null,
-      plotBands: plotBands[mediaType],
+      plotBands: null,
       labels: {
         style: {
           fontSize: '8px'
