@@ -143,8 +143,6 @@ export default function subscriberMOS(
           publisherStats = await publisher.getRtcStatsReport();
         } catch {}
 
-        console.log('publisherStats', publisherStats);
-
         /**
          * We occasionally start to receive faulty stat during long-running
          * tests. If this occurs, let's end the test early and report the
