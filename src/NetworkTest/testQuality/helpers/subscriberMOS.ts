@@ -4,7 +4,6 @@ import MOSState from './MOSState';
 import { OT } from '../../types/opentok';
 import { AV } from '../types/stats';
 import { getOr, last, nth } from '../../util';
-import getPublisherRtcStatsReport from './getPublisherRtcStatsReport';
 
 export type StatsListener = (error?: OT.OTError, stats?: OT.SubscriberStats) => void;
 
@@ -134,52 +133,58 @@ export default function subscriberMOS(
   callback: (state: MOSState) => void) {
   mosState.intervalId = window.setInterval(
     () => {
-      subscriber.getStats((error?: OT.OTError, stats?: OT.SubscriberStats) => {
-        getPublisherRtcStatsReport(publisher, (publisherStats?: OT.PublisherRtcStatsReportArr) => {
-          if (!stats) {
-            return null;
-          }
-
-          /**
-           * We occasionally start to receive faulty stat during long-running
-           * tests. If this occurs, let's end the test early and report the
-           * results as they are, as we should have sufficient data to
-           * calculate a score at this point.
-           *
-           * We know that we're receiving "faulty" stats when we see a negative
-           * value for bytesReceived.
-           */
-          if (stats.audio.bytesReceived < 0 || getOr(1, 'video.bytesReceived', stats) < 0) {
-            mosState.clearInterval();
-            return callback(mosState);
-          }
-
-          stats && mosState.statsLog.push(stats);
-
-          if (getStatsListener && typeof getStatsListener === 'function') {
-            getStatsListener(error, stats);
-          }
-
-          if (mosState.statsLog.length < 2) {
-            return null;
-          }
-
-          mosState.stats = calculateThroughput(mosState);
-          const videoScore = calculateVideoScore(subscriber, mosState.statsLog);
-          mosState.videoScoresLog.push(videoScore);
-
-          const audioScore = calculateAudioScore(subscriber, publisherStats, mosState.statsLog);
-          mosState.audioScoresLog.push(audioScore);
-          mosState.pruneScores();
-
-          // If bandwidth has reached a steady state, end the test early
-          if (isBitrateSteadyState(mosState.statsLog)) {
-            mosState.clearInterval();
-            return callback(mosState);
-          }
-
+      subscriber.getStats(async (error?: OT.OTError, stats?: OT.SubscriberStats) => {
+        if (!stats) {
           return null;
-        });
+        }
+
+        let publisherStats;
+        try {
+          publisherStats = await publisher.getRtcStatsReport();
+        } catch {}
+
+        console.log('publisherStats', publisherStats);
+
+        /**
+         * We occasionally start to receive faulty stat during long-running
+         * tests. If this occurs, let's end the test early and report the
+         * results as they are, as we should have sufficient data to
+         * calculate a score at this point.
+         *
+         * We know that we're receiving "faulty" stats when we see a negative
+         * value for bytesReceived.
+         */
+        if (stats.audio.bytesReceived < 0 || getOr(1, 'video.bytesReceived', stats) < 0) {
+          mosState.clearInterval();
+          return callback(mosState);
+        }
+
+        stats && mosState.statsLog.push(stats);
+
+        if (getStatsListener && typeof getStatsListener === 'function') {
+          getStatsListener(error, stats);
+        }
+
+        if (mosState.statsLog.length < 2) {
+          return null;
+        }
+
+        mosState.stats = calculateThroughput(mosState);
+        const videoScore = calculateVideoScore(subscriber, mosState.statsLog);
+        mosState.videoScoresLog.push(videoScore);
+
+        const audioScore = calculateAudioScore(subscriber, publisherStats, mosState.statsLog);
+        mosState.audioScoresLog.push(audioScore);
+        mosState.pruneScores();
+
+        // If bandwidth has reached a steady state, end the test early
+        if (isBitrateSteadyState(mosState.statsLog)) {
+          mosState.clearInterval();
+          return callback(mosState);
+        }
+
+        return null;
+
       });
     }, MOSState.scoreInterval);
 

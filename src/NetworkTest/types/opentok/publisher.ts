@@ -130,5 +130,5 @@ export interface Publisher extends OTEventEmitter<{
   videoWidth(): number | undefined;
   videoHeight(): number | undefined;
 
-  getRtcStatsReport(callback: (error?: Error, stats?: PublisherRtcStatsReportArr) => void): void;
+  getRtcStatsReport(): Promise<PublisherRtcStatsReportArr>;
 }

@@ -574,7 +574,7 @@ limit the range of scores from 1.0 to 4.5.
 | 1.7 - 2.39 | Poor      |
 | 1.0 - 1.69 | Bad       |
 
-*Note:* The audio MOS estimate is less accurate when using OpenTok.js version 2.17.5 or lower
+*Note:* The audio MOS estimate is less accurate when using OpenTok.js version 2.17.7 or lower
 or on Chrome version 57 or lower, because the OpenTok Network Test cannot access the round-trip time
 for audio, which is factored into the MOS calculation.
 
