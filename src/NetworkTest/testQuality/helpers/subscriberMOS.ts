@@ -4,6 +4,7 @@ import MOSState from './MOSState';
 import { OT } from '../../types/opentok';
 import { AV } from '../types/stats';
 import { getOr, last, nth } from '../../util';
+import getPublisherRtcStatsReport from '../helpers/getPublisherRtcStatsReport';
 
 export type StatsListener = (error?: OT.OTError, stats?: OT.SubscriberStats) => void;
 
@@ -48,7 +49,7 @@ function calculateVideoScore(subscriber: OT.Subscriber, stats: OT.SubscriberStat
 }
 
 function calculateAudioScore(
-  subscriber: OT.Subscriber, publisherStats: OT.PublisherRtcStatsReportArr | undefined,
+  subscriber: OT.Subscriber, publisherStats: OT.PublisherRtcStatsReportArr | null,
   stats: OT.SubscriberStats[]): number {
 
   /**
@@ -138,9 +139,9 @@ export default function subscriberMOS(
           return null;
         }
 
-        let publisherStats;
+        let publisherStats = null;
         try {
-          publisherStats = await publisher.getRtcStatsReport();
+          publisherStats = await getPublisherRtcStatsReport(publisher);
         } catch {}
 
         /**
