@@ -10,11 +10,11 @@ export default (publisher: OT.Publisher): Promise<OT.PublisherRtcStatsReportArr 
 
     // Need to evaluate the result of getRtcStatsReport() to determine
     // whether it's the promise or callback version of the API.
-    const getRtcStatsReport = publisher.getRtcStatsReport();
-    if (!getRtcStatsReport) {
+    const getRtcStatsReportPromise = publisher.getRtcStatsReport();
+    if (!getRtcStatsReportPromise) {
       publisher.getRtcStatsReport((err, stats) => { resolve(stats); });
     } else {
-      (getRtcStatsReport as Promise<OT.PublisherRtcStatsReportArr>)
+      (getRtcStatsReportPromise as Promise<OT.PublisherRtcStatsReportArr>)
         .then(resolve)
         .catch(() => resolve(null));
     }
