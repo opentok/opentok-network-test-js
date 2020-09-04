@@ -8,6 +8,7 @@ import getPublisherRtcStatsReport from '../helpers/getPublisherRtcStatsReport';
 
 export type StatsListener = (error?: OT.OTError, stats?: OT.SubscriberStats) => void;
 
+
 const getPacketsLost = (ts: OT.TrackStats): number => getOr(0, 'packetsLost', ts);
 const getPacketsReceived = (ts: OT.TrackStats): number => getOr(0, 'packetsReceived', ts);
 const getTotalPackets = (ts: OT.TrackStats): number => getPacketsLost(ts) + getPacketsReceived(ts);
@@ -71,24 +72,24 @@ function calculateAudioScore(
         }
       });
     }
-    return roundTripTime;
+    return (roundTripTime * 1000);
   };
 
   const audioScore = (packetLossRatio: number) => {
-    const LOCAL_DELAY = 20; // 20 msecs: typical frame duration
+    const DEFAULT_RTT = 150;
+    const LOCAL_DELAY = 30; // 30 msecs: typical frame duration
     const h = (x: number): number => x < 0 ? 0 : 1;
     const a = 0; // ILBC: a=10
     const b = 19.8;
     const c = 29.7;
-    const roundTripTime = getRoundTripTime();
-
+    const roundTripTime = getRoundTripTime() || DEFAULT_RTT;
     /**
      * Calculate the transmission rating factor, R
      */
     const calculateR = (): number => {
-      const d = roundTripTime + LOCAL_DELAY;
-      const delayImpairment = ((0.024 * d) + 0.11) * (d - 177.3) * h(d - 177.3);
-      const equipmentImpairment = (a + b) * Math.log(1 + (c * packetLossRatio));
+      const d = (roundTripTime / 2) + LOCAL_DELAY;
+      const delayImpairment = 0.024 * d + 0.11 * (d - 177.3) * h(d - 177.3);
+      const equipmentImpairment = a + b * Math.log(1 + (c * packetLossRatio));
       return 94.2 - delayImpairment - equipmentImpairment;
     };
 
