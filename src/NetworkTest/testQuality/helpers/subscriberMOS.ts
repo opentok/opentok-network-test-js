@@ -59,8 +59,9 @@ function calculateAudioScore(
    * we will return 0.
    */
   const getRoundTripTime = (): number => {
+    const DEFAULT_RTT = 150;
     if (!publisherStats) {
-      return 0;
+      return DEFAULT_RTT;
     }
     const { rtcStatsReport } = publisherStats[0];
     let roundTripTime = 0;
@@ -71,25 +72,24 @@ function calculateAudioScore(
         }
       });
     }
-    return (roundTripTime * 1000);
+    return ((roundTripTime * 1000) / 2) || DEFAULT_RTT;
   };
 
   const audioScore = (packetLossRatio: number) => {
-    const DEFAULT_RTT = 150;
     const LOCAL_DELAY = 30; // 30 msecs: typical frame duration
     const h = (x: number): number => x < 0 ? 0 : 1;
     const a = 0; // ILBC: a=10
     const b = 19.8;
     const c = 29.7;
-    const roundTripTime = getRoundTripTime() || DEFAULT_RTT;
+    const roundTripTime = getRoundTripTime();
     /**
      * Calculate the transmission rating factor, R
      */
     const calculateR = (): number => {
-      const d = (roundTripTime / 2) + LOCAL_DELAY;
+      const d = roundTripTime + LOCAL_DELAY;
       const delayImpairment = 0.024 * d + 0.11 * (d - 177.3) * h(d - 177.3);
       const equipmentImpairment = a + b * Math.log(1 + (c * packetLossRatio));
-      return 94.2 - delayImpairment - equipmentImpairment;
+      return 93.2 - delayImpairment - equipmentImpairment;
     };
 
     /**
@@ -102,7 +102,7 @@ function calculateAudioScore(
       if (R > 100) {
         return 4.5;
       }
-      return 1 + (0.035 * R) + ((7.10 / 1000000) * R) * (R - 60) * (100 - R);
+      return 1 + (0.035 * R) + R * (R - 60) * (100 - R) * 0.000007;
     };
 
     return calculateMOS(calculateR());
