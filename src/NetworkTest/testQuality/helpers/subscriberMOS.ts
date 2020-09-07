@@ -18,6 +18,8 @@ const calculateBitRate = (type: AV, current: OT.SubscriberStats, last: OT.Subscr
   return current[type] && current[type].bytesReceived ?
     (8 * (current[type].bytesReceived - last[type].bytesReceived)) / (interval / 1000) : 0;
 };
+const MS_PER_SEC = 1000;
+const DEFAULT_DELAY = 150; // expressed in ms
 
 function calculateVideoScore(subscriber: OT.Subscriber, stats: OT.SubscriberStats[]): number {
   const MIN_VIDEO_BITRATE = 30000;
@@ -58,21 +60,24 @@ function calculateAudioScore(
    * We can get this only using the standard getStats API. For legacy API
    * we will return 0.
    */
-  const getDelay = (): number => {
-    const DEFAULT_RTT = 150; // expressed in ms
-    if (!publisherStats) {
-      return DEFAULT_RTT;
-    }
-    const { rtcStatsReport } = publisherStats[0];
+  const getRoundTripTime = () => {
     let roundTripTime = 0;
-    if (typeof rtcStatsReport.forEach === 'function') {
+    if (publisherStats) {
+      const { rtcStatsReport } = publisherStats[0];
+      let roundTripTime = 0;
       rtcStatsReport.forEach((stat: any) => {
         if (stat.type === 'remote-inbound-rtp' && stat.kind === 'audio') {
           roundTripTime = !isNaN(stat.roundTripTime) ? stat.roundTripTime : 0;
         }
       });
     }
-    return ((roundTripTime * 1000) / 2) || DEFAULT_RTT;
+    return roundTripTime;
+  };
+
+  const getDelay = (): number => {
+    const roundTripTime = getRoundTripTime();
+    const delay = (roundTripTime * MS_PER_SEC) / 2;
+    return delay || DEFAULT_DELAY;
   };
 
   const audioScore = (packetLossRatio: number) => {
