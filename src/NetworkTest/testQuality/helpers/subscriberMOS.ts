@@ -58,8 +58,8 @@ function calculateAudioScore(
    * We can get this only using the standard getStats API. For legacy API
    * we will return 0.
    */
-  const getRoundTripTime = (): number => {
-    const DEFAULT_RTT = 150;
+  const getDelay = (): number => {
+    const DEFAULT_RTT = 150; // expressed in ms
     if (!publisherStats) {
       return DEFAULT_RTT;
     }
@@ -81,12 +81,12 @@ function calculateAudioScore(
     const a = 0; // ILBC: a=10
     const b = 19.8;
     const c = 29.7;
-    const roundTripTime = getRoundTripTime();
+    const delay = getDelay();
     /**
      * Calculate the transmission rating factor, R
      */
     const calculateR = (): number => {
-      const d = roundTripTime + LOCAL_DELAY;
+      const d = delay + LOCAL_DELAY;
       const delayImpairment = 0.024 * d + 0.11 * (d - 177.3) * h(d - 177.3);
       const equipmentImpairment = a + b * Math.log(1 + (c * packetLossRatio));
       return 93.2 - delayImpairment - equipmentImpairment;
