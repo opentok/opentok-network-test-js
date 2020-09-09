@@ -18,6 +18,8 @@ const calculateBitRate = (type: AV, current: OT.SubscriberStats, last: OT.Subscr
   return current[type] && current[type].bytesReceived ?
     (8 * (current[type].bytesReceived - last[type].bytesReceived)) / (interval / 1000) : 0;
 };
+const MS_PER_SEC = 1000;
+const DEFAULT_DELAY = 150; // expressed in ms
 
 function calculateVideoScore(subscriber: OT.Subscriber, stats: OT.SubscriberStats[]): number {
   const MIN_VIDEO_BITRATE = 30000;
@@ -58,13 +60,11 @@ function calculateAudioScore(
    * We can get this only using the standard getStats API. For legacy API
    * we will return 0.
    */
-  const getRoundTripTime = (): number => {
-    if (!publisherStats) {
-      return 0;
-    }
-    const { rtcStatsReport } = publisherStats[0];
+  const getRoundTripTime = () => {
     let roundTripTime = 0;
-    if (typeof rtcStatsReport.forEach === 'function') {
+    if (publisherStats) {
+      const { rtcStatsReport } = publisherStats[0];
+      let roundTripTime = 0;
       rtcStatsReport.forEach((stat: any) => {
         if (stat.type === 'remote-inbound-rtp' && stat.kind === 'audio') {
           roundTripTime = !isNaN(stat.roundTripTime) ? stat.roundTripTime : 0;
@@ -74,22 +74,27 @@ function calculateAudioScore(
     return roundTripTime;
   };
 
+  const getDelay = (): number => {
+    const roundTripTime = getRoundTripTime();
+    const delay = (roundTripTime * MS_PER_SEC) / 2;
+    return delay || DEFAULT_DELAY;
+  };
+
   const audioScore = (packetLossRatio: number) => {
-    const LOCAL_DELAY = 20; // 20 msecs: typical frame duration
+    const LOCAL_DELAY = 30; // 30 msecs: typical frame duration
     const h = (x: number): number => x < 0 ? 0 : 1;
     const a = 0; // ILBC: a=10
     const b = 19.8;
     const c = 29.7;
-    const roundTripTime = getRoundTripTime();
-
+    const delay = getDelay();
     /**
      * Calculate the transmission rating factor, R
      */
     const calculateR = (): number => {
-      const d = roundTripTime + LOCAL_DELAY;
-      const delayImpairment = ((0.024 * d) + 0.11) * (d - 177.3) * h(d - 177.3);
-      const equipmentImpairment = (a + b) * Math.log(1 + (c * packetLossRatio));
-      return 94.2 - delayImpairment - equipmentImpairment;
+      const d = delay + LOCAL_DELAY;
+      const delayImpairment = 0.024 * d + 0.11 * (d - 177.3) * h(d - 177.3);
+      const equipmentImpairment = a + b * Math.log(1 + (c * packetLossRatio));
+      return 93.2 - delayImpairment - equipmentImpairment;
     };
 
     /**
@@ -102,7 +107,7 @@ function calculateAudioScore(
       if (R > 100) {
         return 4.5;
       }
-      return 1 + (0.035 * R) + ((7.10 / 1000000) * R) * (R - 60) * (100 - R);
+      return 1 + (0.035 * R) + R * (R - 60) * (100 - R) * 0.000007;
     };
 
     return calculateMOS(calculateR());
