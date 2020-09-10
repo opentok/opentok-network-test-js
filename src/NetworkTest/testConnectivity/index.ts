@@ -50,8 +50,8 @@ function disconnectFromSession(session: OT.Session) {
 
 /**
  * Clean subscriber objects before disconnecting from the session
- * @param session 
- * @param subscriber 
+ * @param session
+ * @param subscriber
  */
 function cleanSubscriber(session: OT.Session, subscriber: OT.Subscriber) {
   return new Promise((resolve, reject) => {
@@ -83,16 +83,16 @@ function cleanPublisher(publisher: OT.Publisher) {
 function connectToSession(
   OT: OT.Client,
   { apiKey, sessionId, token }: OT.SessionCredentials,
-  options?: NetworkTestOptions
+  options?: NetworkTestOptions,
 ): Promise<OT.Session> {
   return new Promise((resolve, reject) => {
     let sessionOptions: OT.InitSessionOptions = {};
     if (options && options.initSessionOptions) {
-        sessionOptions = options.initSessionOptions
+      sessionOptions = options.initSessionOptions;
     }
     if (options && options.proxyServerUrl) {
       if (!OT.hasOwnProperty('setProxyUrl')) { // Fallback for OT.version < 2.17.4
-        sessionOptions.proxyUrl = options.proxyServerUrl; 
+        sessionOptions.proxyUrl = options.proxyServerUrl;
       }
     }
     const session = OT.initSession(apiKey, sessionId, sessionOptions);
@@ -167,10 +167,10 @@ function checkCreateLocalPublisher(
           showControls: false,
         };
         if (options && options.audioSource) {
-          publisherOptions.audioSource = options.audioSource
+          publisherOptions.audioSource = options.audioSource;
         }
         if (options && options.videoSource) {
-          publisherOptions.videoSource = options.videoSource
+          publisherOptions.videoSource = options.videoSource;
         }
         if (options && options.audioOnly) {
           publisherOptions.videoSource = null;
@@ -264,7 +264,7 @@ function checkSubscribeToSession({ session, publisher }: PublishToSessionResults
  */
 function checkLoggingServer(OT: OT.Client, options?: NetworkTestOptions, input?: SubscribeToSessionResults): Promise<SubscribeToSessionResults> {
   return new Promise((resolve, reject) => {
-    const loggingUrl = `${getOr('', 'properties.loggingURL', OT)}/logging/ClientEvent`; //https://hlg.tokbox.com/prod
+    const loggingUrl = `${getOr('', 'properties.loggingURL', OT)}/logging/ClientEvent`; // https://hlg.tokbox.com/prod
     const url = options && options.proxyServerUrl && `${options.proxyServerUrl}/${loggingUrl.replace('https://', '')}` || loggingUrl;
     const handleError = () => reject(new e.LoggingServerConnectionError());
 
@@ -293,9 +293,13 @@ export function testConnectivity(
       };
       otLogging.logEvent({ action: 'testConnectivity', variation: 'Success' });
       return cleanSubscriber(flowResults.session, flowResults.subscriber)
-        .then(() => cleanPublisher(flowResults.publisher))
+        .then(() => {
+          if (options && options.skipPublisherCleaningOnSuccess) return Promise.resolve();
+
+          return cleanPublisher(flowResults.publisher);
+        })
         .then(() => disconnectFromSession(flowResults.session))
-        .then(() => resolve(results))
+        .then(() => resolve(results));
     };
 
     const onFailure = (error: Error) => {

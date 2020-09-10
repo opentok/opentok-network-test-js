@@ -58,7 +58,7 @@ typings/
 .env
 
 # build files
-dist/
+# dist/
 
 # env
 .env
