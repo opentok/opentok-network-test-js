@@ -13,14 +13,10 @@
   "license": "MIT",
   "homepage": "https://github.com/opentok/opentok-network-connectivity",
   "devDependencies": {
-    "babel-core": "^6.26.0",
-    "babel-loader": "^7.1.2",
-    "babel-polyfill": "^6.26.0",
-    "babel-preset-env": "^1.6.1",
     "webpack": "^4.39.1"
   },
   "dependencies": {
-    "highcharts": "^6.0.3",
+    "highcharts": "^8.1.2",
     "opentok-network-test-js": "file://.."
   }
 }

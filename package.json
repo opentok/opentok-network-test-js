@@ -1,6 +1,6 @@
 {
   "name": "opentok-network-test-js",
-  "version": "2.3.0",
+  "version": "2.4.0",
   "description": "Precall network test for applications using the OpenTok platform.",
   "main": "dist/NetworkTest/index.js",
   "types": "dist/NetworkTest/index.d.ts",
@@ -9,7 +9,9 @@
     "test-setup": "node test/setup/setup.js",
     "test-teardown": "rm test/credentials.json",
     "karma": "karma start",
-    "test": "npm run test-setup && npm run karma && npm run test-teardown"
+    "test": "npm run test-setup && npm run karma && npm run test-teardown",
+    "example": "npm run build && cd sample && npm run build && python -m SimpleHTTPServer",
+    "tslint": "./node_modules/tslint/bin/tslint -p tsconfig.json"
   },
   "repository": {
     "type": "git",
@@ -37,7 +39,7 @@
     "promise": "^8.0.1"
   },
   "devDependencies": {
-    "@opentok/client": "^2.17.5",
+    "@opentok/client": "^2.18.0",
     "@types/expect.js": "^0.3.29",
     "@types/jasmine": "^2.8.8",
     "@types/jasmine-matchers": "^0.2.30",
@@ -46,14 +48,11 @@
     "@types/opentok": "^2.3.4",
     "@types/promise": "^7.1.30",
     "@types/webrtc": "0.0.22",
-    "babel-core": "^6.26.3",
-    "babel-loader": "^7.1.4",
-    "babel-preset-env": "^1.7.0",
     "dotenv": "^4.0.0",
     "fs-extra": "^4.0.3",
     "jasmine": "^2.99.0",
     "jasmine-core": "^2.99.1",
-    "karma": "^4.4.1",
+    "karma": "^5.1.1",
     "karma-chrome-launcher": "^2.2.0",
     "karma-cli": "^1.0.1",
     "karma-firefox-launcher": "^1.1.0",

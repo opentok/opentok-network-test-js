@@ -48,7 +48,7 @@ export namespace OT {
     initSession(
       partnerId: string,
       sessionId: string,
-      options?: OTSession.initSessionOptions
+      options?: OTSession.InitSessionOptions,
     ): Session;
 
     registerScreenSharingExtension(
@@ -90,7 +90,7 @@ export namespace OT {
   }
 
   export type Session = OTSession.Session;
-  export type InitSessionOptions = OTSession.initSessionOptions;
+  export type InitSessionOptions = OTSession.InitSessionOptions;
   export type Event<Type, Target> = OTEvent.Event<Type, Target>;
   export type Connection  = OTConnection.Connection;
   export type Stream  = OTStream.Stream;
@@ -101,4 +101,7 @@ export namespace OT {
   export type SubscriberProperties = OTSubscriber.SubscriberProperties;
   export type TrackStats = OTSubscriber.TrackStats;
   export type OTError = OTError.OTError;
+  export type PublisherRtcStatsReportArr = OTPublisher.PublisherRtcStatsReportArr;
+  export type PublisherRtcStatsReport = OTPublisher.PublisherRtcStatsReport;
+  export type RTCStatsReport = OTPublisher.RTCStatsReport;
 }

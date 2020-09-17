@@ -33,7 +33,7 @@ export interface NetworkTestOptions {
   timeout?: number;
   audioSource?: string;
   videoSource?: string;
-  initSessionOptions?: OT.InitSessionOptions
+  initSessionOptions?: OT.InitSessionOptions;
   proxyServerUrl?: string;
 }
 
@@ -50,12 +50,12 @@ export default class NetworkTest {
   constructor(OT: OT.Client, credentials: OT.SessionCredentials, options?: NetworkTestOptions) {
     this.validateOT(OT);
     this.validateCredentials(credentials);
-    const proxyServerUrl = this.validateProxyUrl(options)
+    const proxyServerUrl = this.validateProxyUrl(options);
     this.otLogging = this.startLoggingEngine(credentials.apiKey, credentials.sessionId, proxyServerUrl);
     this.OT = OT;
     this.credentials = credentials;
     this.options = options;
-    this.setProxyUrl(proxyServerUrl)
+    this.setProxyUrl(proxyServerUrl);
   }
 
   private validateOT(OT: OT.Client) {
@@ -91,11 +91,11 @@ export default class NetworkTest {
       sessionId,
       partnerId: apiKey,
       source: window.location.href,
-      clientVersion: 'js-network-test-' + version,
+      clientVersion: `js-network-test-${version}`,
       name: 'opentok-network-test',
-      componentId: 'opentok-network-test'
+      componentId: 'opentok-network-test',
     }, {
-      proxyUrl
+      proxyUrl,
     });
   }
 

@@ -4,7 +4,6 @@ import * as OTClient from '@opentok/client';
 import {
   primary as sessionCredentials,
   faultyLogging as badLoggingCredentials,
-  faultyApi as badApiCredentials,
 } from './credentials.json';
 import {
   NetworkTestError,
@@ -13,8 +12,7 @@ import {
   IncompleteSessionCredentialsError,
   InvalidOnUpdateCallback,
 } from '../src/NetworkTest/errors';
-import { ConnectivityError, ConnectToSessionTokenError, PublishToSessionError } from '../src/NetworkTest/testConnectivity/errors';
-import { ConnectToSessionError as QualityTestSessionError } from '../src/NetworkTest/testQuality/errors';
+import { ConnectivityError } from '../src/NetworkTest/testConnectivity/errors';
 import NetworkTest, { ErrorNames } from '../src/NetworkTest';
 import { ConnectivityTestResults } from '../src/NetworkTest/testConnectivity/index';
 import { QualityTestError } from '../src/NetworkTest/testQuality/errors/index';
@@ -400,8 +398,7 @@ describe('NetworkTest', () => {
         });
 
         const validateResults = (results: QualityTestResults) => {
-          const { mos, audio, video } = results;
-
+          const { audio, video } = results;
           expect(audio.bitrate).toEqual(jasmine.any(Number));
           expect(audio.supported).toEqual(jasmine.any(Boolean));
           expect(audio.reason || '').toEqual(jasmine.any(String));
@@ -422,7 +419,7 @@ describe('NetworkTest', () => {
           .then(validateResults)
           .catch(validateError)
           .finally(done);
-      }, 8000);
+      }, 10000);
 
       it('should return an error if the window.navigator is undefined', () => {
         spyOnProperty(window, 'navigator', 'get').and.returnValue(undefined);

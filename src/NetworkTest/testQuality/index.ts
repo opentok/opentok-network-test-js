@@ -110,7 +110,6 @@ function validateDevices(OT: OT.Client): Promise<AvailableDevices> {
 function publishAndSubscribe(OT: OT.Client, options?: NetworkTestOptions) {
   return (session: OT.Session): Promise<PublisherSubscriber> =>
     new Promise((resolve, reject) => {
-      let publisherOptions: OT.PublisherProperties;
       type StreamCreatedEvent = OT.Event<'streamCreated', OT.Publisher> & { stream: OT.Stream };
       const containerDiv = document.createElement('div');
       containerDiv.style.position = 'fixed';
@@ -124,7 +123,7 @@ function publishAndSubscribe(OT: OT.Client, options?: NetworkTestOptions) {
           if (!Object.keys(availableDevices.video).length) {
             audioOnly = true;
           }
-          let publisherOptions: OT.PublisherProperties = {
+          const publisherOptions: OT.PublisherProperties = {
             resolution: '1280x720',
             width: '100%',
             height: '100%',
@@ -132,10 +131,10 @@ function publishAndSubscribe(OT: OT.Client, options?: NetworkTestOptions) {
             showControls: false,
           };
           if (options && options.audioSource) {
-            publisherOptions.audioSource = options.audioSource
+            publisherOptions.audioSource = options.audioSource;
           }
           if (options && options.videoSource) {
-            publisherOptions.videoSource = options.videoSource
+            publisherOptions.videoSource = options.videoSource;
           }
           if (audioOnly) {
             publisherOptions.videoSource = null;
@@ -193,6 +192,12 @@ function buildResults(builder: QualityTestResultsBuilder): QualityTestResults {
   const baseProps: (keyof AverageStats)[] = ['bitrate', 'packetLossRatio', 'supported', 'reason', 'mos'];
   builder.state.stats.audio.mos = builder.state.audioQualityScore();
   builder.state.stats.video.mos = builder.state.videoQualityScore();
+  if (builder.state.stats.audio.mos >= config.qualityThresholds.audio[0].minMos) {
+    builder.state.stats.audio.supported = true;
+  } else {
+    builder.state.stats.audio.supported = false;
+    builder.state.stats.audio.reason = config.strings.bandwidthLow;
+  }
   return {
     audio: pick(baseProps, builder.state.stats.audio),
     video: pick(baseProps.concat(['frameRate', 'recommendedResolution', 'recommendedFrameRate']),
@@ -201,16 +206,13 @@ function buildResults(builder: QualityTestResultsBuilder): QualityTestResults {
 }
 
 function isAudioQualityAcceptable(results: QualityTestResults): boolean {
-  return !!results.audio.bitrate && (results.audio.bitrate > config.qualityThresholds.audio[0].bps)
-    && (!!results.audio.packetLossRatio &&
-      (results.audio.packetLossRatio < config.qualityThresholds.audio[0].plr)
-      || results.audio.packetLossRatio === 0);
+  return !!results.audio.mos && (results.audio.mos >= config.qualityThresholds.audio[0].minMos);
 }
 
 /**
  * Clean subscriber objects before disconnecting from the session
- * @param session 
- * @param subscriber 
+ * @param session
+ * @param subscriber
  */
 function cleanSubscriber(session: OT.Session, subscriber: OT.Subscriber) {
   return new Promise((resolve, reject) => {
@@ -226,7 +228,7 @@ function cleanSubscriber(session: OT.Session, subscriber: OT.Subscriber) {
 
 /**
  * Clean publisher objects before disconnecting from the session
- * @param publisher 
+ * @param publisher
  */
 function cleanPublisher(publisher: OT.Publisher) {
   return new Promise((resolve, reject) => {
@@ -274,10 +276,13 @@ function checkSubscriberQuality(
 
             const processResults = () => {
               const audioVideoResults: QualityTestResults = buildResults(builder);
-              if (!audioOnly && !isAudioQualityAcceptable(audioVideoResults)) {
+              if (!audioOnly && !isAudioQualityAcceptable(audioVideoResults) && !stopTestCalled) {
                 audioOnly = true;
+                // We don't want to lose the videoResults.
+                const videoResults = audioVideoResults.video;
                 checkSubscriberQuality(OT, session, credentials, options, onUpdate, true)
                   .then((results: QualityTestResults) => {
+                    results.video = videoResults;
                     resolve(results);
                   });
               } else {
@@ -300,9 +305,10 @@ function checkSubscriberQuality(
               processResults();
             };
 
-            subscriberMOS(builder.state, subscriber, getStatsListener, resultsCallback);
+            subscriberMOS(builder.state, subscriber, publisher, getStatsListener, resultsCallback);
 
-            mosEstimatorTimeoutId = window.setTimeout(processResults, testTimeout);
+            // We add +1 to the testTimeout value in order to consider the last stats snapshot.
+            mosEstimatorTimeoutId = window.setTimeout(processResults, testTimeout + 1);
 
             window.clearTimeout(stopTestTimeoutId);
             stopTestTimeoutId = window.setTimeout(() => {
@@ -367,7 +373,7 @@ export function testQuality(
       .then(() => {
         let sessionOptions: OT.InitSessionOptions = {};
         if (options && options.initSessionOptions) {
-          sessionOptions = options.initSessionOptions
+          sessionOptions = options.initSessionOptions;
         }
         if (options && options.proxyServerUrl) {
           if (!OT.hasOwnProperty('setProxyUrl')) { // Fallback for OT.version < 2.17.4

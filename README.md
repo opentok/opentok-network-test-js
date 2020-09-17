@@ -138,10 +138,10 @@ See the /sample subdirectory (and the /sample/README.md file) for a sample app.
 ## Supported browsers
 
 The `OTNetworkTest.testConnectivity()` method is supported in Chrome, Firefox, Safari,
-Internet Explorer, Opera, and Edge.
+Opera, and Edge.
 
 The `OTNetworkTest.testQuality()` method is supported in Chrome, Firefox, Safari,
-Opera, Chromium-based versions of Edge (versions 79+), and Internet Explorer.
+Opera, and Chromium-based versions of Edge (versions 79+).
 It is not supported in non-Chromium-based versions of Edge.
 
 ## API reference
@@ -344,7 +344,7 @@ the published stream, it provides the following results:
 
 * Whether audio and video are supported and a reason why they aren't supported (if they aren't).
 
-* The MOS estimate (from 0 - 5) for the the audio and video published by the client.
+* The MOS estimate (from 0 - 4.5) for the the audio and video published by the client.
 
 * Statistics for the test, including bitrate and packet loss ratio (for both audio and video),
   as well as the video packet loss ratio.
@@ -573,6 +573,10 @@ limit the range of scores from 1.0 to 4.5.
 | 2.4 - 3.09 | Fair      |
 | 1.7 - 2.39 | Poor      |
 | 1.0 - 1.69 | Bad       |
+
+*Note:* The audio MOS estimate is less accurate when using OpenTok.js version 2.17.5 or lower
+or on Chrome version 57 or lower, because the OpenTok Network Test cannot access the round-trip time
+for audio, which is factored into the MOS calculation.
 
 ## Building the module
 
