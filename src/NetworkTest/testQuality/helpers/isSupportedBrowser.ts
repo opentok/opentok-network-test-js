@@ -42,7 +42,7 @@ function detectBrowser(): Browser {
     return 'WebKit browser without WebRTC support';
   }
 
-  if (navigator.mediaDevices && navigator.userAgent.match(/edge\/(\d+).(\d+)$/)) { // Edge.
+  if (navigator.mediaDevices && navigator.userAgent.match(/Edge\/(\d+).(\d+)$/)) { // Edge.
     return 'non-Chromium Edge';
   }
 

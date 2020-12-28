@@ -429,24 +429,21 @@ describe('NetworkTest', () => {
       });
 
       it('should return an unsupported browser error if the browser is an older version of Edge', () => {
-        const mozGetUserMedia = navigator.mozGetUserMedia;
-        const webkitGetUserMedia = navigator.webkitGetUserMedia;
-        navigator.mozGetUserMedia = undefined;
-        navigator.webkitGetUserMedia = undefined;
-        spyOnProperty(window.navigator, 'userAgent', 'get').and.returnValue('Edge');
+        spyOnProperty(window, 'navigator', 'get').and.returnValue({
+            mediaDevices: {},
+            webkitGetUserMedia: null,
+            mozGetUserMedia: null,
+            userAgent: 'Edge/12.10240',
+          });
         networkTest.testQuality(null)
           .then(validateResultsUndefined)
-          .catch(validateUnsupportedBrowserError)
-          .finally(() => {
-            navigator.mozGetUserMedia = mozGetUserMedia;
-            navigator.webkitGetUserMedia = webkitGetUserMedia;
-          });
-      });
+          .catch(validateUnsupportedBrowserError);
+      }, 10000);
 
       it('should run the test if the browser is a Chromium-based version of Edge', (done) => {
         const mozGetUserMedia = navigator.mozGetUserMedia;
         const webkitGetUserMedia = navigator.webkitGetUserMedia;
-        navigator.mozGetUserMedia = {};
+        navigator.mozGetUserMedia = null;
         navigator.webkitGetUserMedia = {};
         spyOnProperty(window.navigator, 'userAgent', 'get').and.returnValue('Edg');
         networkTestWithOptions.testQuality()
