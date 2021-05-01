@@ -12,7 +12,7 @@
 /* tslint:disable */
 import OTKAnalytics = require('opentok-solutions-logging');
 /* tslint:enable */
-import * as Promise from 'promise';
+import { Promise } from '../util/promise';
 import {
   NetworkTestOptions,
 } from '../index';
