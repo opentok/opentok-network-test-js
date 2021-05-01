@@ -79,15 +79,16 @@ export namespace OT {
   }
 
   export interface ScreenSharingCapabilityResponse {
-    extensionInstalled: boolean;
+    extensionInstalled?: boolean;
     supported: boolean;
     supportedSources: {
-      application: boolean;
-      screen: boolean;
-      window: boolean;
+      application?: boolean;
+      screen?: boolean;
+      window?: boolean;
     };
-    extensionRegistered?: string;
-  }
+    extensionRequired?: string;
+    extensionRegistered?: boolean;
+  };
 
   export type Session = OTSession.Session;
   export type InitSessionOptions = OTSession.InitSessionOptions;
