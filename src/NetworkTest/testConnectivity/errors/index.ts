@@ -112,6 +112,12 @@ export class FailedToCreateLocalPublisher extends PublishToSessionError {
   }
 }
 
+export class MediaPermissionsDeniedError extends PublishToSessionError {
+  constructor() {
+    super('Precall failed to publish because media permissions have been denied.', ErrorNames.MEDIA_PERMISSIONS_ERROR);
+  }
+}
+
 export class PublishToSessionNotConnectedError extends PublishToSessionError {
   constructor() {
     super('Precall failed to publish to the session because it was not connected.',
