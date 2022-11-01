@@ -88,7 +88,7 @@ export namespace OT {
     };
     extensionRequired?: string;
     extensionRegistered?: boolean;
-  };
+  }
 
   export type Session = OTSession.Session;
   export type InitSessionOptions = OTSession.InitSessionOptions;

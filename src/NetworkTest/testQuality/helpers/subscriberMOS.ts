@@ -61,7 +61,7 @@ function calculateAudioScore(
    * we will return 0.
    */
   const getRoundTripTime = () => {
-    let roundTripTime = 0;
+    const roundTripTime = 0;
     if (publisherStats) {
       const { rtcStatsReport } = publisherStats[0];
       let roundTripTime = 0;
