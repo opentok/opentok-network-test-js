@@ -23,6 +23,8 @@ import {
   InvalidOnUpdateCallback,
   MissingOpenTokInstanceError,
   MissingSessionCredentialsError,
+  PermissionDeniedError,
+  UnsupportedResolutionError,
 } from './errors';
 /* tslint:disable */
 import OTKAnalytics = require('opentok-solutions-logging');
@@ -35,6 +37,7 @@ export interface NetworkTestOptions {
   videoSource?: string;
   initSessionOptions?: OT.InitSessionOptions;
   proxyServerUrl?: string;
+  maximumResolution?: '1920x1080' | '1280x720';
 }
 
 export default class NetworkTest {
@@ -139,6 +142,38 @@ export default class NetworkTest {
    */
   stop() {
     stopQualityTest();
+  }
+
+  /**
+   * Checks for camera support for a given resolution.
+   *
+   * See the "API reference" section of the README.md file in the root of the
+   * opentok-network-test-js project for details.
+   */
+  checkCameraSupport(width: number, height: number): Promise<void> {
+    return new Promise((resolve, reject) => {
+      navigator.mediaDevices.getUserMedia({
+        video: {
+          width: { min: width },
+          height: { min: height },
+        },
+      }).then((mediaStream) => {
+        if (mediaStream) {
+          resolve();
+        }
+      }).catch(error => {
+        switch (error.name) {
+          case 'OverconstrainedError':
+            reject(new UnsupportedResolutionError());
+            break;
+          case 'NotAllowedError':
+            reject(new PermissionDeniedError());
+            break;
+          default:
+            reject(error);
+        }
+      });
+    });
   }
 }
 

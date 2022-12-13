@@ -38,6 +38,11 @@ const config: QualityTestConfig = {
   qualityThresholds: {
     video: [
       {
+        bps: 3000000,
+        plr: 0.005,
+        recommendedSetting: '1920x1080 @ 30FPS',
+      },
+      {
         bps: 1000000,
         plr: 0.005,
         recommendedSetting: '1280x720 @ 30FPS',
@@ -51,6 +56,11 @@ const config: QualityTestConfig = {
         bps: 300000,
         plr: 0.005,
         recommendedSetting: '320x240 @ 30FPS',
+      },
+      {
+        bps: 1000000,
+        plr: 0.03,
+        recommendedSetting: '1920x1080 @ 30FPS',
       },
       {
         bps: 350000,

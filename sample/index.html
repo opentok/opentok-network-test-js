@@ -11,9 +11,6 @@
       <div class="options">
         Options:
         <span>
-          <input id="checkBox" type="checkbox"> <label>Audio-only</label>
-        </span>
-        <span>
           Maximum duration:
           <select>
             <option>30</option>
@@ -24,6 +21,14 @@
             <option>5</option>
           </select>
         </span>
+        <div id="checkboxes">
+          <span>
+            <input id="audioOnlyCheckBox" type="checkbox"> <label>Audio-only</label>
+          </span>
+          <span id="fhdContainer">
+            <input id="fhdCheckBox" type="checkbox" disabled> <label id="fhdLabel">Checking for 1080p support...</label>
+          </span>
+        </div>
       </div>
       <button>Start test</button>
     </div>

@@ -124,7 +124,7 @@ function publishAndSubscribe(OT: OT.Client, options?: NetworkTestOptions) {
             audioOnly = true;
           }
           const publisherOptions: OT.PublisherProperties = {
-            resolution: '1280x720',
+            resolution: (options && options.maximumResolution) || '1280x720',
             width: '100%',
             height: '100%',
             insertMode: 'append',

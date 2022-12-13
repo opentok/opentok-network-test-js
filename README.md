@@ -249,6 +249,12 @@ The `OTNetworkTest()` constructor includes the following parameters:
     in OpenTok.js). For more information, please check the 
     [IP Proxy Documentation](https://tokbox.com/developer/guides/ip-proxy/).
 
+  * `maximumResolution` (String) -- (Optional) Set this to the maximum resolution the
+    test should check -- either '1280x720' (HD, the default) or '1920x1080' (FHD). The test
+    will test lower resolutions if a higher resolution test does not pass. The recommended
+    resolution is the `recommendedResolution` of the object resolved as the Promise returned
+    by the `OTNetworkTest.testQuality()` method.
+
   The `options` parameter is optional.
 
 The constructor throws an Error object with a `message` property and a `name` property. The
@@ -404,8 +410,10 @@ following properties:
       (for example, because no camera was found), this property is undefined.
 
     * `recommendedResolution` (String) -- The recommended video resolution. This will be
-      set to `'1280x720'`, `'640x480'`, or `'320x240'`. However, if video is unsupported,
-      this is set to `null`. If the the test ran in audio-only mode (for example, because
+      set to `'1920x1080'`, `'1280x720'`, `'640x480'`, or `'320x240'`. However, if video is unsupported,
+      this is set to `null`. (The test only checks for 1920x1080 support if you set the `maximumResolution`
+      property to 1920x1080' in the `options` passed into the The `OTNetworkTest()` constructor.)
+      If the the test ran in audio-only mode (for example, because
       no camera was found), this property is undefined.
 
     * `reason` (String) -- A string describing the reason for an unsupported video recommendation.
@@ -493,6 +501,25 @@ Stops the `testConnectivity()` test if it is running. The test will not stop unt
 running for at least 5 seconds (after the user has granted access to the camera and microphone).
 While you can call `stop()` prior to this, results will not be returned until the 5-second mark.
 
+### OTNetworkTest.checkCameraSupport(width, height)
+
+Checks support for a given resolution. 
+
+```javascript
+otNetworkTest.checkCameraSupport(1929, 1080).then((results) => {
+  // Display UI based on results
+}).catch(() => {
+  // Adjust UI based on results. Maybe hide FHD option.
+});
+```
+
+#### Promise returned
+
+The Promise returned by the `OTNetworkTest.checkCameraSupport()` method is resolved if the camera
+supports the given resolution. It is rejected with an error if the camera does not support
+the given resolution (or if the user denies access to the camera). See
+"Errors thrown by the OTNetworkTest.checkCameraSupport() method" below.
+
 ### ErrorNames
 
 The ErrorNames object includes properties that enumerate values used in the
@@ -555,6 +582,13 @@ method has a `name` property set to one of the following:
 |   `PUBLISH_TO_SESSION_PERMISSION_OR_TIMEOUT_ERROR` | The test failed to publish to the test session due a permissions error or timeout. | 
 |   `SUBSCRIBE_TO_SESSION_ERROR` | The test encountered an unknown error while attempting to subscribe to a test stream. | 
 |   `SUBSCRIBER_GET_STATS_ERROR` | The test failed to get audio and video statistics for the test stream. | 
+
+#### Errors thrown by the OTNetworkTest.checkCameraSupport() method
+
+| Error.name property set<br/>to this property of<br/>ErrorNames ... | Description       |
+| ------------------------------------------------------------------ | ----------------- |
+|   `PERMISSION_DENIED_ERROR`    | The user denied access to the camera.                 |
+|   `UnsupportedResolutionError` | The camera does not support the requested resolution. | 
 
 ## MOS estimates
 
