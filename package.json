@@ -62,15 +62,15 @@
     "karma-safaritechpreview-launcher": "0.0.6",
     "karma-sauce-launcher": "^1.2.0",
     "karma-sourcemap-loader": "^0.3.7",
-    "karma-webpack": "^2.0.13",
+    "karma-webpack": "^5.0.0",
     "opentok": "^2.9.1",
     "terser-webpack-plugin": "^2.3.3",
-    "ts-loader": "^4.4.1",
+    "ts-loader": "^9.4.2",
     "tslint": "^5.10.0",
     "tslint-config-airbnb": "^5.9.2",
     "typescript": "2.9.2",
-    "webpack": "^4.12.0",
-    "webpack-cli": "^3.0.4",
+    "webpack": "^5.75.0",
+    "webpack-cli": "^5.0.1",
     "webpack-node-externals": "^1.7.2"
   }
 }
