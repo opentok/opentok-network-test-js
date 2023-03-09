@@ -249,6 +249,11 @@ The `OTNetworkTest()` constructor includes the following parameters:
     in OpenTok.js). For more information, please check the 
     [IP Proxy Documentation](https://tokbox.com/developer/guides/ip-proxy/).
 
+  * `scalableVideo` (Boolean) -- (Optional) Whether to use
+    [scalable video](https://tokbox.com/developer/guides/scalable-video/)
+    (`true`, the default) or not (`false`). Disabling scalable video
+    was added in OpenTok.js version 2.24.7.
+
   The `options` parameter is optional.
 
 The constructor throws an Error object with a `message` property and a `name` property. The

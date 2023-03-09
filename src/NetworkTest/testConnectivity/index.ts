@@ -181,6 +181,9 @@ function checkCreateLocalPublisher(
         if (!Object.keys(availableDevices.video).length) {
           publisherOptions.videoSource = null;
         }
+        if (options && options.scalableVideo) {
+          publisherOptions.scalableVideo = options.scalableVideo;
+        }
         const publisher = OT.initPublisher(publisherDiv, publisherOptions, (error?: OT.OTError) => {
           if (!error) {
             resolve({ publisher });
