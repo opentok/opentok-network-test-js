@@ -165,6 +165,7 @@ function checkCreateLocalPublisher(
           height: '100%',
           insertMode: 'append',
           showControls: false,
+          scalableVideo: false,
         };
         if (options && options.audioSource) {
           publisherOptions.audioSource = options.audioSource;
@@ -180,6 +181,9 @@ function checkCreateLocalPublisher(
         }
         if (!Object.keys(availableDevices.video).length) {
           publisherOptions.videoSource = null;
+        }
+        if (options && options.scalableVideo) {
+          publisherOptions.scalableVideo = options.scalableVideo;
         }
         const publisher = OT.initPublisher(publisherDiv, publisherOptions, (error?: OT.OTError) => {
           if (!error) {

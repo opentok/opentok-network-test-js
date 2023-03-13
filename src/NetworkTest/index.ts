@@ -35,6 +35,7 @@ export interface NetworkTestOptions {
   videoSource?: string;
   initSessionOptions?: OT.InitSessionOptions;
   proxyServerUrl?: string;
+  scalableVideo?: boolean;
 }
 
 export default class NetworkTest {
