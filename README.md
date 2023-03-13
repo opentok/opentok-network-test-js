@@ -251,7 +251,7 @@ The `OTNetworkTest()` constructor includes the following parameters:
 
   * `scalableVideo` (Boolean) -- (Optional) Whether to use
     [scalable video](https://tokbox.com/developer/guides/scalable-video/)
-    (`true`, the default) or not (`false`). Disabling scalable video
+    (`true`) or not (`false`, the default). Disabling scalable video
     was added in OpenTok.js version 2.24.7.
 
   The `options` parameter is optional.

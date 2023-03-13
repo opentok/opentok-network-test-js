@@ -165,6 +165,7 @@ function checkCreateLocalPublisher(
           height: '100%',
           insertMode: 'append',
           showControls: false,
+          scalableVideo: false,
         };
         if (options && options.audioSource) {
           publisherOptions.audioSource = options.audioSource;

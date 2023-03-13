@@ -63,6 +63,7 @@ export interface PublisherProperties extends WidgetProperties, GetUserMediaPrope
     '320x240' |
     '320x180'
   );
+  scalableVideo?: boolean;
   style?: Partial<PublisherStyle>;
   usePreviousDeviceSelection?: boolean;
   videoSource?: string | null;
