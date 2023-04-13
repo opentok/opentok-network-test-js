@@ -2,6 +2,7 @@ import { Stream } from './stream';
 import { Session } from './session';
 import { Event, OTEventEmitter, VideoDimensionsChangedEvent } from './events';
 import { Dimensions, WidgetProperties, WidgetStyle } from './widget';
+import { RTCStatsArrayInternal } from './rtcStats';
 
 export interface OutgoingTrackStats {
   bytesSent: number;
@@ -9,10 +10,34 @@ export interface OutgoingTrackStats {
   packetsSent: number;
 }
 
+export interface VideoStats {
+  ssrc: number;
+  byteSent: number;
+  bitrate: number;
+  qualityLimitationReason: string;
+  resolution: string;
+  framerate: number;
+  active: boolean;
+  pliCount: number;
+  nackCount: number;
+  currentTimestamp: number;
+}
+
+export interface AudioStats {
+  bitrate: number;
+  byteSent: number;
+  currentTimestamp: number;
+}
+
 export interface PublisherStats {
-  audio: OutgoingTrackStats;
-  video: OutgoingTrackStats & { frameRate: number; };
-  timestamp: number;
+  videoStats: VideoStats[];
+  audioStats: AudioStats[];
+  availableOutgoingBitrate: number;
+  totalVideoByteSent: number;
+  totalAudioByteSent: number;
+  simulcastEnabled: boolean;
+  transportProtocol: string;
+  currentRoundTripTime: number;
 }
 
 export interface PublisherStatContainer {
@@ -69,18 +94,9 @@ export interface PublisherProperties extends WidgetProperties, GetUserMediaPrope
   videoSource?: string | null;
 }
 
-export interface RTCStatsReport {
-  forEach(callbackfn: (value: any, key: string, parent: RTCStatsReport) => void, thisArg?: any): void;
-  type: string;
-  roundTripTime: number;
-  kind: string;
-}
-
 export type PublisherRtcStatsReport = {
-  rtcStatsReport: RTCStatsReport,
+  rtcStatsReport: RTCStatsArrayInternal[],
 };
-
-export type PublisherRtcStatsReportArr = PublisherRtcStatsReport[];
 
 export interface Publisher extends OTEventEmitter<{
   accessAllowed: Event<'accessAllowed', Publisher>;
@@ -132,6 +148,6 @@ export interface Publisher extends OTEventEmitter<{
   videoHeight(): number | undefined;
 
   getRtcStatsReport(
-    callback?: (error?: Error, stats?: PublisherRtcStatsReportArr) => void,
-  ): Promise<PublisherRtcStatsReportArr> | undefined;
+    callback?: (error?: Error, stats?: PublisherRtcStatsReport) => void,
+  ): Promise<PublisherRtcStatsReport> | undefined;
 }

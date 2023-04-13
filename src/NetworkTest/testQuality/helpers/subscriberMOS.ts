@@ -4,9 +4,13 @@ import MOSState from './MOSState';
 import { OT } from '../../types/opentok';
 import { AV } from '../types/stats';
 import { getOr, last, nth } from '../../util';
-import getPublisherRtcStatsReport from '../helpers/getPublisherRtcStatsReport';
+import { getPublisherStats }  from '../helpers/getPublisherRtcStatsReport';
 
-export type StatsListener = (error?: OT.OTError, stats?: OT.SubscriberStats) => void;
+export type StatsListener = (
+  error?: OT.OTError,
+  stats?: OT.SubscriberStats,
+  publisherStats?: OT.PublisherStats,
+) => void;
 
 const getPacketsLost = (ts: OT.TrackStats): number => getOr(0, 'packetsLost', ts);
 const getPacketsReceived = (ts: OT.TrackStats): number => getOr(0, 'packetsReceived', ts);
@@ -51,28 +55,10 @@ function calculateVideoScore(subscriber: OT.Subscriber, stats: OT.SubscriberStat
 }
 
 function calculateAudioScore(
-  subscriber: OT.Subscriber, publisherStats: OT.PublisherRtcStatsReportArr | null,
+  subscriber: OT.Subscriber, publisherStats: OT.PublisherStats | null,
   stats: OT.SubscriberStats[]): number {
 
-  /**
-   * Get publisher raw stats directly from the Peer Connection in order
-   * to get the roundTripTime on type=remote-inbound-rtp and kind=audio
-   * We can get this only using the standard getStats API. For legacy API
-   * we will return 0.
-   */
-  const getRoundTripTime = () => {
-    const roundTripTime = 0;
-    if (publisherStats) {
-      const { rtcStatsReport } = publisherStats[0];
-      let roundTripTime = 0;
-      rtcStatsReport.forEach((stat: any) => {
-        if (stat.type === 'remote-inbound-rtp' && stat.kind === 'audio') {
-          roundTripTime = !isNaN(stat.roundTripTime) ? stat.roundTripTime : 0;
-        }
-      });
-    }
-    return roundTripTime;
-  };
+  const getRoundTripTime = () => publisherStats?.currentRoundTripTime || 0;
 
   const getDelay = (): number => {
     const roundTripTime = getRoundTripTime();
@@ -136,19 +122,14 @@ export default function subscriberMOS(
   subscriber: OT.Subscriber,
   publisher: OT.Publisher,
   getStatsListener: StatsListener,
-  callback: (state: MOSState) => void) {
-  mosState.intervalId = window.setInterval(
-    () => {
-      subscriber.getStats(async (error?: OT.OTError, stats?: OT.SubscriberStats) => {
-        if (!stats) {
+  callback: (state: MOSState) => void,
+) {
+  mosState.intervalId = window.setInterval(() => {
+    subscriber.getStats(
+      async (error?: OT.OTError, subscriberStats?: OT.SubscriberStats) => {
+        if (!subscriberStats) {
           return null;
         }
-
-        let publisherStats = null;
-        try {
-          publisherStats = await getPublisherRtcStatsReport(publisher);
-        } catch {}
-
         /**
          * We occasionally start to receive faulty stat during long-running
          * tests. If this occurs, let's end the test early and report the
@@ -158,15 +139,16 @@ export default function subscriberMOS(
          * We know that we're receiving "faulty" stats when we see a negative
          * value for bytesReceived.
          */
-        if (stats.audio.bytesReceived < 0 || getOr(1, 'video.bytesReceived', stats) < 0) {
+        if (subscriberStats.audio.bytesReceived < 0 || getOr(1, 'video.bytesReceived', subscriberStats) < 0) {
           mosState.clearInterval();
           return callback(mosState);
         }
 
-        stats && mosState.statsLog.push(stats);
+        subscriberStats && mosState.statsLog.push(subscriberStats);
+        const publisherStats = await getPublisherStats(publisher);
 
         if (getStatsListener && typeof getStatsListener === 'function') {
-          getStatsListener(error, stats);
+          getStatsListener(error, subscriberStats, publisherStats || undefined);
         }
 
         if (mosState.statsLog.length < 2) {
@@ -177,7 +159,11 @@ export default function subscriberMOS(
         const videoScore = calculateVideoScore(subscriber, mosState.statsLog);
         mosState.videoScoresLog.push(videoScore);
 
-        const audioScore = calculateAudioScore(subscriber, publisherStats, mosState.statsLog);
+        const audioScore = calculateAudioScore(
+          subscriber,
+          publisherStats,
+          mosState.statsLog,
+        );
         mosState.audioScoresLog.push(audioScore);
         mosState.pruneScores();
 
@@ -188,9 +174,9 @@ export default function subscriberMOS(
         }
 
         return null;
-
-      });
-    }, MOSState.scoreInterval);
+      },
+    );
+  }, MOSState.scoreInterval);
 
   subscriber.on('destroyed', mosState.clearInterval.bind(mosState));
   return mosState;

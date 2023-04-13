@@ -266,10 +266,11 @@ function checkSubscriberQuality(
               ... { credentials },
             };
 
-            const getStatsListener = (error?: OT.OTError, stats?: OT.SubscriberStats) => {
+            const getStatsListener = (error?: OT.OTError, stats?: OT.SubscriberStats, publisherStats?: OT.PublisherStats) => {
               const updateStats = (subscriberStats: OT.SubscriberStats): UpdateCallbackStats => ({
                 ...subscriberStats,
                 phase: audioOnly ? 'audio-only' : 'audio-video',
+                publisherStats,
               });
               stats && onUpdate && onUpdate(updateStats(stats));
             };
@@ -316,7 +317,7 @@ function checkSubscriberQuality(
               if (stopTestCalled && stopTest) {
                 stopTest();
               }
-            }, 5000);
+            }, testTimeout);
 
           } catch (exception) {
             reject(new e.SubscriberGetStatsError());
@@ -350,7 +351,6 @@ export function testQuality(
   stopTestTimeoutCompleted = false;
   stopTestCalled = false;
   return new Promise((resolve, reject) => {
-
     audioOnly = !!(options && options.audioOnly);
     testTimeout = audioOnly ? config.getStatsAudioOnlyDuration :
       config.getStatsVideoAndAudioTestDuration;
