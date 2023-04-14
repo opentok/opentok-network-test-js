@@ -1,4 +1,3 @@
-
 export interface RTCStatsInternal {
   forEach(callbackfn: (value: RTCStatsInternal, key: string, parent: RTCStatsReport) => void, thisArg?: any): void;
   entries(): IterableIterator<[string, RTCStatsInternal]>;
@@ -14,17 +13,21 @@ export interface RTCStatsInternal {
   nominated: boolean;
 }
 
-export interface RTCStatsArrayInternal extends RTCStatsInternal {
-  find(predicate: (value: RTCStatsInternal, index: number, obj: RTCStatsInternal[])
-   => boolean, thisArg?: any): RTCStatsInternal | undefined;
-  filter(predicate: (value: RTCStatsInternal, index: number, obj: RTCStatsInternal[])
-  => boolean, thisArg?: any): RTCStatsInternal[];
+export interface RTCStatsArray extends RTCStatsInternal {
+  find(
+    predicate: (value: RTCStatsInternal, index: number, obj: RTCStatsInternal[]) => boolean,
+    thisArg?: any,
+  ): RTCStatsInternal | undefined;
+  filter(
+    predicate: (value: RTCStatsInternal, index: number, obj: RTCStatsInternal[]) => boolean,
+    thisArg?: any,
+  ): RTCStatsInternal[];
 }
 
 type DOMHighResTimeStamp = number;
 
 export type PublisherRtcStatsReport = {
-  rtcStatsReport: RTCStatsArrayInternal,
+  rtcStatsReport: RTCStatsArray,
 };
 
 export interface RTCandidateStatsInternal extends RTCStatsInternal {
@@ -42,7 +45,7 @@ export interface RTCandidateStatsInternal extends RTCStatsInternal {
   usernameFragment: string;
 }
 
-export interface RTCTransportStatsInternal extends RTCStatsInternal {
+export interface RTCTransportStats extends RTCStatsInternal {
   bytesReceived?: number;
   bytesSent?: number;
   dtlsCipher?: string;
@@ -64,7 +67,7 @@ export interface RTCTransportStatsInternal extends RTCStatsInternal {
   type: 'transport';
 }
 
-export interface RTCIceCandidatePairStatsInternal extends RTCStatsInternal {
+export interface RTCIceCandidatePairStats extends RTCStatsInternal {
   availableOutgoingBitrate?: number;
   bytesDiscardedOnSend?: number;
   bytesReceived?: number;
@@ -93,7 +96,7 @@ export interface RTCIceCandidatePairStatsInternal extends RTCStatsInternal {
   writable?: boolean;
 }
 
-export interface RTCOutboundRtpStreamStatsInternal extends RTCStatsInternal {
+export interface RTCOutboundRtpStreamStats extends RTCStatsInternal {
   id: string;
   timestamp: number;
   ssrc: number;

@@ -1,15 +1,23 @@
 import { OT } from '../../types/opentok';
 import {
-  RTCTransportStatsInternal,
-  RTCOutboundRtpStreamStatsInternal,
-  RTCIceCandidatePairStatsInternal,
+  RTCTransportStats,
+  RTCOutboundRtpStreamStats,
+  RTCIceCandidatePairStats,
   RTCStatsInternal,
   RTCandidateStatsInternal,
 } from '../../types/opentok/rtcStats';
 
-const previousStreamStats = new Map<number, [number, number]>();
+export interface PreviousStreamStats {
+  [ssrc: number]: {
+    timestamp: number;
+    bytesSent: number;
+  };
+}
 
-export async function getPublisherStats(publisher: OT.Publisher): Promise<OT.PublisherStats | null> {
+export async function getPublisherStats(
+  publisher: OT.Publisher,
+  previousStreamStats: PreviousStreamStats,
+): Promise<OT.PublisherStats | null> {
 
   if (typeof publisher.getRtcStatsReport !== 'function') {
     return null;
@@ -17,34 +25,40 @@ export async function getPublisherStats(publisher: OT.Publisher): Promise<OT.Pub
 
   try {
     const publisherStatsReport = await publisher.getRtcStatsReport();
-    return extractPublisherStats(publisherStatsReport);
+    return extractPublisherStats(publisherStatsReport, previousStreamStats);
   } catch (error) {
     console.error(error);
+    return null;
   }
 }
 
-const calculateBitrate = (stats: RTCOutboundRtpStreamStatsInternal,
-  previousSsrcFrameData: [number, number] | undefined) => {
+const calculateBitrate = (
+  stats: RTCOutboundRtpStreamStats,
+  previousStreamStats: PreviousStreamStats,
+): number => {
+  const previousSsrcFrameData = previousStreamStats[stats.ssrc];
   if (!previousSsrcFrameData) {
     return 0;
   }
 
-  const [previousTimestamp, previousByteSent] = previousSsrcFrameData;
+  const { timestamp: previousTimestamp, bytesSent: previousByteSent } = previousSsrcFrameData;
   const bytesSent = stats.bytesSent - previousByteSent;
   const timeDiff = (stats.timestamp - previousTimestamp) / 1000; // Convert to seconds
-  return Math.round(bytesSent * 8 / (1000 * timeDiff)); // Convert to bits per second
-}
+  return Math.round((bytesSent * 8) / (1000 * timeDiff)); // Convert to bits per second
+};
 
-const extractOutboundRtpStats = (outboundRtpStats: RTCOutboundRtpStreamStatsInternal[]) => {
+const extractOutboundRtpStats = (
+  outboundRtpStats: RTCOutboundRtpStreamStats[],
+  previousStreamStats: PreviousStreamStats,
+) => {
   const videoStats = [];
   const audioStats = [];
 
   for (const stats of outboundRtpStats) {
-    const previousSsrcFrameData = previousStreamStats.get(stats.ssrc);
-    const bitrate = calculateBitrate(stats, previousSsrcFrameData);
-    previousStreamStats.set(stats.ssrc, [stats.timestamp, stats.bytesSent]);
+    const kbs = calculateBitrate(stats, previousStreamStats);
+    previousStreamStats[stats.ssrc] = { timestamp: stats.timestamp, bytesSent: stats.bytesSent };
 
-    const baseStats = { bitrate, ssrc: stats.ssrc, byteSent: stats.bytesSent, currentTimestamp: stats.timestamp };
+    const baseStats = { kbs, ssrc: stats.ssrc, byteSent: stats.bytesSent, currentTimestamp: stats.timestamp };
 
     if (stats.mediaType === 'video') {
       videoStats.push({
@@ -54,7 +68,7 @@ const extractOutboundRtpStats = (outboundRtpStats: RTCOutboundRtpStreamStatsInte
         framerate: stats.framesPerSecond || 0,
         active: stats.active || false,
         pliCount: stats.pliCount || 0,
-        nackCount: stats.nackCount || 0
+        nackCount: stats.nackCount || 0,
       });
     } else if (stats.mediaType === 'audio') {
       audioStats.push(baseStats);
@@ -62,9 +76,12 @@ const extractOutboundRtpStats = (outboundRtpStats: RTCOutboundRtpStreamStatsInte
   }
 
   return { videoStats, audioStats };
-}
+};
 
-const extractPublisherStats = (publisherRtcStatsReport?: OT.PublisherRtcStatsReport): OT.PublisherStats | null => {
+const extractPublisherStats = (
+  publisherRtcStatsReport?: OT.PublisherRtcStatsReport,
+  previousStreamStats?: PreviousStreamStats,
+  ): OT.PublisherStats | null => {
   if (!publisherRtcStatsReport) {
     return null;
   }
@@ -73,9 +90,12 @@ const extractPublisherStats = (publisherRtcStatsReport?: OT.PublisherRtcStatsRep
 
   const rtcStatsArray: RTCStatsInternal[] = Array.from(rtcStatsReport.values());
 
-  const transportStats = rtcStatsArray.find(stats => stats.type === 'transport') as RTCTransportStatsInternal;
-  const outboundRtpStats = rtcStatsArray.filter(stats => stats.type === 'outbound-rtp') as RTCOutboundRtpStreamStatsInternal[];
-  const iceCandidatePairStats = rtcStatsArray.find(stats => stats.type === 'candidate-pair' && stats.nominated)as RTCIceCandidatePairStatsInternal;
+  const transportStats = rtcStatsArray.find(
+    stats => stats.type === 'transport') as RTCTransportStats;
+  const outboundRtpStats = rtcStatsArray.filter(
+    stats => stats.type === 'outbound-rtp') as RTCOutboundRtpStreamStats[];
+  const iceCandidatePairStats = rtcStatsArray.find(
+    stats => stats.type === 'candidate-pair' && stats.nominated) as RTCIceCandidatePairStats;
 
   const findCandidateById = (type: string, id: string) => {
     return rtcStatsArray.find(stats => stats.type === type && stats.id === id) as RTCandidateStatsInternal | null;
@@ -84,12 +104,11 @@ const extractPublisherStats = (publisherRtcStatsReport?: OT.PublisherRtcStatsRep
   const localCandidate = findCandidateById('local-candidate', iceCandidatePairStats.localCandidateId);
   const remoteCandidate = findCandidateById('remote-candidate', iceCandidatePairStats.remoteCandidateId);
 
-  const { videoStats, audioStats } = extractOutboundRtpStats(outboundRtpStats);
+  const { videoStats, audioStats } = extractOutboundRtpStats(outboundRtpStats, previousStreamStats);
 
   const availableOutgoingBitrate = iceCandidatePairStats?.availableOutgoingBitrate || -1;
   const currentRoundTripTime = iceCandidatePairStats?.currentRoundTripTime || -1;
-  const totalVideoByteSent = videoStats.reduce((sum, stats) => sum + stats.bitrate, 0);
-  const totalAudioByteSent = audioStats.length > 0 ? audioStats[0].bitrate : 0;
+  const videoSentKbs = videoStats.reduce((sum, stats) => sum + stats.kbs, 0);
   const simulcastEnabled = videoStats.length > 1;
   const transportProtocol = localCandidate?.protocol || 'N/A';
 
@@ -97,8 +116,7 @@ const extractPublisherStats = (publisherRtcStatsReport?: OT.PublisherRtcStatsRep
     videoStats,
     audioStats,
     availableOutgoingBitrate,
-    totalVideoByteSent,
-    totalAudioByteSent,
+    videoSentKbs,
     simulcastEnabled,
     transportProtocol,
     currentRoundTripTime,

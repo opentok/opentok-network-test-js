@@ -2,7 +2,7 @@ import { Stream } from './stream';
 import { Session } from './session';
 import { Event, OTEventEmitter, VideoDimensionsChangedEvent } from './events';
 import { Dimensions, WidgetProperties, WidgetStyle } from './widget';
-import { RTCStatsArrayInternal } from './rtcStats';
+import { RTCStatsArray } from './rtcStats';
 
 export interface OutgoingTrackStats {
   bytesSent: number;
@@ -13,7 +13,7 @@ export interface OutgoingTrackStats {
 export interface VideoStats {
   ssrc: number;
   byteSent: number;
-  bitrate: number;
+  kbs: number;
   qualityLimitationReason: string;
   resolution: string;
   framerate: number;
@@ -24,7 +24,7 @@ export interface VideoStats {
 }
 
 export interface AudioStats {
-  bitrate: number;
+  kbs: number;
   byteSent: number;
   currentTimestamp: number;
 }
@@ -33,8 +33,7 @@ export interface PublisherStats {
   videoStats: VideoStats[];
   audioStats: AudioStats[];
   availableOutgoingBitrate: number;
-  totalVideoByteSent: number;
-  totalAudioByteSent: number;
+  videoSentKbs: number;
   simulcastEnabled: boolean;
   transportProtocol: string;
   currentRoundTripTime: number;
@@ -95,7 +94,7 @@ export interface PublisherProperties extends WidgetProperties, GetUserMediaPrope
 }
 
 export type PublisherRtcStatsReport = {
-  rtcStatsReport: RTCStatsArrayInternal[],
+  rtcStatsReport: RTCStatsArray[],
 };
 
 export interface Publisher extends OTEventEmitter<{

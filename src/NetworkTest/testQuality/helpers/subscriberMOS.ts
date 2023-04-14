@@ -4,7 +4,7 @@ import MOSState from './MOSState';
 import { OT } from '../../types/opentok';
 import { AV } from '../types/stats';
 import { getOr, last, nth } from '../../util';
-import { getPublisherStats }  from '../helpers/getPublisherRtcStatsReport';
+import { getPublisherStats, PreviousStreamStats }  from '../helpers/getPublisherRtcStatsReport';
 
 export type StatsListener = (
   error?: OT.OTError,
@@ -124,53 +124,51 @@ export default function subscriberMOS(
   getStatsListener: StatsListener,
   callback: (state: MOSState) => void,
 ) {
+  const previousStreamStats: PreviousStreamStats = {};
+
   mosState.intervalId = window.setInterval(() => {
     subscriber.getStats(
       async (error?: OT.OTError, subscriberStats?: OT.SubscriberStats) => {
         if (!subscriberStats) {
           return null;
         }
-        /**
-         * We occasionally start to receive faulty stat during long-running
-         * tests. If this occurs, let's end the test early and report the
-         * results as they are, as we should have sufficient data to
-         * calculate a score at this point.
-         *
-         * We know that we're receiving "faulty" stats when we see a negative
-         * value for bytesReceived.
-         */
+
+        // Check for faulty stats
         if (subscriberStats.audio.bytesReceived < 0 || getOr(1, 'video.bytesReceived', subscriberStats) < 0) {
           mosState.clearInterval();
           return callback(mosState);
         }
 
+        // Push subscriber stats to MOSState statsLog array
         subscriberStats && mosState.statsLog.push(subscriberStats);
-        const publisherStats = await getPublisherStats(publisher);
 
+        // Get publisher stats and push to MOSState statsLog array
+        const publisherStats = await getPublisherStats(publisher, previousStreamStats);
+
+        // Call getStatsListener if it exists
         if (getStatsListener && typeof getStatsListener === 'function') {
-          getStatsListener(error, subscriberStats, publisherStats || undefined);
+          getStatsListener(error, subscriberStats, publisherStats);
         }
 
-        if (mosState.statsLog.length < 2) {
-          return null;
-        }
+        // Calculate MOSState stats and push to appropriate logs
+        if (mosState.statsLog.length >= 2) {
+          mosState.stats = calculateThroughput(mosState);
+          const videoScore = calculateVideoScore(subscriber, mosState.statsLog);
+          mosState.videoScoresLog.push(videoScore);
 
-        mosState.stats = calculateThroughput(mosState);
-        const videoScore = calculateVideoScore(subscriber, mosState.statsLog);
-        mosState.videoScoresLog.push(videoScore);
+          const audioScore = calculateAudioScore(
+            subscriber,
+            publisherStats,
+            mosState.statsLog,
+          );
+          mosState.audioScoresLog.push(audioScore);
+          mosState.pruneScores();
 
-        const audioScore = calculateAudioScore(
-          subscriber,
-          publisherStats,
-          mosState.statsLog,
-        );
-        mosState.audioScoresLog.push(audioScore);
-        mosState.pruneScores();
-
-        // If bandwidth has reached a steady state, end the test early
-        if (isBitrateSteadyState(mosState.statsLog)) {
-          mosState.clearInterval();
-          return callback(mosState);
+          // Check if bitrate has reached a steady state, if yes end the test early
+          if (isBitrateSteadyState(mosState.statsLog)) {
+            mosState.clearInterval();
+            return callback(mosState);
+          }
         }
 
         return null;
@@ -179,5 +177,7 @@ export default function subscriberMOS(
   }, MOSState.scoreInterval);
 
   subscriber.on('destroyed', mosState.clearInterval.bind(mosState));
+  // Fix: Incorrect statistics were sent because the publisher disconnected before the subscriber.
+  publisher.on('destroyed', mosState.clearInterval.bind(mosState));
   return mosState;
 }

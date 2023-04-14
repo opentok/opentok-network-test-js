@@ -266,11 +266,15 @@ function checkSubscriberQuality(
               ... { credentials },
             };
 
-            const getStatsListener = (error?: OT.OTError, stats?: OT.SubscriberStats, publisherStats?: OT.PublisherStats) => {
+            const getStatsListener = (
+              error?: OT.OTError,
+              stats?: OT.SubscriberStats,
+              rtcStats?: OT.PublisherStats,
+            ) => {
               const updateStats = (subscriberStats: OT.SubscriberStats): UpdateCallbackStats => ({
+                rtcStats,
                 ...subscriberStats,
                 phase: audioOnly ? 'audio-only' : 'audio-video',
-                publisherStats,
               });
               stats && onUpdate && onUpdate(updateStats(stats));
             };
