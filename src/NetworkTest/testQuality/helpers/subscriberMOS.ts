@@ -124,8 +124,6 @@ export default function subscriberMOS(
   getStatsListener: StatsListener,
   callback: (state: MOSState) => void,
 ) {
-  const previousStreamStats: PreviousStreamStats = {};
-
   mosState.intervalId = window.setInterval(() => {
     subscriber.getStats(
       async (error?: OT.OTError, subscriberStats?: OT.SubscriberStats) => {
@@ -139,11 +137,12 @@ export default function subscriberMOS(
           return callback(mosState);
         }
 
-        // Push subscriber stats to MOSState statsLog array
-        subscriberStats && mosState.statsLog.push(subscriberStats);
-
         // Get publisher stats and push to MOSState statsLog array
-        const publisherStats = await getPublisherStats(publisher, previousStreamStats);
+        const publisherStats = await getPublisherStats(publisher, mosState.getLastPublisherStats());
+
+        // Push subscriber stats to MOSState statsLog array
+        subscriberStats && mosState.subscriberStatsLog.push(subscriberStats);
+        publisherStats && mosState.publisherStatsLog.push(publisherStats);
 
         // Call getStatsListener if it exists
         if (getStatsListener && typeof getStatsListener === 'function') {
@@ -151,21 +150,21 @@ export default function subscriberMOS(
         }
 
         // Calculate MOSState stats and push to appropriate logs
-        if (mosState.statsLog.length >= 2) {
+        if (mosState.subscriberStatsLog.length >= 2) {
           mosState.stats = calculateThroughput(mosState);
-          const videoScore = calculateVideoScore(subscriber, mosState.statsLog);
+          const videoScore = calculateVideoScore(subscriber, mosState.subscriberStatsLog);
           mosState.videoScoresLog.push(videoScore);
 
           const audioScore = calculateAudioScore(
             subscriber,
             publisherStats,
-            mosState.statsLog,
+            mosState.subscriberStatsLog,
           );
           mosState.audioScoresLog.push(audioScore);
           mosState.pruneScores();
 
           // Check if bitrate has reached a steady state, if yes end the test early
-          if (isBitrateSteadyState(mosState.statsLog)) {
+          if (isBitrateSteadyState(mosState.subscriberStatsLog)) {
             mosState.clearInterval();
             return callback(mosState);
           }

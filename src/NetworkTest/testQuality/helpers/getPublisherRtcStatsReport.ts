@@ -16,7 +16,7 @@ export interface PreviousStreamStats {
 
 export async function getPublisherStats(
   publisher: OT.Publisher,
-  previousStreamStats: PreviousStreamStats,
+  previousStats: OT.PublisherStats | undefined,
 ): Promise<OT.PublisherStats | null> {
 
   if (typeof publisher.getRtcStatsReport !== 'function') {
@@ -25,7 +25,7 @@ export async function getPublisherStats(
 
   try {
     const publisherStatsReport = await publisher.getRtcStatsReport();
-    return extractPublisherStats(publisherStatsReport, previousStreamStats);
+    return extractPublisherStats(publisherStatsReport, previousStats);
   } catch (error) {
     console.error(error);
     return null;
@@ -34,31 +34,30 @@ export async function getPublisherStats(
 
 const calculateBitrate = (
   stats: RTCOutboundRtpStreamStats,
-  previousStreamStats: PreviousStreamStats,
+  previousStats: OT.PublisherStats | undefined,
 ): number => {
-  const previousSsrcFrameData = previousStreamStats[stats.ssrc];
+  const previousSsrcFrameData = previousStats?.videoStats.find(stats => stats.ssrc === stats.ssrc);
   if (!previousSsrcFrameData) {
     return 0;
   }
 
-  const { timestamp: previousTimestamp, bytesSent: previousByteSent } = previousSsrcFrameData;
-  const bytesSent = stats.bytesSent - previousByteSent;
+  const { currentTimestamp: previousTimestamp, byteSent: previousByteSent } = previousSsrcFrameData;
+  const byteSent = stats.bytesSent - previousByteSent;
   const timeDiff = (stats.timestamp - previousTimestamp) / 1000; // Convert to seconds
-  return Math.round((bytesSent * 8) / (1000 * timeDiff)); // Convert to bits per second
+  return Math.round((byteSent * 8) / (1000 * timeDiff)); // Convert to bits per second
 };
 
 const extractOutboundRtpStats = (
   outboundRtpStats: RTCOutboundRtpStreamStats[],
-  previousStreamStats: PreviousStreamStats,
+  previousStats?: OT.PublisherStats,
 ) => {
   const videoStats = [];
   const audioStats = [];
 
   for (const stats of outboundRtpStats) {
-    const kbs = calculateBitrate(stats, previousStreamStats);
-    previousStreamStats[stats.ssrc] = { timestamp: stats.timestamp, bytesSent: stats.bytesSent };
-
-    const baseStats = { kbs, ssrc: stats.ssrc, byteSent: stats.bytesSent, currentTimestamp: stats.timestamp };
+    const kbs = calculateBitrate(stats, previousStats);
+    const { ssrc, bytesSent: byteSent, timestamp: currentTimestamp } = stats;
+    const baseStats = { kbs, ssrc, byteSent, currentTimestamp };
 
     if (stats.mediaType === 'video') {
       videoStats.push({
@@ -80,8 +79,8 @@ const extractOutboundRtpStats = (
 
 const extractPublisherStats = (
   publisherRtcStatsReport?: OT.PublisherRtcStatsReport,
-  previousStreamStats?: PreviousStreamStats,
-  ): OT.PublisherStats | null => {
+  previousStats?: OT.PublisherStats,
+): OT.PublisherStats | null => {
   if (!publisherRtcStatsReport) {
     return null;
   }
@@ -104,7 +103,7 @@ const extractPublisherStats = (
   const localCandidate = findCandidateById('local-candidate', iceCandidatePairStats.localCandidateId);
   const remoteCandidate = findCandidateById('remote-candidate', iceCandidatePairStats.remoteCandidateId);
 
-  const { videoStats, audioStats } = extractOutboundRtpStats(outboundRtpStats, previousStreamStats);
+  const { videoStats, audioStats } = extractOutboundRtpStats(outboundRtpStats, previousStats);
 
   const availableOutgoingBitrate = iceCandidatePairStats?.availableOutgoingBitrate || -1;
   const currentRoundTripTime = iceCandidatePairStats?.currentRoundTripTime || -1;

@@ -3,7 +3,8 @@ import { OT } from '../../types/opentok';
 import { AverageStats, Bandwidth, HasAudioVideo } from '../types/stats';
 
 export default class MOSState {
-  statsLog: OT.SubscriberStats[];
+  subscriberStatsLog: OT.SubscriberStats[];
+  publisherStatsLog: OT.PublisherStats[];
   audioScoresLog: number[];
   videoScoresLog: number[];
   stats: HasAudioVideo<AverageStats> = { audio: {}, video: {} };
@@ -12,7 +13,8 @@ export default class MOSState {
   audioOnlyFallback: boolean;
 
   constructor(audioOnly?: boolean) {
-    this.statsLog = [];
+    this.subscriberStatsLog = [];
+    this.publisherStatsLog = [];
     this.audioScoresLog = [];
     this.videoScoresLog = [];
     this.audioOnlyFallback = !!audioOnly;
@@ -21,8 +23,11 @@ export default class MOSState {
   static readonly maxLogLength: number = 1000;
   static readonly scoreInterval: number = 1000;
 
-  readonly hasAudioTrack = (): boolean => this.statsLog[0] && !!this.statsLog[0].audio;
-  readonly hasVideoTrack = (): boolean => this.statsLog[0] && !!this.statsLog[0].video;
+  readonly hasAudioTrack = (): boolean => this.subscriberStatsLog[0] && !!this.subscriberStatsLog[0].audio;
+  readonly hasVideoTrack = (): boolean => this.subscriberStatsLog[0] && !!this.subscriberStatsLog[0].video;
+
+  public getLastPublisherStats = (): OT.PublisherStats | undefined =>
+    this.publisherStatsLog[this.publisherStatsLog.length - 1] ?? undefined
 
   private audioScore(): number {
     return this.audioScoresLog.reduce((acc, score) => acc + score, 0) / this.audioScoresLog.length;

@@ -312,8 +312,7 @@ function checkSubscriberQuality(
 
             subscriberMOS(builder.state, subscriber, publisher, getStatsListener, resultsCallback);
 
-            // We add +1 to the testTimeout value in order to consider the last stats snapshot.
-            mosEstimatorTimeoutId = window.setTimeout(processResults, testTimeout + 1);
+            mosEstimatorTimeoutId = window.setTimeout(processResults, testTimeout);
 
             window.clearTimeout(stopTestTimeoutId);
             stopTestTimeoutId = window.setTimeout(() => {
@@ -321,7 +320,7 @@ function checkSubscriberQuality(
               if (stopTestCalled && stopTest) {
                 stopTest();
               }
-            }, testTimeout);
+            }, testTimeout + 1);
 
           } catch (exception) {
             reject(new e.SubscriberGetStatsError());
