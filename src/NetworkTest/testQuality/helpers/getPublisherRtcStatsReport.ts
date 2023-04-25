@@ -27,16 +27,15 @@ export async function getPublisherStats(
     const publisherStatsReport = await publisher.getRtcStatsReport();
     return extractPublisherStats(publisherStatsReport, previousStats);
   } catch (error) {
-    console.error(error);
     return null;
   }
 }
 
-const calculateBitrate = (
+const calculateAudioBitrate = (
   stats: RTCOutboundRtpStreamStats,
   previousStats: OT.PublisherStats | undefined,
 ): number => {
-  const previousSsrcFrameData = previousStats?.videoStats.find(stats => stats.ssrc === stats.ssrc);
+  const previousSsrcFrameData = previousStats?.audioStats[0];
   if (!previousSsrcFrameData) {
     return 0;
   }
@@ -44,6 +43,23 @@ const calculateBitrate = (
   const { currentTimestamp: previousTimestamp, byteSent: previousByteSent } = previousSsrcFrameData;
   const byteSent = stats.bytesSent - previousByteSent;
   const timeDiff = (stats.timestamp - previousTimestamp) / 1000; // Convert to seconds
+
+  return Math.round((byteSent * 8) / (1000 * timeDiff)); // Convert to bits per second
+};
+
+const calculateVideoBitrate = (
+  stats: RTCOutboundRtpStreamStats,
+  previousStats: OT.PublisherStats | undefined,
+): number => {
+  const previousSsrcFrameData = previousStats?.videoStats.find(videoStats => videoStats.ssrc === stats.ssrc);
+  if (!previousSsrcFrameData) {
+    return 0;
+  }
+
+  const { currentTimestamp: previousTimestamp, byteSent: previousByteSent } = previousSsrcFrameData;
+  const byteSent = stats.bytesSent - previousByteSent;
+  const timeDiff = (stats.timestamp - previousTimestamp) / 1000; // Convert to seconds
+
   return Math.round((byteSent * 8) / (1000 * timeDiff)); // Convert to bits per second
 };
 
@@ -53,13 +69,11 @@ const extractOutboundRtpStats = (
 ) => {
   const videoStats = [];
   const audioStats = [];
-
   for (const stats of outboundRtpStats) {
-    const kbs = calculateBitrate(stats, previousStats);
-    const { ssrc, bytesSent: byteSent, timestamp: currentTimestamp } = stats;
-    const baseStats = { kbs, ssrc, byteSent, currentTimestamp };
-
     if (stats.mediaType === 'video') {
+      const kbs = calculateVideoBitrate(stats, previousStats);
+      const { ssrc, bytesSent: byteSent, timestamp: currentTimestamp } = stats;
+      const baseStats = { kbs, ssrc, byteSent, currentTimestamp };
       videoStats.push({
         ...baseStats,
         qualityLimitationReason: stats.qualityLimitationReason || 'N/A',
@@ -70,6 +84,9 @@ const extractOutboundRtpStats = (
         nackCount: stats.nackCount || 0,
       });
     } else if (stats.mediaType === 'audio') {
+      const kbs = calculateAudioBitrate(stats, previousStats);
+      const { ssrc, bytesSent: byteSent, timestamp: currentTimestamp } = stats;
+      const baseStats = { kbs, ssrc, byteSent, currentTimestamp };
       audioStats.push(baseStats);
     }
   }
@@ -110,6 +127,16 @@ const extractPublisherStats = (
   const videoSentKbs = videoStats.reduce((sum, stats) => sum + stats.kbs, 0);
   const simulcastEnabled = videoStats.length > 1;
   const transportProtocol = localCandidate?.protocol || 'N/A';
+
+  /**
+  console.trace("videoStats: ", videoStats);
+  console.trace("audioStats: ", audioStats);
+  console.trace("availableOutgoingBitrate: ", availableOutgoingBitrate);
+  console.trace("currentRoundTripTime: ", currentRoundTripTime);
+  console.trace("videoSentKbs: ", videoSentKbs);
+  console.trace("simulcastEnabled: ", simulcastEnabled);
+  console.trace("transportProtocol: ", transportProtocol);
+  */
 
   return {
     videoStats,

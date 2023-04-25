@@ -230,7 +230,7 @@ function cleanSubscriber(session: OT.Session, subscriber: OT.Subscriber) {
  * Clean publisher objects before disconnecting from the session
  * @param publisher
  */
-function cleanPublisher(publisher: OT.Publisher) {
+function cleanPublisher(session: OT.Session, publisher: OT.Publisher) {
   return new Promise((resolve, reject) => {
     publisher.on('destroyed', () => {
       resolve();
@@ -238,7 +238,7 @@ function cleanPublisher(publisher: OT.Publisher) {
     if (!publisher) {
       resolve();
     }
-    publisher.destroy();
+    session.unpublish(publisher);
   });
 }
 
@@ -269,10 +269,8 @@ function checkSubscriberQuality(
             const getStatsListener = (
               error?: OT.OTError,
               stats?: OT.SubscriberStats,
-              rtcStats?: OT.PublisherStats,
             ) => {
               const updateStats = (subscriberStats: OT.SubscriberStats): UpdateCallbackStats => ({
-                rtcStats,
                 ...subscriberStats,
                 phase: audioOnly ? 'audio-only' : 'audio-video',
               });
@@ -296,12 +294,13 @@ function checkSubscriberQuality(
                   session.off();
                 });
                 cleanSubscriber(session, subscriber)
-                  .then(() => cleanPublisher(publisher))
+                  .then(() => cleanPublisher(session, publisher))
                   .then(() => session.disconnect());
               }
             };
 
             stopTest = () => {
+              clearTimeout(mosEstimatorTimeoutId);
               processResults();
             };
 
@@ -320,7 +319,7 @@ function checkSubscriberQuality(
               if (stopTestCalled && stopTest) {
                 stopTest();
               }
-            }, testTimeout + 1);
+            }, 5000);
 
           } catch (exception) {
             reject(new e.SubscriberGetStatsError());

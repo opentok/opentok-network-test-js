@@ -4,12 +4,11 @@ import MOSState from './MOSState';
 import { OT } from '../../types/opentok';
 import { AV } from '../types/stats';
 import { getOr, last, nth } from '../../util';
-import { getPublisherStats, PreviousStreamStats }  from '../helpers/getPublisherRtcStatsReport';
+import { getPublisherStats }  from '../helpers/getPublisherRtcStatsReport';
 
 export type StatsListener = (
   error?: OT.OTError,
   stats?: OT.SubscriberStats,
-  publisherStats?: OT.PublisherStats,
 ) => void;
 
 const getPacketsLost = (ts: OT.TrackStats): number => getOr(0, 'packetsLost', ts);
@@ -22,7 +21,7 @@ const calculateBitRate = (type: AV, current: OT.SubscriberStats, last: OT.Subscr
   return current[type] && current[type].bytesReceived ?
     (8 * (current[type].bytesReceived - last[type].bytesReceived)) / (interval / 1000) : 0;
 };
-const MS_PER_SEC = 1000;
+const MS_PER_SEC = 10000;
 const DEFAULT_DELAY = 150; // expressed in ms
 
 function calculateVideoScore(subscriber: OT.Subscriber, stats: OT.SubscriberStats[]): number {
@@ -146,7 +145,7 @@ export default function subscriberMOS(
 
         // Call getStatsListener if it exists
         if (getStatsListener && typeof getStatsListener === 'function') {
-          getStatsListener(error, subscriberStats, publisherStats);
+          getStatsListener(error, subscriberStats);
         }
 
         // Calculate MOSState stats and push to appropriate logs
