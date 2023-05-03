@@ -144,7 +144,7 @@ export function graphIntermediateStats(mediaType, stats) {
   if (!charts[mediaType]) {
     charts[mediaType] = createChart(mediaType);
   }
-  const bitsReceived = mediaStats && mediaStats.bytesReceived ? mediaStats.bytesReceived * 8 : 0;
+  const bitsReceived = mediaStats && mediaStats.bytesSent ? mediaStats.bytesSent * 8 : 0;
   resultCount[mediaType]++;
   charts[mediaType].series[0].addPoint({
     x: resultCount[mediaType],

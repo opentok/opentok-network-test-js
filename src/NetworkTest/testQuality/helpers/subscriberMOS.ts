@@ -8,7 +8,8 @@ import { getPublisherStats }  from '../helpers/getPublisherRtcStatsReport';
 
 export type StatsListener = (
   error?: OT.OTError,
-  stats?: OT.SubscriberStats,
+  subStats?: OT.SubscriberStats,
+  pubStats?: OT.PublisherStats,
 ) => void;
 
 const getPacketsLost = (ts: OT.TrackStats): number => getOr(0, 'packetsLost', ts);
@@ -145,11 +146,11 @@ export default function subscriberMOS(
 
         // Call getStatsListener if it exists
         if (getStatsListener && typeof getStatsListener === 'function') {
-          getStatsListener(error, subscriberStats);
+          getStatsListener(error, subscriberStats, publisherStats);
         }
 
         // Calculate MOSState stats and push to appropriate logs
-        if (mosState.subscriberStatsLog.length >= 2) {
+        if (mosState.publisherStatsLog.length && mosState.publisherStatsLog.length >= 2) {
           mosState.stats = calculateThroughput(mosState);
           const videoScore = calculateVideoScore(subscriber, mosState.subscriberStatsLog);
           mosState.videoScoresLog.push(videoScore);
@@ -163,7 +164,7 @@ export default function subscriberMOS(
           mosState.pruneScores();
 
           // Check if bitrate has reached a steady state, if yes end the test early
-          if (isBitrateSteadyState(mosState.subscriberStatsLog)) {
+          if (isBitrateSteadyState(mosState.publisherStatsLog)) {
             mosState.clearInterval();
             return callback(mosState);
           }

@@ -1,18 +1,30 @@
 import getLatestSampleWindow from './getLatestSampleWindow';
 import calculateQualityStats from './calculateQualityStats';
 import getVideoQualityEvaluation from './getVideoQualityEvaluation';
-import { AV, AverageStats, AverageStatsBase, HasAudioVideo, QualityStats } from '../types/stats';
+import { AV, AverageStats, AverageStatsBase, HasAudioVideo, SubscriberQualityStats } from '../types/stats';
 import config from './config';
 import MOSState from './MOSState';
+import { PublisherStats } from '../../types/opentok/publisher';
 import { getOr } from '../../util';
 
-function getAverageBitrateAndPlr(type: AV, statsList: QualityStats[]): AverageStats {
+function getAverageBitrateAndPlr(type: AV,
+                                 subscriberStatsList: SubscriberQualityStats[],
+                                 publisherStatsList: PublisherStats[]): AverageStats {
+
   let sumBps = 0;
   let sumPlr = 0;
   let sumFrameRate = 0;
 
-  statsList.forEach((stat) => {
-    sumBps += stat.averageBitrate;
+  publisherStatsList.forEach((stat) => {
+    sumPlr += 0;
+    if (type === 'video') {
+      sumBps += stat.videoKbsSent * 1000;
+    } else {
+      sumBps += stat.audioStats[0].kbs * 1000;
+    }
+  });
+
+  subscriberStatsList.forEach((stat) => {
     sumPlr += stat.packetLossRatio;
     if (type === 'video') {
       sumFrameRate += Number(getOr(0, 'frameRate', stat));
@@ -20,19 +32,20 @@ function getAverageBitrateAndPlr(type: AV, statsList: QualityStats[]): AverageSt
   });
 
   const averageStats: AverageStatsBase = {
-    bitrate: sumBps / statsList.length,
-    packetLossRatio: sumPlr / statsList.length,
+    availableOutgoingBitrate: publisherStatsList[publisherStatsList.length - 1].availableOutgoingBitrate,
+    bitrate: sumBps / publisherStatsList.length,
+    packetLossRatio: sumPlr / subscriberStatsList.length,
   };
 
   if (type === 'video') {
     const { supported, reason, recommendedResolution, recommendedFrameRate } =
-    getVideoQualityEvaluation(averageStats);
+      getVideoQualityEvaluation(averageStats);
 
     const videoStats =
       type === 'video' ? {
         recommendedResolution,
         recommendedFrameRate,
-        frameRate: sumFrameRate / statsList.length,
+        frameRate: sumFrameRate / subscriberStatsList.length,
       } : {};
     return { ...averageStats, supported, reason, ...videoStats };
   }
@@ -41,8 +54,8 @@ function getAverageBitrateAndPlr(type: AV, statsList: QualityStats[]): AverageSt
 
 export default function calculateThroughput(state: MOSState): HasAudioVideo<AverageStats> {
 
-  const sampleWindow = getLatestSampleWindow(state.subscriberStatsLog);
-  const qualityStats = calculateQualityStats(sampleWindow);
+  const sampleWindow = getLatestSampleWindow(state.publisherStatsLog);
+  const subscriberQualityStats = calculateQualityStats(state.subscriberStatsLog);
 
   const averageAudioStats = () => {
     if (!state.hasAudioTrack()) {
@@ -51,7 +64,7 @@ export default function calculateThroughput(state: MOSState): HasAudioVideo<Aver
         reason: config.strings.noMic,
       };
     }
-    return getAverageBitrateAndPlr('audio', qualityStats.audio);
+    return getAverageBitrateAndPlr('audio', subscriberQualityStats.audio, sampleWindow);
   };
 
   const averageVideoStats = () => {
@@ -67,7 +80,7 @@ export default function calculateThroughput(state: MOSState): HasAudioVideo<Aver
         reason: config.strings.noCam,
       };
     }
-    return getAverageBitrateAndPlr('video', qualityStats.video);
+    return getAverageBitrateAndPlr('video', subscriberQualityStats.video, sampleWindow);
   };
 
   return {

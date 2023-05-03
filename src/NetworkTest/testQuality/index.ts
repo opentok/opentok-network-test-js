@@ -26,6 +26,7 @@ import subscriberMOS from './helpers/subscriberMOS';
 import MOSState from './helpers/MOSState';
 import config from './helpers/config';
 import isSupportedBrowser from './helpers/isSupportedBrowser';
+import getUpdateCallbackStats from './helpers/getUpdateCallbackStats';
 
 interface QualityTestResultsBuilder {
   state: MOSState;
@@ -118,6 +119,7 @@ function publishAndSubscribe(OT: OT.Client, options?: NetworkTestOptions) {
       containerDiv.style.height = '1px';
       containerDiv.style.opacity = '0';
       document.body.appendChild(containerDiv);
+
       validateDevices(OT)
         .then((availableDevices: AvailableDevices) => {
           if (!Object.keys(availableDevices.video).length) {
@@ -161,7 +163,7 @@ function publishAndSubscribe(OT: OT.Client, options?: NetworkTestOptions) {
             const subscriber =
               session.subscribe(event.stream,
                 containerDiv,
-                { testNetwork: true, insertMode: 'append' },
+                { testNetwork: true, insertMode: 'append', subscribeToAudio: true, subscribeToVideo: true },
                 (subscribeError?: OT.OTError) => {
                   return subscribeError ?
                     reject(new e.SubscribeToSessionError(subscribeError.message)) :
@@ -247,7 +249,7 @@ function checkSubscriberQuality(
   session: OT.Session,
   credentials: OT.SessionCredentials,
   options?: NetworkTestOptions,
-  onUpdate?: UpdateCallback<OT.SubscriberStats>,
+  onUpdate?: UpdateCallback<UpdateCallbackStats>,
   audioOnlyFallback?: boolean,
 ): Promise<QualityTestResults> {
 
@@ -268,13 +270,13 @@ function checkSubscriberQuality(
 
             const getStatsListener = (
               error?: OT.OTError,
-              stats?: OT.SubscriberStats,
+              subscriberStats?: OT.SubscriberStats,
+              publisherStats?: OT.PublisherStats,
             ) => {
-              const updateStats = (subscriberStats: OT.SubscriberStats): UpdateCallbackStats => ({
-                ...subscriberStats,
-                phase: audioOnly ? 'audio-only' : 'audio-video',
-              });
-              stats && onUpdate && onUpdate(updateStats(stats));
+              if (subscriberStats && publisherStats && onUpdate) {
+                const updateStats = getUpdateCallbackStats(subscriberStats, publisherStats, audioOnly ? 'audio-only' : 'audio-video');
+                onUpdate(updateStats);
+              }
             };
 
             const processResults = () => {

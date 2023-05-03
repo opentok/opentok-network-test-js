@@ -33,10 +33,12 @@ export interface PublisherStats {
   videoStats: VideoStats[];
   audioStats: AudioStats[];
   availableOutgoingBitrate: number;
-  videoSentKbs: number;
+  videoByteSent:number;
+  videoKbsSent: number;
   simulcastEnabled: boolean;
   transportProtocol: string;
   currentRoundTripTime: number;
+  timestamp: number;
 }
 
 export interface PublisherStatContainer {

@@ -1,6 +1,6 @@
 
 export interface AudioThreshold { minMos: number; }
-export interface VideoThreshold { bps: number; plr: number; recommendedSetting: string; }
+export interface VideoThreshold { bps: number; recommendedSetting: string; }
 
 export type QualityTestConfig = {
   getStatsInterval: number,
@@ -38,34 +38,28 @@ const config: QualityTestConfig = {
   qualityThresholds: {
     video: [
       {
-        bps: 1000000,
-        plr: 0.005,
+        bps: 4000000,
+        recommendedSetting: '1920x1080 @ 30FPS',
+      },
+      {
+        bps: 2500000,
         recommendedSetting: '1280x720 @ 30FPS',
       },
       {
-        bps: 600000,
-        plr: 0.005,
-        recommendedSetting: '640x480 @ 30FPS',
+        bps: 1200000,
+        recommendedSetting: '960x540 @ 30FPS',
+      },
+      {
+        bps: 500000,
+        recommendedSetting: '640x360 @ 30FPS',
       },
       {
         bps: 300000,
-        plr: 0.005,
-        recommendedSetting: '320x240 @ 30FPS',
-      },
-      {
-        bps: 350000,
-        plr: 0.03,
-        recommendedSetting: '1280x720 @ 30FPS',
-      },
-      {
-        bps: 250000,
-        plr: 0.03,
-        recommendedSetting: '640x480 @ 30FPS',
+        recommendedSetting: '480x270 @ 30FPS',
       },
       {
         bps: 150000,
-        plr: 0.03,
-        recommendedSetting: '320x240 @ 30FPS',
+        recommendedSetting: '320x180 @ 30FPS',
       },
     ],
     audio: [

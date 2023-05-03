@@ -60,7 +60,7 @@ const calculateVideoBitrate = (
   const byteSent = stats.bytesSent - previousByteSent;
   const timeDiff = (stats.timestamp - previousTimestamp) / 1000; // Convert to seconds
 
-  return Math.round((byteSent * 8) / (1000 * timeDiff)); // Convert to bits per second
+  return Math.round((byteSent * 8) / (1000 * timeDiff)); // Convert to kbit per second
 };
 
 const extractOutboundRtpStats = (
@@ -124,9 +124,11 @@ const extractPublisherStats = (
 
   const availableOutgoingBitrate = iceCandidatePairStats?.availableOutgoingBitrate || -1;
   const currentRoundTripTime = iceCandidatePairStats?.currentRoundTripTime || -1;
-  const videoSentKbs = videoStats.reduce((sum, stats) => sum + stats.kbs, 0);
+  const videoKbsSent = videoStats.reduce((sum, stats) => sum + stats.kbs, 0);
+  const videoByteSent = videoStats.reduce((sum, stats) => sum + stats.byteSent, 0);
   const simulcastEnabled = videoStats.length > 1;
   const transportProtocol = localCandidate?.protocol || 'N/A';
+  const timestamp = localCandidate?.timestamp || 0;
 
   /**
   console.trace("videoStats: ", videoStats);
@@ -136,15 +138,19 @@ const extractPublisherStats = (
   console.trace("videoSentKbs: ", videoSentKbs);
   console.trace("simulcastEnabled: ", simulcastEnabled);
   console.trace("transportProtocol: ", transportProtocol);
-  */
+  console.info("availableOutgoingBitrate: ", availableOutgoingBitrate);
+  console.info("videoByteSent: ", videoByteSent);
+  **/
 
   return {
     videoStats,
     audioStats,
     availableOutgoingBitrate,
-    videoSentKbs,
+    videoByteSent,
+    videoKbsSent,
     simulcastEnabled,
     transportProtocol,
     currentRoundTripTime,
+    timestamp,
   };
 };
