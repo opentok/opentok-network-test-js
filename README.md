@@ -140,9 +140,11 @@ See the /sample subdirectory (and the /sample/README.md file) for a sample app.
 The `OTNetworkTest.testConnectivity()` method is supported in Chrome, Firefox, Safari,
 Opera, and Edge.
 
-The `OTNetworkTest.testQuality()` method is supported in Chrome, Firefox, Safari,
+The `OTNetworkTest.testQuality()` method is supported in Chrome, Safari,
 Opera, and Chromium-based versions of Edge (versions 79+).
 It is not supported in non-Chromium-based versions of Edge.
+
+Update: **Firefox** has been removed from the list of supported browsers for the testQuality feature since version **2.6.0** due to missing some important statistics. This could lead to inaccurate results.
 
 ## API reference
 
@@ -386,7 +388,6 @@ video in the test stream. The object has the following data:
     packetsLost: 0   // The total number of video packets lost, cumulative
   },
   timestamp: 1512679143897, // The timestamp of the sample
-  availableOutgoingBitrate: 434349 // Maximum amount of bit that can be sent per second from the publisher
   phase: 'audio-video' // Either 'audio-video' or 'audio-only'
 }
 ```
@@ -394,9 +395,6 @@ video in the test stream. The object has the following data:
 The `phase` property is set to 'audio-video' during the initial audio-video test. If a
 secondary audio-only test is required (because audio quality was not acceptable during the
 audio-video test), the property is set to 'audio-only'.
-
-The `availableOutgoingBitrate` is calculated dynamically based on the current network conditions and the resources available on the sender's device. The sender can use this value to adjust the quality of the media stream, such as the resolution, frame rate, and bitrate of the video stream, to ensure that the receiver can receive the media with the best possible quality, while still maintaining a smooth and uninterrupted transmission.
-By continuously monitoring the AvailableOutgoingBitrate and adapting to changing network conditions, WebRTC ensures that the audio and video streams are transmitted with the highest quality possible, while avoiding buffering, delays, or interruptions.
 
 Pass in a `null` value if you do not want to register an `updateCallback` function.
 

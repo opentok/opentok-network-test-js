@@ -144,15 +144,15 @@ export function graphIntermediateStats(mediaType, stats) {
   if (!charts[mediaType]) {
     charts[mediaType] = createChart(mediaType);
   }
-  const bitsReceived = mediaStats && mediaStats.bytesSent ? mediaStats.bytesSent * 8 : 0;
+  const bitsSent = mediaStats && mediaStats.bytesSent ? mediaStats.bytesSent * 8 : 0;
   resultCount[mediaType]++;
   charts[mediaType].series[0].addPoint({
     x: resultCount[mediaType],
-    y: bitsReceived - prevBitsReceived[mediaType]
+    y: bitsSent - prevBitsReceived[mediaType]
   }, true, false);
   const chartTitle = (stats.phase === 'audio-only') && (mediaType === 'video') ?
    'Testing audio-only stream' :
    'Bitrate over ' + resultCount[mediaType] + 'sec';
   charts[mediaType].setTitle(null, { text: chartTitle});
-  prevBitsReceived[mediaType] = bitsReceived;
+  prevBitsReceived[mediaType] = bitsSent;
 }

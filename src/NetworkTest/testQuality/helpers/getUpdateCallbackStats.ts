@@ -23,7 +23,6 @@ const getUpdateCallbackStats = (subscriberStats: OT.SubscriberStats, publisherSt
     phase,
     audio: audioCallbackStats,
     video: videoCallbackStats,
-    availableOugoingBitrate: publisherStats.availableOutgoingBitrate,
     timestamp: subscriberStats.timestamp,
   };
 };
