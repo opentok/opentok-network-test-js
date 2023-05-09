@@ -9,8 +9,6 @@
     "sourceMap": true,                        /* Generates corresponding '.map' file. */
     "outDir": "../",                       /* Redirect output structure to the directory. */
     "rootDir": "src",                       /* Specify the root directory of input files. Use to control the output directory structure with --outDir. */
-    /* Strict Type-Checking Options */
-    "strict": false,                            /* Enable all strict type-checking options. */
     /* Module Resolution Options */
     "types": [
       "node"
