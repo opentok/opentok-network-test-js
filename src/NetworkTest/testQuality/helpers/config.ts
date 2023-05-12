@@ -13,6 +13,7 @@ export type QualityTestConfig = {
   minimumVideoAndAudioTestSampleSize: number,
   steadyStateSampleWindow: number, // this is also used to calculate bandwidth
   steadyStateAllowedDelta: number,
+  thresholdRatio: number,
   qualityThresholds: {
     audio: AudioThreshold[],
     video: VideoThreshold[],
@@ -35,6 +36,7 @@ const config: QualityTestConfig = {
   minimumVideoAndAudioTestSampleSize: 5,
   steadyStateSampleWindow: 5000, // this is also used to calculate bandwidth
   steadyStateAllowedDelta: 0.05, // 1 = 100%, from point to point
+  thresholdRatio: 0.75,
   qualityThresholds: {
     video: [
       {
