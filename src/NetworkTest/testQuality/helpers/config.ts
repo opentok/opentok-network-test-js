@@ -1,6 +1,6 @@
 
 export interface AudioThreshold { minMos: number; }
-export interface VideoThreshold { bps: number; recommendedSetting: string; }
+export interface VideoThreshold { targetBitrate: number; targetBitrateSimulcast: number; recommendedSetting: string; }
 
 export type QualityTestConfig = {
   getStatsInterval: number,
@@ -38,27 +38,33 @@ const config: QualityTestConfig = {
   qualityThresholds: {
     video: [
       {
-        bps: 4000000,
+        targetBitrate: 4000000,
+        targetBitrateSimulcast: 5550000,
         recommendedSetting: '1920x1080 @ 30FPS',
       },
       {
-        bps: 2500000,
+        targetBitrate: 2500000,
+        targetBitrateSimulcast: 3150000,
         recommendedSetting: '1280x720 @ 30FPS',
       },
       {
-        bps: 1200000,
+        targetBitrate: 1200000,
+        targetBitrateSimulcast: 1550000,
         recommendedSetting: '960x540 @ 30FPS',
       },
       {
-        bps: 500000,
+        targetBitrate: 500000,
+        targetBitrateSimulcast: 650000,
         recommendedSetting: '640x360 @ 30FPS',
       },
       {
-        bps: 300000,
+        targetBitrate: 300000,
+        targetBitrateSimulcast: 350000,
         recommendedSetting: '480x270 @ 30FPS',
       },
       {
-        bps: 150000,
+        targetBitrate: 150000,
+        targetBitrateSimulcast: 150000,
         recommendedSetting: '320x180 @ 30FPS',
       },
     ],
@@ -68,6 +74,7 @@ const config: QualityTestConfig = {
       },
     ],
   },
+
   strings: {
     bandwidthLow: 'Bandwidth too low.',
     noCam: 'No camera was found.',

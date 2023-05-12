@@ -31,8 +31,13 @@ function getAverageBitrateAndPlr(type: AV,
     }
   });
 
+  const isSimulcastEnabled = publisherStatsList.some(
+    publisherStats => publisherStats.simulcastEnabled,
+  );
+
   const averageStats: AverageStatsBase = {
     availableOutgoingBitrate: publisherStatsList[publisherStatsList.length - 1].availableOutgoingBitrate,
+    simulcast: isSimulcastEnabled,
     bitrate: sumBps / publisherStatsList.length,
     packetLossRatio: sumPlr / subscriberStatsList.length,
   };

@@ -20,7 +20,8 @@ export default function getVideoQualityEvaluationt(stats: AverageStatsBase): Qua
 
   for (let i = 0; i < thresholds.length; i += 1) {
     const threshold = thresholds[i];
-    if (bitrate >= threshold.bps) {
+    const targetBitrate = stats.simulcast ? threshold.targetBitrateSimulcast : threshold.targetBitrate;
+    if (bitrate >= targetBitrate) {
       supported = true;
       recommendedSetting = get('recommendedSetting', threshold);
       // recommendedSetting is of the form '640x480 @ 30FPS'

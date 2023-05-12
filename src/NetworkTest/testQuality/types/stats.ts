@@ -34,6 +34,7 @@ export interface AverageStats {
 }
 
 export interface AverageStatsBase {
+  simulcast : boolean;
   availableOutgoingBitrate: number;
   bitrate: number;
   packetLossRatio: number;
