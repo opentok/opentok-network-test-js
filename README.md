@@ -142,7 +142,7 @@ Opera, and Edge.
 
 The `OTNetworkTest.testQuality()` method is supported in Chrome, Safari,
 Opera, and Chromium-based versions of Edge (versions 79+).
-It is not supported in non-Chromium-based versions of Edge.
+It is *not* supported in Firefox and non-Chromium-based versions of Edge.
 
 Update: **Firefox** has been removed from the list of supported browsers for the testQuality feature since version **2.6.0** due to missing some important statistics. This could lead to inaccurate results.
 
