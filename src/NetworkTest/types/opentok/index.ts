@@ -1,4 +1,3 @@
-
 import * as OTSession from './session';
 import * as OTStream from './stream';
 import * as OTConnection from './connection';
@@ -102,7 +101,6 @@ export namespace OT {
   export type SubscriberProperties = OTSubscriber.SubscriberProperties;
   export type TrackStats = OTSubscriber.TrackStats;
   export type OTError = OTError.OTError;
-  export type PublisherRtcStatsReportArr = OTPublisher.PublisherRtcStatsReportArr;
+  export type PublisherStats = OTPublisher.PublisherStats;
   export type PublisherRtcStatsReport = OTPublisher.PublisherRtcStatsReport;
-  export type RTCStatsReport = OTPublisher.RTCStatsReport;
 }

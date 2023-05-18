@@ -140,9 +140,11 @@ See the /sample subdirectory (and the /sample/README.md file) for a sample app.
 The `OTNetworkTest.testConnectivity()` method is supported in Chrome, Firefox, Safari,
 Opera, and Edge.
 
-The `OTNetworkTest.testQuality()` method is supported in Chrome, Firefox, Safari,
+The `OTNetworkTest.testQuality()` method is supported in Chrome, Safari,
 Opera, and Chromium-based versions of Edge (versions 79+).
-It is not supported in non-Chromium-based versions of Edge.
+It is *not* supported in Firefox and non-Chromium-based versions of Edge.
+
+Update: **Firefox** has been removed from the list of supported browsers for the testQuality feature since version **2.6.0** due to missing some important statistics. This could lead to inaccurate results.
 
 ## API reference
 
@@ -372,6 +374,7 @@ video in the test stream. The object has the following data:
 {
   audio: {
     timestamp: 1509747314,
+    bytesSent:534349,// The total number of video bytes received, cumulative
     bytesReceived: 434349, // The total number of audio bytes received, cumulative
     packetsReceived: 24234,  // The total number of audio packets received, cumulative
     packetsLost: 0   // The total number of audio packets lost, cumulative
@@ -379,6 +382,7 @@ video in the test stream. The object has the following data:
   video: {
     timestamp: 1509747314,
     bytesReceived: 434349, // The total number of video bytes received, cumulative
+    bytesSent:434349, // The total number of video bytes sent
     frameRate: 15,   // The video frame rate
     packetsReceived: 24234,  // The total number of video packets received, cumulative
     packetsLost: 0   // The total number of video packets lost, cumulative
@@ -393,6 +397,8 @@ secondary audio-only test is required (because audio quality was not acceptable 
 audio-video test), the property is set to 'audio-only'.
 
 Pass in a `null` value if you do not want to register an `updateCallback` function.
+
+Update: We advise using 'bytesSent' to provide a more accurate result, especially if scalable video is enabled for the API key
 
 #### Promise returned
 

@@ -9,7 +9,14 @@ export interface Kbps { kbps: number; }
 export interface KbpsMap extends HasAudioVideo<Kbps[]> { }
 export interface Bandwidth extends HasAudioVideo<number> { }
 
+export interface SubscriberQualityStats {
+  averageBitrate: number;
+  packetLossRatio: number;
+  frameRate?: number;
+}
+
 export interface QualityStats {
+  averageAvailableOutgoingBitrate: number;
   averageBitrate: number;
   packetLossRatio: number;
   frameRate?: number;
@@ -27,6 +34,8 @@ export interface AverageStats {
 }
 
 export interface AverageStatsBase {
+  simulcast : boolean;
+  availableOutgoingBitrate: number;
   bitrate: number;
   packetLossRatio: number;
 }
