@@ -22,7 +22,9 @@ export const assocPath = (path: string, value: any, obj: Object): Object => {
   }
 
   const valForKey = get(key, obj);
-  const base: Object = (!!valForKey && typeof valForKey === 'object') ? valForKey : { ...obj, [key]: {} };
+  const base: Object = (!!valForKey && typeof valForKey === 'object')
+  ? valForKey
+  : (!!valForKey ? { ...obj, [key]: {} } : obj);
   const update = assoc(key, assocPath(keys.slice(1).join('.'), value, get(key, base)), obj);
   return { ...obj, ...update };
 

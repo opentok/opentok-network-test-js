@@ -9,10 +9,11 @@ export interface QualityEvaluationResults{
   reason?: string;
 }
 
-export default function getVideoQualityEvaluation(stats: AverageStatsBase): QualityEvaluationResults {
+export default function getVideoQualityEvaluationt(stats: AverageStatsBase): QualityEvaluationResults {
   const thresholds = config.qualityThresholds.video;
-  const bitrate = stats.bitrate;
-  const packetLoss = stats.packetLossRatio;
+  const thresholdRatio = config.thresholdRatio;
+  const bitrate = stats.availableOutgoingBitrate;
+
   let supported = false;
   let recommendedFrameRate : number = 30;
   let recommendedResolution : string = '';
@@ -20,7 +21,8 @@ export default function getVideoQualityEvaluation(stats: AverageStatsBase): Qual
 
   for (let i = 0; i < thresholds.length; i += 1) {
     const threshold = thresholds[i];
-    if (bitrate >= threshold.bps && packetLoss <= threshold.plr) {
+    const targetBitrate = stats.simulcast ? threshold.targetBitrateSimulcast : threshold.targetBitrate;
+    if (bitrate >= targetBitrate * thresholdRatio) {
       supported = true;
       recommendedSetting = get('recommendedSetting', threshold);
       // recommendedSetting is of the form '640x480 @ 30FPS'

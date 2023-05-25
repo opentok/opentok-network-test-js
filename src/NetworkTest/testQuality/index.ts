@@ -26,6 +26,7 @@ import subscriberMOS from './helpers/subscriberMOS';
 import MOSState from './helpers/MOSState';
 import config from './helpers/config';
 import isSupportedBrowser from './helpers/isSupportedBrowser';
+import getUpdateCallbackStats from './helpers/getUpdateCallbackStats';
 
 interface QualityTestResultsBuilder {
   state: MOSState;
@@ -118,6 +119,7 @@ function publishAndSubscribe(OT: OT.Client, options?: NetworkTestOptions) {
       containerDiv.style.height = '1px';
       containerDiv.style.opacity = '0';
       document.body.appendChild(containerDiv);
+
       validateDevices(OT)
         .then((availableDevices: AvailableDevices) => {
           if (!Object.keys(availableDevices.video).length) {
@@ -161,7 +163,7 @@ function publishAndSubscribe(OT: OT.Client, options?: NetworkTestOptions) {
             const subscriber =
               session.subscribe(event.stream,
                 containerDiv,
-                { testNetwork: true, insertMode: 'append' },
+                { testNetwork: true, insertMode: 'append', subscribeToAudio: true, subscribeToVideo: true },
                 (subscribeError?: OT.OTError) => {
                   return subscribeError ?
                     reject(new e.SubscribeToSessionError(subscribeError.message)) :
@@ -230,7 +232,7 @@ function cleanSubscriber(session: OT.Session, subscriber: OT.Subscriber) {
  * Clean publisher objects before disconnecting from the session
  * @param publisher
  */
-function cleanPublisher(publisher: OT.Publisher) {
+function cleanPublisher(session: OT.Session, publisher: OT.Publisher) {
   return new Promise((resolve, reject) => {
     publisher.on('destroyed', () => {
       resolve();
@@ -238,7 +240,7 @@ function cleanPublisher(publisher: OT.Publisher) {
     if (!publisher) {
       resolve();
     }
-    publisher.destroy();
+    session.unpublish(publisher);
   });
 }
 
@@ -247,7 +249,7 @@ function checkSubscriberQuality(
   session: OT.Session,
   credentials: OT.SessionCredentials,
   options?: NetworkTestOptions,
-  onUpdate?: UpdateCallback<OT.SubscriberStats>,
+  onUpdate?: UpdateCallback<UpdateCallbackStats>,
   audioOnlyFallback?: boolean,
 ): Promise<QualityTestResults> {
 
@@ -266,12 +268,15 @@ function checkSubscriberQuality(
               ... { credentials },
             };
 
-            const getStatsListener = (error?: OT.OTError, stats?: OT.SubscriberStats) => {
-              const updateStats = (subscriberStats: OT.SubscriberStats): UpdateCallbackStats => ({
-                ...subscriberStats,
-                phase: audioOnly ? 'audio-only' : 'audio-video',
-              });
-              stats && onUpdate && onUpdate(updateStats(stats));
+            const getStatsListener = (
+              error?: OT.OTError,
+              subscriberStats?: OT.SubscriberStats,
+              publisherStats?: OT.PublisherStats,
+            ) => {
+              if (subscriberStats && publisherStats && onUpdate) {
+                const updateStats = getUpdateCallbackStats(subscriberStats, publisherStats, audioOnly ? 'audio-only' : 'audio-video');
+                onUpdate(updateStats);
+              }
             };
 
             const processResults = () => {
@@ -291,12 +296,13 @@ function checkSubscriberQuality(
                   session.off();
                 });
                 cleanSubscriber(session, subscriber)
-                  .then(() => cleanPublisher(publisher))
+                  .then(() => cleanPublisher(session, publisher))
                   .then(() => session.disconnect());
               }
             };
 
             stopTest = () => {
+              clearTimeout(mosEstimatorTimeoutId);
               processResults();
             };
 
@@ -307,8 +313,7 @@ function checkSubscriberQuality(
 
             subscriberMOS(builder.state, subscriber, publisher, getStatsListener, resultsCallback);
 
-            // We add +1 to the testTimeout value in order to consider the last stats snapshot.
-            mosEstimatorTimeoutId = window.setTimeout(processResults, testTimeout + 1);
+            mosEstimatorTimeoutId = window.setTimeout(processResults, testTimeout);
 
             window.clearTimeout(stopTestTimeoutId);
             stopTestTimeoutId = window.setTimeout(() => {
@@ -350,7 +355,6 @@ export function testQuality(
   stopTestTimeoutCompleted = false;
   stopTestCalled = false;
   return new Promise((resolve, reject) => {
-
     audioOnly = !!(options && options.audioOnly);
     testTimeout = audioOnly ? config.getStatsAudioOnlyDuration :
       config.getStatsVideoAndAudioTestDuration;

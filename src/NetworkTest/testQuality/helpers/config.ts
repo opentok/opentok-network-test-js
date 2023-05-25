@@ -1,6 +1,6 @@
 
 export interface AudioThreshold { minMos: number; }
-export interface VideoThreshold { bps: number; plr: number; recommendedSetting: string; }
+export interface VideoThreshold { targetBitrate: number; targetBitrateSimulcast: number; recommendedSetting: string; }
 
 export type QualityTestConfig = {
   getStatsInterval: number,
@@ -13,6 +13,7 @@ export type QualityTestConfig = {
   minimumVideoAndAudioTestSampleSize: number,
   steadyStateSampleWindow: number, // this is also used to calculate bandwidth
   steadyStateAllowedDelta: number,
+  thresholdRatio: number,
   qualityThresholds: {
     audio: AudioThreshold[],
     video: VideoThreshold[],
@@ -35,37 +36,38 @@ const config: QualityTestConfig = {
   minimumVideoAndAudioTestSampleSize: 5,
   steadyStateSampleWindow: 5000, // this is also used to calculate bandwidth
   steadyStateAllowedDelta: 0.05, // 1 = 100%, from point to point
+  thresholdRatio: 0.75,
   qualityThresholds: {
     video: [
       {
-        bps: 1000000,
-        plr: 0.005,
+        targetBitrate: 4000000,
+        targetBitrateSimulcast: 5550000,
+        recommendedSetting: '1920x1080 @ 30FPS',
+      },
+      {
+        targetBitrate: 2500000,
+        targetBitrateSimulcast: 3150000,
         recommendedSetting: '1280x720 @ 30FPS',
       },
       {
-        bps: 600000,
-        plr: 0.005,
-        recommendedSetting: '640x480 @ 30FPS',
+        targetBitrate: 1200000,
+        targetBitrateSimulcast: 1550000,
+        recommendedSetting: '960x540 @ 30FPS',
       },
       {
-        bps: 300000,
-        plr: 0.005,
-        recommendedSetting: '320x240 @ 30FPS',
+        targetBitrate: 500000,
+        targetBitrateSimulcast: 650000,
+        recommendedSetting: '640x360 @ 30FPS',
       },
       {
-        bps: 350000,
-        plr: 0.03,
-        recommendedSetting: '1280x720 @ 30FPS',
+        targetBitrate: 300000,
+        targetBitrateSimulcast: 350000,
+        recommendedSetting: '480x270 @ 30FPS',
       },
       {
-        bps: 250000,
-        plr: 0.03,
-        recommendedSetting: '640x480 @ 30FPS',
-      },
-      {
-        bps: 150000,
-        plr: 0.03,
-        recommendedSetting: '320x240 @ 30FPS',
+        targetBitrate: 150000,
+        targetBitrateSimulcast: 150000,
+        recommendedSetting: '320x180 @ 30FPS',
       },
     ],
     audio: [
@@ -74,6 +76,7 @@ const config: QualityTestConfig = {
       },
     ],
   },
+
   strings: {
     bandwidthLow: 'Bandwidth too low.',
     noCam: 'No camera was found.',
