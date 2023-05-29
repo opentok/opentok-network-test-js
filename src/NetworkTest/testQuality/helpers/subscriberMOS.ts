@@ -63,7 +63,8 @@ function calculateAudioScore(
   const getDelay = (): number => {
     const roundTripTime = getRoundTripTime();
     const delay = (roundTripTime * MS_PER_SEC) / 2;
-    return delay || DEFAULT_DELAY;
+    // Return default delay until proper calculation
+    return DEFAULT_DELAY;
   };
 
   const audioScore = (packetLossRatio: number) => {
