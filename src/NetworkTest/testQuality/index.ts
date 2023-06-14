@@ -27,6 +27,7 @@ import MOSState from './helpers/MOSState';
 import config from './helpers/config';
 import isSupportedBrowser from './helpers/isSupportedBrowser';
 import getUpdateCallbackStats from './helpers/getUpdateCallbackStats';
+import { PermissionDeniedError, UnsupportedResolutionError } from '../errors';
 
 interface QualityTestResultsBuilder {
   state: MOSState;
@@ -75,31 +76,70 @@ function connectToSession(session: OT.Session, token: string): Promise<OT.Sessio
     }
   });
 }
-
+/**
+ * Checks for camera support for a given resolution.
+ *
+ * See the "API reference" section of the README.md file in the root of the
+ * opentok-network-test-js project for details.
+ */
+function checkCameraSupport(width: number, height: number): Promise<void> {
+  return new Promise((resolve, reject) => {
+    console.log(width, height)
+    navigator.mediaDevices.getUserMedia({
+      video: {
+        width: { exact: width },
+        height: { exact: height },
+      },
+      audio: false,
+    }).then((mediaStream) => {
+      if (mediaStream) {
+        resolve();
+      }
+    }).catch(error => {
+      switch (error.name) {
+        case 'OverconstrainedError':
+          reject(new UnsupportedResolutionError());
+          break;
+        case 'NotAllowedError':
+          reject(new PermissionDeniedError());
+          break;
+        default:
+          reject(error);
+      }
+    });
+  });
+}
 /**
  * Ensure that audio and video devices are available
  */
-function validateDevices(OT: OT.Client): Promise<AvailableDevices> {
+function validateDevices(OT: OT.Client, options?: NetworkTestOptions): Promise<AvailableDevices> {
   return new Promise((resolve, reject) => {
     OT.getDevices((error?: OT.OTError, devices: OT.Device[] = []) => {
-
       if (error) {
         reject(new e.FailedToObtainMediaDevices());
+        return;
+      }
+
+      const availableDevices: AvailableDevices = devices.reduce(
+        (acc: AvailableDevices, device: OT.Device) => {
+          const type: AV = device.kind === 'audioInput' ? 'audio' : 'video';
+          return { ...acc, [type]: { ...acc[type], [device.deviceId]: device } };
+        },
+        { audio: {}, video: {} },
+      );
+
+      if (!Object.keys(availableDevices.audio).length) {
+        reject(new e.NoAudioCaptureDevicesError());
+        return;
+      }
+      if (options?.fullHD) {
+        console.log(options)
+
+        checkCameraSupport(1920, 1080)
+          .then(() => resolve(availableDevices))
+          .catch(reject);
       } else {
-
-        const availableDevices: AvailableDevices = devices.reduce(
-          (acc: AvailableDevices, device: OT.Device) => {
-            const type: AV = device.kind === 'audioInput' ? 'audio' : 'video';
-            return { ...acc, [type]: { ...acc[type], [device.deviceId]: device } };
-          },
-          { audio: {}, video: {} },
-        );
-
-        if (!Object.keys(availableDevices.audio).length) {
-          reject(new e.NoAudioCaptureDevicesError());
-        } else {
-          resolve(availableDevices);
-        }
+        resolve(availableDevices);
       }
     });
   });
@@ -120,13 +160,15 @@ function publishAndSubscribe(OT: OT.Client, options?: NetworkTestOptions) {
       containerDiv.style.opacity = '0';
       document.body.appendChild(containerDiv);
 
-      validateDevices(OT)
+      validateDevices(OT, options)
         .then((availableDevices: AvailableDevices) => {
           if (!Object.keys(availableDevices.video).length) {
             audioOnly = true;
           }
+          const resolution = options.fullHD ? '1920x1080' : '1280x720';
           const publisherOptions: OT.PublisherProperties = {
-            resolution: '1280x720',
+            resolution: resolution,
+            scalableVideo: options.scalableVideo,
             width: '100%',
             height: '100%',
             insertMode: 'append',

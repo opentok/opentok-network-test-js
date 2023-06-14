@@ -43,3 +43,16 @@ export class InvalidOnUpdateCallback extends NetworkTestError {
       ErrorNames.INVALID_ON_UPDATE_CALLBACK);
   }
 }
+export class PermissionDeniedError extends NetworkTestError {
+  constructor() {
+    super('Precall failed to acquire camera due to a permissions error.',
+      ErrorNames.PERMISSION_DENIED_ERROR);
+  }
+}
+
+export class UnsupportedResolutionError extends NetworkTestError {
+  constructor() {
+    super('The camera does not support the given resolution.',
+      ErrorNames.UNSUPPORTED_RESOLUTION_ERROR);
+  }
+}
