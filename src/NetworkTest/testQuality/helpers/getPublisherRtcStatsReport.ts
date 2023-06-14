@@ -130,17 +130,13 @@ const extractPublisherStats = (
   const transportProtocol = localCandidate?.protocol || 'N/A';
   const timestamp = localCandidate?.timestamp || 0;
 
-  /**
-  console.trace("videoStats: ", videoStats);
-  console.trace("audioStats: ", audioStats);
-  console.trace("availableOutgoingBitrate: ", availableOutgoingBitrate);
-  console.trace("currentRoundTripTime: ", currentRoundTripTime);
-  console.trace("videoSentKbs: ", videoSentKbs);
-  console.trace("simulcastEnabled: ", simulcastEnabled);
-  console.trace("transportProtocol: ", transportProtocol);
+
+  console.info("availableOutgoingBitrate: ", availableOutgoingBitrate);
+  console.info("currentRoundTripTime: ", currentRoundTripTime);
+  console.info("simulcastEnabled: ", simulcastEnabled);
+  console.info("transportProtocol: ", transportProtocol);
   console.info("availableOutgoingBitrate: ", availableOutgoingBitrate);
   console.info("videoByteSent: ", videoByteSent);
-  **/
 
   return {
     videoStats,
