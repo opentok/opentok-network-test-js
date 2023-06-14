@@ -11,16 +11,27 @@ precallDiv.querySelector('#precall button').addEventListener('click', function (
     document.getElementById('connectivity_status_container').style.display = 'block';
     precallDiv.style.display = 'none';
     startTest();
-})
+});
 
 function startTest() {
-    audioOnly = precallDiv.querySelector('#precall input').checked;
-    var timeoutSelect = precallDiv.querySelector('select');
-    var timeout = timeoutSelect.options[timeoutSelect.selectedIndex].text * 1000;
-    var options = {
+    const audioOnly = precallDiv.querySelector('#audioOnlyCheckbox').checked;
+    const scalableVideo = precallDiv.querySelector('#scalableCheckbox').checked;
+    const fullHD = precallDiv.querySelector('#fullHdCheckbox').checked;
+      
+    const timeoutSelect = precallDiv.querySelector('select');
+    const timeout = timeoutSelect.options[timeoutSelect.selectedIndex].text * 1000;
+
+    console.log('Audio-only:', audioOnly);
+    console.log('Scalable-video:', scalableVideo);
+    console.log('Full HD:', fullHD);
+
+    const options = {
         audioOnly: audioOnly,
+        scalableVideo: scalableVideo,
+        fullHD: fullHD,
         timeout: timeout
     };
+
     otNetworkTest = new NetworkTest(OT, sessionInfo, options);
     otNetworkTest.testConnectivity()
         .then(results => ConnectivityUI.displayTestConnectivityResults(results))
