@@ -256,6 +256,8 @@ The `OTNetworkTest()` constructor includes the following parameters:
     (`true`) or not (`false`, the default). Disabling scalable video
     was added in OpenTok.js version 2.24.7.
 
+  * `fullHd` (Boolean) -- (Optional) Allows publishing with a resolution of 1080x1920. If the camera does not support 1080x1920 resolution, an `UNSUPPORTED_RESOLUTION_ERROR` will be returned.
+
   The `options` parameter is optional.
 
 The constructor throws an Error object with a `message` property and a `name` property. The
@@ -421,6 +423,9 @@ following properties:
 
     * `reason` (String) -- A string describing the reason for an unsupported video recommendation.
       For example, `'No camera was found.'`
+    
+    * `qualityLimitationReason` (String) --  The qualityLimitationReason indicates the reason behind 
+       any limitations in media quality during a session. It can have values: `cpu` for CPU overload, `bandwidth` for insufficient network bandwidth and `none` if there is no limition.
 
     * `bitrate` (Number) -- The average number of video bits per second during the last
       five seconds of the test. If the the test ran in audio-only mode (for example, because
@@ -566,6 +571,14 @@ method has a `name` property set to one of the following:
 |   `PUBLISH_TO_SESSION_PERMISSION_OR_TIMEOUT_ERROR` | The test failed to publish to the test session due a permissions error or timeout. | 
 |   `SUBSCRIBE_TO_SESSION_ERROR` | The test encountered an unknown error while attempting to subscribe to a test stream. | 
 |   `SUBSCRIBER_GET_STATS_ERROR` | The test failed to get audio and video statistics for the test stream. | 
+
+#### Errors thrown by the OTNetworkTest.checkCameraSupport() method
+
+| Error.name property set<br/>to this property of<br/>ErrorNames ... | Description       |
+| ------------------------------------------------------------------ | ----------------- |
+|   `PERMISSION_DENIED_ERROR`    | The user denied access to the camera.                 |
+|   `UNSUPPORTED_RESOLUTION_ERROR` | The camera does not support the requested resolution. | 
+
 
 ## MOS estimates
 

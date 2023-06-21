@@ -29,6 +29,11 @@ import isSupportedBrowser from './helpers/isSupportedBrowser';
 import getUpdateCallbackStats from './helpers/getUpdateCallbackStats';
 import { PermissionDeniedError, UnsupportedResolutionError } from '../errors';
 
+const FULL_HD_WIDTH = 1920;
+const FULL_HD_HEIGHT = 1080;
+const FULL_HD_RESOLUTION = '1920x1080';
+const HD_RESOUTION = '1280x720';
+
 interface QualityTestResultsBuilder {
   state: MOSState;
   subscriber: OT.Subscriber;
@@ -50,7 +55,6 @@ let stopTest: Function | undefined;
 let stopTestTimeoutId: number;
 let stopTestTimeoutCompleted = false;
 let stopTestCalled = false;
-
 /**
  * If not already connected, connect to the OpenTok Session
  */
@@ -84,7 +88,6 @@ function connectToSession(session: OT.Session, token: string): Promise<OT.Sessio
  */
 function checkCameraSupport(width: number, height: number): Promise<void> {
   return new Promise((resolve, reject) => {
-    console.log(width, height)
     navigator.mediaDevices.getUserMedia({
       video: {
         width: { exact: width },
@@ -132,10 +135,8 @@ function validateDevices(OT: OT.Client, options?: NetworkTestOptions): Promise<A
         reject(new e.NoAudioCaptureDevicesError());
         return;
       }
-      if (options?.fullHD) {
-        console.log(options)
-
-        checkCameraSupport(1920, 1080)
+      if (options?.fullHd) {
+        checkCameraSupport(FULL_HD_WIDTH, FULL_HD_HEIGHT)
           .then(() => resolve(availableDevices))
           .catch(reject);
       } else {
@@ -165,9 +166,8 @@ function publishAndSubscribe(OT: OT.Client, options?: NetworkTestOptions) {
           if (!Object.keys(availableDevices.video).length) {
             audioOnly = true;
           }
-          const resolution = options.fullHD ? '1920x1080' : '1280x720';
           const publisherOptions: OT.PublisherProperties = {
-            resolution: resolution,
+            resolution: options.fullHd ? FULL_HD_RESOLUTION : HD_RESOUTION,
             scalableVideo: options.scalableVideo,
             width: '100%',
             height: '100%',
@@ -179,6 +179,9 @@ function publishAndSubscribe(OT: OT.Client, options?: NetworkTestOptions) {
           }
           if (options && options.videoSource) {
             publisherOptions.videoSource = options.videoSource;
+          }
+          if (options && options.fullHd) {
+            options.scalableVideo = true;
           }
           if (audioOnly) {
             publisherOptions.videoSource = null;
@@ -244,7 +247,7 @@ function buildResults(builder: QualityTestResultsBuilder): QualityTestResults {
   }
   return {
     audio: pick(baseProps, builder.state.stats.audio),
-    video: pick(baseProps.concat(['frameRate', 'recommendedResolution', 'recommendedFrameRate']),
+    video: pick(baseProps.concat(['frameRate', 'qualityLimitationReason','recommendedResolution', 'recommendedFrameRate']),
       builder.state.stats.video),
   };
 }
