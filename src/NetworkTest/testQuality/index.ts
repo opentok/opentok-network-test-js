@@ -98,7 +98,7 @@ function checkCameraSupport(width: number, height: number): Promise<void> {
       if (mediaStream) {
         resolve();
       }
-    }).catch(error => {
+    }).catch((error) => {
       switch (error.name) {
         case 'OverconstrainedError':
           reject(new UnsupportedResolutionError());
@@ -247,7 +247,7 @@ function buildResults(builder: QualityTestResultsBuilder): QualityTestResults {
   }
   return {
     audio: pick(baseProps, builder.state.stats.audio),
-    video: pick(baseProps.concat(['frameRate', 'qualityLimitationReason','recommendedResolution', 'recommendedFrameRate']),
+    video: pick(baseProps.concat(['frameRate', 'qualityLimitationReason', 'recommendedResolution', 'recommendedFrameRate']),
       builder.state.stats.video),
   };
 }

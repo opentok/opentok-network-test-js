@@ -138,7 +138,7 @@ const extractPublisherStats = (
   console.info("availableOutgoingBitrate: ", availableOutgoingBitrate);
   console.info("videoByteSent: ", videoByteSent);
   **/
- 
+
   return {
     videoStats,
     audioStats,

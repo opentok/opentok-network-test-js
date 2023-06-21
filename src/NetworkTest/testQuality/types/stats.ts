@@ -27,7 +27,7 @@ export interface AverageStats {
   packetLossRatio?: number;
   supported?: boolean;
   reason?: string;
-  qualityLimitationReason? : string,
+  qualityLimitationReason? : string;
   frameRate?: number;
   recommendedFrameRate?: number;
   recommendedResolution?: string;

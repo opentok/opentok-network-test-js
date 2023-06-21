@@ -4,7 +4,7 @@ import { UpdateCallbackStats, CallbackTrackStats } from '../../types/callbacks';
 const getUpdateCallbackStats = (
   subscriberStats: OT.SubscriberStats,
   publisherStats: OT.PublisherStats,
-  phase: string
+  phase: string,
 ): UpdateCallbackStats => {
   const { audio: audioTrackStats, video: videoTrackStats } = subscriberStats;
 
