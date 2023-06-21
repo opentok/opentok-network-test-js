@@ -13,4 +13,5 @@ export interface CallbackTrackStats {
   bytesReceived: number;
   packetsLost: number;
   packetsReceived: number;
+  availableOutgoingBitrate: number,
 }

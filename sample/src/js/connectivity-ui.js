@@ -4,11 +4,13 @@ var charts = {};
 var audioOnlyTest;
 const resultCount = {
   audio: 0,
-  video: 0
+  video: 0,
+  videoAvailableOutgoingBitrate: 0
 };
 const prevBitsReceived = {
   audio: 0,
-  video: 0
+  video: 0,
+  videoAvailableOutgoingBitrate: 0
 };
 var stopBtnTimeout;
 var stopTestBtn = document.getElementById('stop_test');
@@ -155,6 +157,22 @@ export function graphIntermediateStats(mediaType, stats) {
   const chartTitle = (stats.phase === 'audio-only') && (mediaType === 'video') ?
    'Testing audio-only stream' :
    'Bitrate over ' + resultCount[mediaType] + 'sec';
+  charts[mediaType].setTitle(null, { text: chartTitle});
+  prevBitsReceived[mediaType] = bitsSent;
+}
+
+export function graphIntermediateStatsAvialble(mediaType, stats) {
+  const mediaStats = stats['video'];
+  if (!charts[mediaType]) {
+    charts[mediaType] = createChart(mediaType);
+  }
+  const bitsSent = mediaStats && mediaStats.availableOutgoingBitrate ? mediaStats.availableOutgoingBitrate:  0;
+  resultCount[mediaType]++;
+  charts[mediaType].series[0].addPoint({
+    x: resultCount[mediaType],
+    y: bitsSent
+  }, true, false);
+  const chartTitle = "availableOutgoingBitrate";
   charts[mediaType].setTitle(null, { text: chartTitle});
   prevBitsReceived[mediaType] = bitsSent;
 }

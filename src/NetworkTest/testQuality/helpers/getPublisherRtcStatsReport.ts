@@ -74,6 +74,7 @@ const extractOutboundRtpStats = (
       const kbs = calculateVideoBitrate(stats, previousStats);
       const { ssrc, bytesSent: byteSent, timestamp: currentTimestamp } = stats;
       const baseStats = { kbs, ssrc, byteSent, currentTimestamp };
+      console.log(stats.qualityLimitationReason)
       videoStats.push({
         ...baseStats,
         qualityLimitationReason: stats.qualityLimitationReason || 'none',

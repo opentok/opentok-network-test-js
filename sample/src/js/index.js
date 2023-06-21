@@ -37,6 +37,7 @@ function startTest() {
 function testQuality() {
     createChart('audio');
     createChart('video');
+    createChart('videoAvailableOutgoingBitrate')
     ConnectivityUI.init(audioOnly);
     document.getElementById('stop_test').addEventListener('click', function stopTestListener() {
         ConnectivityUI.hideStopButton();
@@ -46,6 +47,7 @@ function testQuality() {
         ConnectivityUI.checkToDisplayStopButton();
         ConnectivityUI.graphIntermediateStats('audio', stats);
         ConnectivityUI.graphIntermediateStats('video', stats);
+        ConnectivityUI.graphIntermediateStatsAvialble('videoAvailableOutgoingBitrate', stats);
     }).then(results => ConnectivityUI.displayTestQualityResults(null, results))
         .catch(error => ConnectivityUI.displayTestQualityResults(error));
 }

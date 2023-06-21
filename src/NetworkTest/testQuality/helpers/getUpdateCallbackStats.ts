@@ -9,6 +9,7 @@ const getUpdateCallbackStats = (
   const { audio: audioTrackStats, video: videoTrackStats } = subscriberStats;
 
   const audioCallbackStats: CallbackTrackStats = {
+    availableOutgoingBitrate: publisherStats.availableOutgoingBitrate,
     bytesSent: publisherStats.audioStats[0].byteSent,
     bytesReceived: audioTrackStats.bytesReceived,
     packetsLost: audioTrackStats.packetsLost,
@@ -20,10 +21,12 @@ const getUpdateCallbackStats = (
   if (phase === 'audio-video') {
     videoCallbackStats = {
       bytesSent: publisherStats.videoByteSent,
+      availableOutgoingBitrate: publisherStats.availableOutgoingBitrate,
       bytesReceived: videoTrackStats?.bytesReceived || 0,
       packetsLost: videoTrackStats?.packetsLost || 0,
       packetsReceived: videoTrackStats?.packetsReceived || 0,
       frameRate: videoTrackStats?.frameRate || 0,
+      
     };
   }
 
