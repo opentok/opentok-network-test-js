@@ -180,9 +180,6 @@ function publishAndSubscribe(OT: OT.Client, options?: NetworkTestOptions) {
           if (options && options.videoSource) {
             publisherOptions.videoSource = options.videoSource;
           }
-          if (options && options.fullHd) {
-            options.scalableVideo = true;
-          }
           if (audioOnly) {
             publisherOptions.videoSource = null;
           }
