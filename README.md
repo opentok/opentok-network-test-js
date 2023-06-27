@@ -424,8 +424,8 @@ following properties:
     * `reason` (String) -- A string describing the reason for an unsupported video recommendation.
       For example, `'No camera was found.'`
     
-    * `qualityLimitationReason` (String) --  The qualityLimitationReason indicates the reason behind 
-       any limitations in media quality during a session. It can have values: `cpu` for CPU overload, `bandwidth` for insufficient network bandwidth and `none` if there is no limition.
+    * `qualityLimitationReason` (String) --  Indicates the reason behind
+       the highest resolution tested failing. It can have values: `'cpu'` for CPU overload, `'bandwidth'` for insufficient network bandwidth, and `'none'` if there is no limitation.
 
     * `bitrate` (Number) -- The average number of video bits per second during the last
       five seconds of the test. If the the test ran in audio-only mode (for example, because
