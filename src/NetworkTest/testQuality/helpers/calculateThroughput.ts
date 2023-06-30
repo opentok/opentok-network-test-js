@@ -35,6 +35,11 @@ function getAverageBitrateAndPlr(type: AV,
     publisherStats => publisherStats.simulcastEnabled,
   );
 
+  const lastPublisherStats = publisherStatsList[publisherStatsList.length - 1];
+
+  const qualityLimitationReason = lastPublisherStats.videoStats.find(
+    videoStats => videoStats.qualityLimitationReason !== null)?.qualityLimitationReason || null;
+
   const averageStats: AverageStatsBase = {
     availableOutgoingBitrate: publisherStatsList[publisherStatsList.length - 1].availableOutgoingBitrate,
     simulcast: isSimulcastEnabled,
@@ -52,7 +57,7 @@ function getAverageBitrateAndPlr(type: AV,
         recommendedFrameRate,
         frameRate: sumFrameRate / subscriberStatsList.length,
       } : {};
-    return { ...averageStats, supported, reason, ...videoStats };
+    return { ...averageStats, supported, reason, qualityLimitationReason, ...videoStats };
   }
   return { ...averageStats };
 }

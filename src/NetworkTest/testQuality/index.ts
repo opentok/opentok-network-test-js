@@ -27,6 +27,12 @@ import MOSState from './helpers/MOSState';
 import config from './helpers/config';
 import isSupportedBrowser from './helpers/isSupportedBrowser';
 import getUpdateCallbackStats from './helpers/getUpdateCallbackStats';
+import { PermissionDeniedError, UnsupportedResolutionError } from '../errors';
+
+const FULL_HD_WIDTH = 1920;
+const FULL_HD_HEIGHT = 1080;
+const FULL_HD_RESOLUTION = '1920x1080';
+const HD_RESOUTION = '1280x720';
 
 interface QualityTestResultsBuilder {
   state: MOSState;
@@ -49,7 +55,6 @@ let stopTest: Function | undefined;
 let stopTestTimeoutId: number;
 let stopTestTimeoutCompleted = false;
 let stopTestCalled = false;
-
 /**
  * If not already connected, connect to the OpenTok Session
  */
@@ -75,31 +80,67 @@ function connectToSession(session: OT.Session, token: string): Promise<OT.Sessio
     }
   });
 }
-
+/**
+ * Checks for camera support for a given resolution.
+ *
+ * See the "API reference" section of the README.md file in the root of the
+ * opentok-network-test-js project for details.
+ */
+function checkCameraSupport(width: number, height: number): Promise<void> {
+  return new Promise((resolve, reject) => {
+    navigator.mediaDevices.getUserMedia({
+      video: {
+        width: { exact: width },
+        height: { exact: height },
+      },
+      audio: false,
+    }).then((mediaStream) => {
+      if (mediaStream) {
+        resolve();
+      }
+    }).catch((error) => {
+      switch (error.name) {
+        case 'OverconstrainedError':
+          reject(new UnsupportedResolutionError());
+          break;
+        case 'NotAllowedError':
+          reject(new PermissionDeniedError());
+          break;
+        default:
+          reject(error);
+      }
+    });
+  });
+}
 /**
  * Ensure that audio and video devices are available
  */
-function validateDevices(OT: OT.Client): Promise<AvailableDevices> {
+function validateDevices(OT: OT.Client, options?: NetworkTestOptions): Promise<AvailableDevices> {
   return new Promise((resolve, reject) => {
     OT.getDevices((error?: OT.OTError, devices: OT.Device[] = []) => {
-
       if (error) {
         reject(new e.FailedToObtainMediaDevices());
+        return;
+      }
+
+      const availableDevices: AvailableDevices = devices.reduce(
+        (acc: AvailableDevices, device: OT.Device) => {
+          const type: AV = device.kind === 'audioInput' ? 'audio' : 'video';
+          return { ...acc, [type]: { ...acc[type], [device.deviceId]: device } };
+        },
+        { audio: {}, video: {} },
+      );
+
+      if (!Object.keys(availableDevices.audio).length) {
+        reject(new e.NoAudioCaptureDevicesError());
+        return;
+      }
+      if (options?.fullHd) {
+        checkCameraSupport(FULL_HD_WIDTH, FULL_HD_HEIGHT)
+          .then(() => resolve(availableDevices))
+          .catch(reject);
       } else {
-
-        const availableDevices: AvailableDevices = devices.reduce(
-          (acc: AvailableDevices, device: OT.Device) => {
-            const type: AV = device.kind === 'audioInput' ? 'audio' : 'video';
-            return { ...acc, [type]: { ...acc[type], [device.deviceId]: device } };
-          },
-          { audio: {}, video: {} },
-        );
-
-        if (!Object.keys(availableDevices.audio).length) {
-          reject(new e.NoAudioCaptureDevicesError());
-        } else {
-          resolve(availableDevices);
-        }
+        resolve(availableDevices);
       }
     });
   });
@@ -120,13 +161,14 @@ function publishAndSubscribe(OT: OT.Client, options?: NetworkTestOptions) {
       containerDiv.style.opacity = '0';
       document.body.appendChild(containerDiv);
 
-      validateDevices(OT)
+      validateDevices(OT, options)
         .then((availableDevices: AvailableDevices) => {
           if (!Object.keys(availableDevices.video).length) {
             audioOnly = true;
           }
           const publisherOptions: OT.PublisherProperties = {
-            resolution: '1280x720',
+            resolution: options.fullHd ? FULL_HD_RESOLUTION : HD_RESOUTION,
+            scalableVideo: options.scalableVideo,
             width: '100%',
             height: '100%',
             insertMode: 'append',
@@ -202,7 +244,7 @@ function buildResults(builder: QualityTestResultsBuilder): QualityTestResults {
   }
   return {
     audio: pick(baseProps, builder.state.stats.audio),
-    video: pick(baseProps.concat(['frameRate', 'recommendedResolution', 'recommendedFrameRate']),
+    video: pick(baseProps.concat(['frameRate', 'qualityLimitationReason', 'recommendedResolution', 'recommendedFrameRate']),
       builder.state.stats.video),
   };
 }

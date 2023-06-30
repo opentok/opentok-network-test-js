@@ -38,6 +38,8 @@ export enum ErrorNames {
   UNSUPPORTED_BROWSER = 'UnsupportedBrowser',
   SUBSCRIBER_GET_STATS_ERROR = 'SubscriberGetStatsError',
   MISSING_SUBSCRIBER_ERROR = 'MissingSubscriberError',
+  PERMISSION_DENIED_ERROR = 'PermissionDeniedError',
+  UNSUPPORTED_RESOLUTION_ERROR = 'UnsupportedResolutionError',
 }
 
 export enum OTErrorType {
