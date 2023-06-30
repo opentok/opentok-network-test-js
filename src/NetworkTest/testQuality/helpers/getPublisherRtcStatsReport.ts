@@ -76,7 +76,7 @@ const extractOutboundRtpStats = (
       const baseStats = { kbs, ssrc, byteSent, currentTimestamp };
       videoStats.push({
         ...baseStats,
-        qualityLimitationReason: stats.qualityLimitationReason || 'none',
+        qualityLimitationReason: stats.qualityLimitationReason,
         resolution: `${stats.frameWidth || 0}x${stats.frameHeight || 0}`,
         framerate: stats.framesPerSecond || 0,
         active: stats.active || false,

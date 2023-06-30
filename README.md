@@ -425,7 +425,7 @@ following properties:
       For example, `'No camera was found.'`
     
     * `qualityLimitationReason` (String) --  Indicates the reason behind
-       the highest resolution tested failing. It can have values: `'cpu'` for CPU overload, `'bandwidth'` for insufficient network bandwidth, and `'none'` if there is no limitation.
+       the highest resolution tested failing. It can have values: `'cpu'` for CPU overload, `'bandwidth'` for insufficient network bandwidth, or value is `'null'` if there is no limitation.
 
     * `bitrate` (Number) -- The average number of video bits per second during the last
       five seconds of the test. If the the test ran in audio-only mode (for example, because

@@ -120,7 +120,7 @@ export function displayTestQualityResults(error, results) {
   resultsEl.querySelector('#video-bitrate').textContent = results.video.bitrate ?
     (results.video.bitrate / 1000).toFixed(2) + ' kbps' : '--';
   resultsEl.querySelector("#video-qualityLimitationReason").textContent =
-  results.video.qualityLimitationReason;
+  results.video.qualityLimitationReason ? results.video.qualityLimitationReason : "none";
   resultsEl.querySelector('#video-plr').textContent = results.video.packetLossRatio ?
     (results.video.packetLossRatio * 100).toFixed(2) + '%' : '0.00%';
   resultsEl.querySelector('#video-recommendedResolution').textContent =
