@@ -76,7 +76,7 @@ const extractOutboundRtpStats = (
       const baseStats = { kbs, ssrc, byteSent, currentTimestamp };
       videoStats.push({
         ...baseStats,
-        qualityLimitationReason: stats.qualityLimitationReason || 'N/A',
+        qualityLimitationReason: stats.qualityLimitationReason,
         resolution: `${stats.frameWidth || 0}x${stats.frameHeight || 0}`,
         framerate: stats.framesPerSecond || 0,
         active: stats.active || false,
@@ -131,13 +131,10 @@ const extractPublisherStats = (
   const timestamp = localCandidate?.timestamp || 0;
 
   /**
-  console.trace("videoStats: ", videoStats);
-  console.trace("audioStats: ", audioStats);
-  console.trace("availableOutgoingBitrate: ", availableOutgoingBitrate);
-  console.trace("currentRoundTripTime: ", currentRoundTripTime);
-  console.trace("videoSentKbs: ", videoSentKbs);
-  console.trace("simulcastEnabled: ", simulcastEnabled);
-  console.trace("transportProtocol: ", transportProtocol);
+  console.info("availableOutgoingBitrate: ", availableOutgoingBitrate);
+  console.info("currentRoundTripTime: ", currentRoundTripTime);
+  console.info("simulcastEnabled: ", simulcastEnabled);
+  console.info("transportProtocol: ", transportProtocol);
   console.info("availableOutgoingBitrate: ", availableOutgoingBitrate);
   console.info("videoByteSent: ", videoByteSent);
   **/

@@ -60,6 +60,7 @@ export interface GetUserMediaProperties {
   frameRate?: 30 | 15 | 7 | 1;
   maxResolution?: Dimensions;
   resolution?: (
+    '1920x1080' |
     '1280x960' |
     '1280x720' |
     '640x480' |
@@ -82,6 +83,7 @@ export interface PublisherProperties extends WidgetProperties, GetUserMediaPrope
   publishAudio?: boolean;
   publishVideo?: boolean;
   resolution?: (
+    '1920x1080' |
     '1280x960' |
     '1280x720' |
     '640x480' |
