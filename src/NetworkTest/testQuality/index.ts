@@ -46,8 +46,8 @@ export interface QualityTestResults extends HasAudioVideo<AverageStats> { }
 
 type MOSResultsCallback = (state: MOSState) => void;
 type DeviceMap = { [deviceId: string]: OT.Device };
-type AvailableDevices = { audio: DeviceMap, video: DeviceMap };
-type PublisherSubscriber = { publisher: OT.Publisher, subscriber: OT.Subscriber };
+type AvailableDevices = { audio: DeviceMap; video: DeviceMap };
+type PublisherSubscriber = { publisher: OT.Publisher; subscriber: OT.Subscriber };
 
 let audioOnly = false; // By default, the initial test is audio-video
 let testTimeout: number;
@@ -100,14 +100,14 @@ function checkCameraSupport(width: number, height: number): Promise<void> {
       }
     }).catch((error) => {
       switch (error.name) {
-        case 'OverconstrainedError':
-          reject(new UnsupportedResolutionError());
-          break;
-        case 'NotAllowedError':
-          reject(new PermissionDeniedError());
-          break;
-        default:
-          reject(error);
+      case 'OverconstrainedError':
+        reject(new UnsupportedResolutionError());
+        break;
+      case 'NotAllowedError':
+        reject(new PermissionDeniedError());
+        break;
+      default:
+        reject(error);
       }
     });
   });
@@ -244,8 +244,10 @@ function buildResults(builder: QualityTestResultsBuilder): QualityTestResults {
   }
   return {
     audio: pick(baseProps, builder.state.stats.audio),
-    video: pick(baseProps.concat(['frameRate', 'qualityLimitationReason', 'recommendedResolution', 'recommendedFrameRate']),
-      builder.state.stats.video),
+    video: pick(baseProps.concat([
+      'frameRate', 'qualityLimitationReason', 'recommendedResolution', 'recommendedFrameRate',
+    ]),
+    builder.state.stats.video),
   };
 }
 
@@ -316,7 +318,10 @@ function checkSubscriberQuality(
               publisherStats?: OT.PublisherStats,
             ) => {
               if (subscriberStats && publisherStats && onUpdate) {
-                const updateStats = getUpdateCallbackStats(subscriberStats, publisherStats, audioOnly ? 'audio-only' : 'audio-video');
+                const updateStats = getUpdateCallbackStats(subscriberStats, publisherStats, audioOnly ?
+                  'audio-only' :
+                  'audio-video'
+                );
                 onUpdate(updateStats);
               }
             };

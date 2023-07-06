@@ -3,7 +3,7 @@ import { OT } from './opentok';
 export type UpdateCallback<A> = (stats: UpdateCallbackStats) => void;
 export type UpdateCallbackStats = {
   audio: CallbackTrackStats;
-  video: CallbackTrackStats & { frameRate: number; };
+  video: CallbackTrackStats & { frameRate: number };
   timestamp: number;
   phase: string;
 };
