@@ -27,11 +27,11 @@ type CreateLocalPublisherResults = { publisher: OT.Publisher };
 type PublishToSessionResults = { session: OT.Session } & CreateLocalPublisherResults;
 type SubscribeToSessionResults = { subscriber: OT.Subscriber } & PublishToSessionResults;
 type DeviceMap = { [deviceId: string]: OT.Device };
-type AvailableDevices = { audio: DeviceMap, video: DeviceMap };
+type AvailableDevices = { audio: DeviceMap; video: DeviceMap };
 
 export type ConnectivityTestResults = {
-  success: boolean,
-  failedTests: FailureCase[],
+  success: boolean;
+  failedTests: FailureCase[];
 };
 
 /**
@@ -267,7 +267,7 @@ function checkSubscribeToSession({ session, publisher }: PublishToSessionResults
  * Attempt to connect to the tokbox client logging server
  */
 function checkLoggingServer(OT: OT.Client, options?: NetworkTestOptions, input?: SubscribeToSessionResults):
-  Promise<SubscribeToSessionResults> {
+Promise<SubscribeToSessionResults> {
   return new Promise((resolve, reject) => {
     const loggingUrl = `${getOr('', 'properties.loggingURL', OT)}/logging/ClientEvent`; // https://hlg.tokbox.com/prod
     const url = options && options.proxyServerUrl &&
