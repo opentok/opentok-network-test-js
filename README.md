@@ -256,7 +256,10 @@ The `OTNetworkTest()` constructor includes the following parameters:
     (`true`) or not (`false`, the default). Disabling scalable video
     was added in OpenTok.js version 2.24.7.
 
-  * `fullHd` (Boolean) -- (Optional) Allows publishing with a resolution of 1920x1080. If the camera does not support 1920x1080 resolution, OTNetworkTest.testConnectivity() method is rejected with  `UNSUPPORTED_RESOLUTION_ERROR` error.
+  * `fullHd` (Boolean) -- (Optional) Allows publishing with a resolution of 1920x1080 (1080p).
+    If the camera does not support 1920x1080 resolution, the `OTNetworkTest.testConnectivity()` method
+    is rejected with an `UNSUPPORTED_RESOLUTION_ERROR` error. For best results, you should also
+    set the `scalableVideo` option to `true` when testing full HD resolution.
 
   The `options` parameter is optional.
 
