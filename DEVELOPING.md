@@ -7,7 +7,7 @@ This document describes tools, tasks and workflow that one needs to be familiar 
 This project is developed with [TypeScript](https://www.typescriptlang.org/) and uses [Webpack](https://webpack.js.org/) to compile and bundle code into a browser-friendly UMD module.  To install the dependencies required for development, simply run:
 
 ```
-nvm use # Or use Node 16 if you do not use nvm
+nvm use # Or use Node 18 if you do not use nvm
 npm install
 ```
 
