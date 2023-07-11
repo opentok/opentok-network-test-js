@@ -258,8 +258,7 @@ The `OTNetworkTest()` constructor includes the following parameters:
 
   * `fullHd` (Boolean) -- (Optional) Allows publishing with a resolution of 1920x1080 (1080p).
     If the camera does not support 1920x1080 resolution, the `OTNetworkTest.testConnectivity()` method
-    is rejected with an `UNSUPPORTED_RESOLUTION_ERROR` error. For best results, you should also
-    set the `scalableVideo` option to `true` when testing full HD resolution.
+    is rejected with an `UNSUPPORTED_RESOLUTION_ERROR` error. We highly recommend set `scalableVideo` setting to `true` when testing full HD resolution. Without `scalableVideo`, the client may not reach full HD resolution during the test period..
 
   The `options` parameter is optional.
 
