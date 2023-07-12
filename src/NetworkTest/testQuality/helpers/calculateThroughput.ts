@@ -38,7 +38,8 @@ function getAverageBitrateAndPlr(type: AV,
   const lastPublisherStats = publisherStatsList[publisherStatsList.length - 1];
 
   const qualityLimitationReason = lastPublisherStats.videoStats.find(
-    videoStats => videoStats.qualityLimitationReason !== null)?.qualityLimitationReason || null;
+    videoStats => videoStats.qualityLimitationReason !== null
+    && videoStats.qualityLimitationReason !== 'none')?.qualityLimitationReason || null;
 
   const averageStats: AverageStatsBase = {
     availableOutgoingBitrate: publisherStatsList[publisherStatsList.length - 1].availableOutgoingBitrate,
