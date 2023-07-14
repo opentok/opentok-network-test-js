@@ -41,7 +41,8 @@ Make sure you have configured the app (see the previous section). Then:
 
    ```"opentok-network-test-js": "*"```
 
-2. Run `npm install` (in the /sample directory).
+2. Run `nvm use` (in the /sample directory), or use Node 18 (if you do not use nvm).
+   Then run `npm install` (in the /sample directory).
 
 3. Run `npm run build` (in the /sample directory). (Run this any time you edit the source code.)
 
