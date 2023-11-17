@@ -6,6 +6,7 @@
 * Define Network Connectivy class
 */
 
+// eslint-disable-next-line
 const version = require('../../package.json').version;
 import { OT } from './types/opentok';
 import { UpdateCallback, UpdateCallbackStats } from './types/callbacks';
@@ -24,9 +25,7 @@ import {
   MissingOpenTokInstanceError,
   MissingSessionCredentialsError,
 } from './errors';
-/* tslint:disable */
 import OTKAnalytics = require('opentok-solutions-logging');
-/* tslint:enable */
 
 export interface NetworkTestOptions {
   audioOnly?: boolean;
