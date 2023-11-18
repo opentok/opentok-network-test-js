@@ -27,7 +27,7 @@ export interface RTCStatsArray extends RTCStatsInternal {
 type DOMHighResTimeStamp = number;
 
 export type PublisherRtcStatsReport = {
-  rtcStatsReport: RTCStatsArray,
+  rtcStatsReport: RTCStatsArray;
 };
 
 export interface RTCandidateStatsInternal extends RTCStatsInternal {

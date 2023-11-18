@@ -3,9 +3,11 @@ import * as OTStream from './stream';
 import * as OTConnection from './connection';
 import * as OTPublisher from './publisher';
 import * as OTSubscriber from './subscriber';
+// eslint-disable-next-line  @typescript-eslint/no-unused-vars
 import * as OTError from './error';
 import * as OTEvent from './events';
 
+// eslint-disable-next-line @typescript-eslint/no-namespace
 export namespace OT {
 
   /**
@@ -24,7 +26,7 @@ export namespace OT {
       cdnURLSSL: string;
       loggingURLSSL: string;
       apiURLSSL: string;
-      minimumVersion: { firefox: number, chrome: number };
+      minimumVersion: { firefox: number; chrome: number };
       sentryDSN: string;
       enableErrorReporting: boolean;
       assetURL: string;

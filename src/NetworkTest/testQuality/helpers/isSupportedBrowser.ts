@@ -27,6 +27,7 @@ function detectBrowser(): Browser {
   }
   if (get('webkitGetUserMedia', navigator)) {
     // Chrome, Chromium, Webview, Opera, and Edge 79+ all use the chrome shim
+    // eslint-disable-next-line no-prototype-builtins
     if (window.hasOwnProperty('webkitRTCPeerConnection')) {
       if (navigator.userAgent.match(/Edg/)) {
         return 'Edge';
@@ -47,7 +48,7 @@ function detectBrowser(): Browser {
   }
 
   if (navigator.userAgent.indexOf('MSIE ') > 0 ||
-    !!navigator.userAgent.match(/Trident.*rv\:11\./)) {
+    !!navigator.userAgent.match(/Trident.*rv:11\./)) {
     return 'Internet Explorer';
   }
 
@@ -59,7 +60,7 @@ function detectBrowser(): Browser {
   return 'unsupported browser';
 }
 
-export default function isSupportedBrowser(): { supported: boolean, browser: Browser } {
+export default function isSupportedBrowser(): { supported: boolean; browser: Browser } {
   const supportedBrowsers = ['Chrome', 'Safari', 'Edge', 'Opera'];
   const browser = detectBrowser();
   const supported = supportedBrowsers.indexOf(browser) > -1;

@@ -1,5 +1,4 @@
 import { Connection } from './connection';
-import { OTError } from './error';
 import { OTEventEmitter, Event } from './events';
 import { Publisher } from './publisher';
 import { Stream } from './stream';
@@ -54,9 +53,9 @@ export interface Session extends OTEventEmitter<{
     Event<'streamPropertyChanged', Session> & {
       stream: Stream;
     } & (
-      { changedProperty: 'hasAudio'; oldValue: boolean; newValue: boolean; } |
-      { changedProperty: 'hasVideo'; oldValue: boolean; newValue: boolean; } |
-      { changedProperty: 'videoDimensions'; oldValue: Dimensions; newValue: Dimensions; }
+      { changedProperty: 'hasAudio'; oldValue: boolean; newValue: boolean } |
+      { changedProperty: 'hasVideo'; oldValue: boolean; newValue: boolean } |
+      { changedProperty: 'videoDimensions'; oldValue: Dimensions; newValue: Dimensions }
     )
   );
 }> {
@@ -79,7 +78,7 @@ export interface Session extends OTEventEmitter<{
   publish(publisher: Publisher, callback: (error?: Error) => void): void;
 
   signal(
-    signal: { type?: string, data?: string, to?: Connection },
+    signal: { type?: string; data?: string; to?: Connection },
     callback: (error?: Error) => void,
   ): void;
 

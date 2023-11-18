@@ -27,7 +27,7 @@ export default class MOSState {
   readonly hasVideoTrack = (): boolean => this.subscriberStatsLog[0] && !!this.subscriberStatsLog[0].video;
 
   public getLastPublisherStats = (): OT.PublisherStats | undefined =>
-    this.publisherStatsLog[this.publisherStatsLog.length - 1] ?? undefined
+    this.publisherStatsLog[this.publisherStatsLog.length - 1] ?? undefined;
 
   private audioScore(): number {
     return this.audioScoresLog.reduce((acc, score) => acc + score, 0) / this.audioScoresLog.length;
