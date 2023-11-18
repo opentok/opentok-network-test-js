@@ -39,7 +39,7 @@ export type ConnectivityTestResults = {
  * event listeners and invoke the provided callback function.
  */
 function disconnectFromSession(session: OT.Session) {
-  return new Promise((resolve, reject) => {
+  return new Promise((resolve) => {
     session.on('sessionDisconnected', () => {
       session.off();
       resolve();
@@ -54,7 +54,7 @@ function disconnectFromSession(session: OT.Session) {
  * @param subscriber
  */
 function cleanSubscriber(session: OT.Session, subscriber: OT.Subscriber) {
-  return new Promise((resolve, reject) => {
+  return new Promise((resolve) => {
     subscriber.on('destroyed', () => {
       resolve();
     });
@@ -66,7 +66,7 @@ function cleanSubscriber(session: OT.Session, subscriber: OT.Subscriber) {
 }
 
 function cleanPublisher(publisher: OT.Publisher) {
-  return new Promise((resolve, reject) => {
+  return new Promise((resolve) => {
     publisher.on('destroyed', () => {
       resolve();
     });
@@ -91,6 +91,7 @@ function connectToSession(
       sessionOptions = options.initSessionOptions;
     }
     if (options && options.proxyServerUrl) {
+      // eslint-disable-next-line no-prototype-builtins
       if (!OT.hasOwnProperty('setProxyUrl')) { // Fallback for OT.version < 2.17.4
         sessionOptions.proxyUrl = options.proxyServerUrl;
       }
@@ -290,7 +291,7 @@ export function testConnectivity(
   otLogging: OTKAnalytics,
   options?: NetworkTestOptions,
 ): Promise<ConnectivityTestResults> {
-  return new Promise((resolve, reject) => {
+  return new Promise((resolve) => {
 
     const onSuccess = (flowResults: SubscribeToSessionResults) => {
       const results: ConnectivityTestResults = {
