@@ -10,8 +10,5 @@
       ],
       "max-line-length": [true, 120],
       "align": [true, "parameters", "statements", "members", "elements"]
-    },
-    "linterOptions": {
-      "exclude": ["test", "**/*.spec.ts"]
     }
   }
