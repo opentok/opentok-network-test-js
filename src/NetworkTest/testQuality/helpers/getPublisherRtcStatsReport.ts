@@ -1,6 +1,5 @@
 import { OT } from '../../types/opentok';
 import {
-  RTCTransportStats,
   RTCOutboundRtpStreamStats,
   RTCIceCandidatePairStats,
   RTCStatsInternal,
@@ -106,8 +105,6 @@ const extractPublisherStats = (
 
   const rtcStatsArray: RTCStatsInternal[] = Array.from(rtcStatsReport.values());
 
-  const transportStats = rtcStatsArray.find(
-    stats => stats.type === 'transport') as RTCTransportStats;
   const outboundRtpStats = rtcStatsArray.filter(
     stats => stats.type === 'outbound-rtp') as RTCOutboundRtpStreamStats[];
   const iceCandidatePairStats = rtcStatsArray.find(
@@ -118,7 +115,6 @@ const extractPublisherStats = (
   };
 
   const localCandidate = findCandidateById('local-candidate', iceCandidatePairStats.localCandidateId);
-  const remoteCandidate = findCandidateById('remote-candidate', iceCandidatePairStats.remoteCandidateId);
 
   const { videoStats, audioStats } = extractOutboundRtpStats(outboundRtpStats, previousStats);
 

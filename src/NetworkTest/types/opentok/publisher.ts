@@ -98,7 +98,7 @@ export interface PublisherProperties extends WidgetProperties, GetUserMediaPrope
 }
 
 export type PublisherRtcStatsReport = {
-  rtcStatsReport: RTCStatsArray[],
+  rtcStatsReport: RTCStatsArray[];
 };
 
 export interface Publisher extends OTEventEmitter<{
@@ -108,7 +108,7 @@ export interface Publisher extends OTEventEmitter<{
   accessDialogOpened: Event<'accessDialogOpened', Publisher>;
 
   audioLevelUpdated: Event<'audioLevelUpdated', Publisher> & {
-    audioLevel: number,
+    audioLevel: number;
   };
 
   destroyed: Event<'destroyed', Publisher>;
@@ -116,7 +116,7 @@ export interface Publisher extends OTEventEmitter<{
   getStats(callback: (error?: Error, stats?: PublisherStatsArr) => void): void;
 
   mediaStopped: Event<'mediaStopped', Publisher> & {
-    track: MediaStreamTrack | undefined,
+    track: MediaStreamTrack | undefined;
   };
 
   streamCreated: Event<'streamCreated', Publisher> & {

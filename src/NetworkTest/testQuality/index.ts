@@ -42,6 +42,7 @@ interface QualityTestResultsBuilder {
   bandwidth?: Bandwidth;
 }
 
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface QualityTestResults extends HasAudioVideo<AverageStats> { }
 
 type MOSResultsCallback = (state: MOSState) => void;
@@ -261,7 +262,7 @@ function isAudioQualityAcceptable(results: QualityTestResults): boolean {
  * @param subscriber
  */
 function cleanSubscriber(session: OT.Session, subscriber: OT.Subscriber) {
-  return new Promise((resolve, reject) => {
+  return new Promise((resolve) => {
     subscriber.on('destroyed', () => {
       resolve();
     });
@@ -277,7 +278,7 @@ function cleanSubscriber(session: OT.Session, subscriber: OT.Subscriber) {
  * @param publisher
  */
 function cleanPublisher(session: OT.Session, publisher: OT.Publisher) {
-  return new Promise((resolve, reject) => {
+  return new Promise((resolve) => {
     publisher.on('destroyed', () => {
       resolve();
     });
@@ -353,7 +354,7 @@ function checkSubscriberQuality(
               processResults();
             };
 
-            const resultsCallback: MOSResultsCallback = (state: MOSState) => {
+            const resultsCallback: MOSResultsCallback = () => {
               clearTimeout(mosEstimatorTimeoutId);
               processResults();
             };
@@ -427,6 +428,7 @@ export function testQuality(
           sessionOptions = options.initSessionOptions;
         }
         if (options && options.proxyServerUrl) {
+          // eslint-disable-next-line no-prototype-builtins
           if (!OT.hasOwnProperty('setProxyUrl')) { // Fallback for OT.version < 2.17.4
             sessionOptions.proxyUrl = options.proxyServerUrl;
           }

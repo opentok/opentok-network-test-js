@@ -20,6 +20,8 @@ module.exports = {
     ],
     "root": true,
     "rules": {
+        "@typescript-eslint/no-explicit-any": "off",
+        "@typescript-eslint/ban-types": "off",
         "@typescript-eslint/indent": [
             "error",
             2,

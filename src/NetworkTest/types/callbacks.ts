@@ -1,5 +1,4 @@
-import { OT } from './opentok';
-
+// eslint-disable-next-line  @typescript-eslint/no-unused-vars
 export type UpdateCallback<A> = (stats: UpdateCallbackStats) => void;
 export type UpdateCallbackStats = {
   audio: CallbackTrackStats;

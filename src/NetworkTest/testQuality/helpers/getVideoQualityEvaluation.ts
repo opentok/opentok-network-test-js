@@ -15,8 +15,8 @@ export default function getVideoQualityEvaluationt(stats: AverageStatsBase): Qua
   const bitrate = stats.availableOutgoingBitrate;
 
   let supported = false;
-  let recommendedFrameRate : number = 30;
-  let recommendedResolution : string = '';
+  let recommendedFrameRate  = 30;
+  let recommendedResolution  = '';
   let recommendedSetting : string;
 
   for (let i = 0; i < thresholds.length; i += 1) {

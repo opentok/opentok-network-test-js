@@ -13,8 +13,8 @@
     "example": "npm run build && cd sample && npm run build && python -m SimpleHTTPServer",
     "lint": "npm run tslint",
     "lint-fix": "npm run tslint-fix",
-    "tslint": "./node_modules/eslint/bin/eslint.js src/**/*.ts test/**/*.ts",
-    "tslint-fix": "./node_modules/eslint/bin/eslint.js src/**/*.ts --fix"
+    "tslint": "./node_modules/eslint/bin/eslint.js src",
+    "tslint-fix": "./node_modules/eslint/bin/eslint.js src --fix"
   },
   "repository": {
     "type": "git",

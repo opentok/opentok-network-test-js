@@ -16,7 +16,7 @@ export interface TrackStats {
 
 export interface SubscriberStats {
   audio: TrackStats;
-  video: TrackStats & { frameRate: number; };
+  video: TrackStats & { frameRate: number };
   timestamp: number;
 }
 
@@ -32,7 +32,7 @@ export interface SubscriberProperties extends WidgetProperties {
 
 export interface Subscriber extends OTEventEmitter<{
   audioLevelUpdated: Event<'audioLevelUpdated', Subscriber> & {
-    audioLevel: number,
+    audioLevel: number;
   };
 
   connected: Event<'connected', Subscriber>;

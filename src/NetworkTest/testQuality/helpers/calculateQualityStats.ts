@@ -36,7 +36,7 @@ function calculateStats(type: AV, samples: SubscriberStats[]): SubscriberQuality
 
 export default function calculateQualityStats(
   latestSamples: SubscriberStats[],
-  ): HasAudioVideo<SubscriberQualityStats[]> {
+): HasAudioVideo<SubscriberQualityStats[]> {
   if (latestSamples.length < 2) {
     throw new Error('Cannot calculate bitrate with less than two data points.');
   }
