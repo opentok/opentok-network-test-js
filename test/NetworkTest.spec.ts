@@ -56,6 +56,14 @@ describe('NetworkTest', () => {
     jasmine.addMatchers(customMatchers);
   });
 
+  afterEach((done) => {
+    if (networkTest) {
+      networkTest.stop();
+    }
+    // A bit of a hack. But this prevents tests from failing if a previous test's Session didn't disconnect:
+    setTimeout(() => { done(); }, 1000);
+  });
+
   it('its constructor requires OT and valid session credentials', () => {
     expect(() => new NetworkTest(sessionCredentials)).toThrow(new MissingOpenTokInstanceError());
     expect(() => new NetworkTest({}, sessionCredentials)).toThrow(new MissingOpenTokInstanceError());
