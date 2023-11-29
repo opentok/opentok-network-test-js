@@ -339,7 +339,7 @@ describe('NetworkTest', () => {
           expect(error.name).toBe(QUALITY_TEST_ERROR);
         };
 
-        const onUpdate = (stats: Stats) => console.info('Subscriber stats:', stats);
+        const onUpdate = (stats: Stats) => {}
 
         networkTest.testQuality(onUpdate)
           .then(validateStandardResults)
@@ -364,7 +364,7 @@ describe('NetworkTest', () => {
           expect(error.name).toBe(QUALITY_TEST_ERROR);
         };
 
-        const onUpdate = (stats: Stats) => console.info('Subscriber stats:', stats);
+        const onUpdate = (stats: Stats) => {}
 
         networkTestWithOptions.testQuality(onUpdate)
           .then(validateResults)
@@ -378,7 +378,6 @@ describe('NetworkTest', () => {
         };
 
         const onUpdate = (stats: Stats) => {
-          console.info('Subscriber stats:', stats);
           networkTest.stop(); // The test will wait for adequate stats before stopping
         };
 
@@ -413,7 +412,7 @@ describe('NetworkTest', () => {
           expect(error).toBe(QualityTestError);
         };
 
-        const onUpdate = (stats: Stats) => console.info('Subscriber stats:', stats);
+        const onUpdate = (stats: Stats) => {}
 
         networkTest.testQuality(onUpdate)
           .then(validateResults)
