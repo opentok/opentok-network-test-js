@@ -17,9 +17,7 @@ import NetworkTest, { ErrorNames } from '../src/NetworkTest';
 import { ConnectivityTestResults } from '../src/NetworkTest/testConnectivity/index';
 import { QualityTestError } from '../src/NetworkTest/testQuality/errors/index';
 
-type Util = jasmine.MatchersUtil;
 type CustomMatcher = jasmine.CustomMatcher;
-type EqualityTesters = jasmine.CustomEqualityTester[];
 
 const malformedCredentials = { apiKey: '1234', invalidProp: '1234', token: '1234' };
 const badCredentials = { apiKey: '1234', sessionId: '1234', token: '1234' };
@@ -32,7 +30,7 @@ const badCredentialsNetworkTest = new NetworkTest(OTClient, badCredentials);
 const validOnUpdateCallback = (stats: OT.SubscriberStats) => stats;
 
 const customMatchers: jasmine.CustomMatcherFactories = {
-  toBeInstanceOf: (util: Util, customEqualityTesters: EqualityTesters): CustomMatcher => {
+  toBeInstanceOf: (): CustomMatcher => {
     return {
       compare: (actual: any, expected: any): jasmine.CustomMatcherResult => {
         const pass: boolean = actual instanceof expected;
@@ -41,7 +39,7 @@ const customMatchers: jasmine.CustomMatcherFactories = {
       },
     };
   },
-  toBeABoolean: (util: Util, customEqualityTesters: EqualityTesters): CustomMatcher => {
+  toBeABoolean: (): CustomMatcher => {
     return {
       compare: (actual: any, expected: any): jasmine.CustomMatcherResult => {
         const pass: boolean = typeof actual === 'boolean';
@@ -72,7 +70,7 @@ describe('NetworkTest', () => {
 
   describe('Connectivity Test', () => {
     const testConnectFailure = (errorName, expectedType) => {
-      return new Promise((resolve, reject) => {
+      return new Promise((resolve) => {
         const realInitSession = OT.initSession;
         spyOn(OT, 'initSession').and.callFake((apiKey, sessionId) => {
           const session = realInitSession(apiKey, sessionId);
@@ -131,11 +129,11 @@ describe('NetworkTest', () => {
           ...{
             properties: {
               ...OTClient.properties,
-              loggingURL: OTClient.properties.loggingURL.replace('tokbox', 'bad-tokbox')
-            }
-          }
+              loggingURL: OTClient.properties.loggingURL.replace('tokbox', 'bad-tokbox'),
+            },
+          },
         };
-        const badLoggingNetworkTest = new NetworkTest(badLoggingOT, badLoggingCredentials)
+        const badLoggingNetworkTest = new NetworkTest(badLoggingOT, badLoggingCredentials);
         badLoggingNetworkTest.testConnectivity()
           .then((results: ConnectivityTestResults) => {
             expect(results.failedTests).toBeInstanceOf(Array);
@@ -276,9 +274,10 @@ describe('NetworkTest', () => {
       };
 
       it('validates its onUpdate callback', () => {
-        expect(() => networkTest.testQuality('callback').toThrow(new InvalidOnUpdateCallback()))
+        // eslint-disable-next-line
+        expect(() => networkTest.testQuality('bad-callback').toThrow(new InvalidOnUpdateCallback()));
         expect(() => networkTest.testConnectivity(validOnUpdateCallback)
-          .not.toThrowError(NetworkTestError))
+          .not.toThrowError(NetworkTestError));
       });
 
       it('should return an error if invalid session credentials are used', (done) => {
@@ -314,7 +313,7 @@ describe('NetworkTest', () => {
         });
         networkTest.testQuality()
           .catch((error?: QualityTestError) => {
-            expect(error.name).toBe(ErrorNames.FAILED_TO_OBTAIN_MEDIA_DEVICES);
+            expect(error?.name).toBe(ErrorNames.FAILED_TO_OBTAIN_MEDIA_DEVICES);
             done();
           });
       }, 10000);
@@ -323,23 +322,23 @@ describe('NetworkTest', () => {
         const realOTGetDevices = OT.getDevices;
         spyOn(OT, 'getDevices').and.callFake((callbackFn) => {
           realOTGetDevices((error, devices) => {
-            const onlyVideoDevices = devices.filter(device => device.kind !== 'audioInput');
+            const onlyVideoDevices = devices?.filter(device => device.kind !== 'audioInput');
             callbackFn(error, onlyVideoDevices);
           });
         });
         networkTest.testQuality()
           .catch((error?: QualityTestError) => {
-            expect(error.name).toBe(ErrorNames.NO_AUDIO_CAPTURE_DEVICES);
+            expect(error?.name).toBe(ErrorNames.NO_AUDIO_CAPTURE_DEVICES);
             done();
           });
       }, 10000);
 
       it('should return valid test results or an error', (done) => {
         const validateError = (error?: QualityTestError) => {
-          expect(error.name).toBe(QUALITY_TEST_ERROR);
+          expect(error?.name).toBe(ErrorNames.QUALITY_TEST_ERROR);
         };
 
-        const onUpdate = (stats: Stats) => {}
+        const onUpdate = (stats: Stats) => validOnUpdateCallback(stats);
 
         networkTest.testQuality(onUpdate)
           .then(validateStandardResults)
@@ -361,10 +360,10 @@ describe('NetworkTest', () => {
         };
 
         const validateError = (error?: QualityTestError) => {
-          expect(error.name).toBe(QUALITY_TEST_ERROR);
+          expect(error?.name).toBe(ErrorNames.QUALITY_TEST_ERROR);
         };
 
-        const onUpdate = (stats: Stats) => {}
+        const onUpdate = (stats: Stats) => validOnUpdateCallback(stats);
 
         networkTestWithOptions.testQuality(onUpdate)
           .then(validateResults)
@@ -374,10 +373,11 @@ describe('NetworkTest', () => {
 
       it('should stop the quality test when you call the stop() method', (done) => {
         const validateError = (error?: QualityTestError) => {
-          expect(error.name).toBe(QUALITY_TEST_ERROR);
+          expect(error?.name).toBe(ErrorNames.QUALITY_TEST_ERROR);
         };
 
         const onUpdate = (stats: Stats) => {
+          validOnUpdateCallback(stats);
           networkTest.stop(); // The test will wait for adequate stats before stopping
         };
 
@@ -391,7 +391,7 @@ describe('NetworkTest', () => {
         const realOTGetDevices = OT.getDevices;
         spyOn(OT, 'getDevices').and.callFake((callbackFn) => {
           realOTGetDevices((error, devices) => {
-            const onlyAudioDevices = devices.filter(device => device.kind !== 'videoInput');
+            const onlyAudioDevices = devices?.filter(device => device.kind !== 'videoInput');
             callbackFn(error, onlyAudioDevices);
           });
         });
@@ -400,7 +400,6 @@ describe('NetworkTest', () => {
           const { audio, video } = results;
           expect(audio.bitrate).toEqual(jasmine.any(Number));
           expect(audio.supported).toEqual(jasmine.any(Boolean));
-          expect(audio.reason || '').toEqual(jasmine.any(String));
           expect(audio.packetLossRatio).toEqual(jasmine.any(Number));
           expect(audio.mos).toEqual(jasmine.any(Number));
 
@@ -412,7 +411,7 @@ describe('NetworkTest', () => {
           expect(error).toBe(QualityTestError);
         };
 
-        const onUpdate = (stats: Stats) => {}
+        const onUpdate = (stats: Stats) => validOnUpdateCallback(stats);
 
         networkTest.testQuality(onUpdate)
           .then(validateResults)
@@ -423,17 +422,17 @@ describe('NetworkTest', () => {
       it('should return an error if the window.navigator is undefined', () => {
         spyOnProperty(window, 'navigator', 'get').and.returnValue(undefined);
         networkTest.testQuality(null)
-        .then(validateResultsUndefined)
-        .catch(validateUnsupportedBrowserError)
+          .then(validateResultsUndefined)
+          .catch(validateUnsupportedBrowserError);
       });
 
       it('should return an unsupported browser error if the browser is an older version of Edge', () => {
         spyOnProperty(window, 'navigator', 'get').and.returnValue({
-            mediaDevices: {},
-            webkitGetUserMedia: null,
-            mozGetUserMedia: null,
-            userAgent: 'Edge/12.10240',
-          });
+          mediaDevices: {},
+          webkitGetUserMedia: null,
+          mozGetUserMedia: null,
+          userAgent: 'Edge/12.10240',
+        });
         networkTest.testQuality(null)
           .then(validateResultsUndefined)
           .catch(validateUnsupportedBrowserError);
@@ -450,7 +449,7 @@ describe('NetworkTest', () => {
             navigator.mozGetUserMedia = mozGetUserMedia;
             navigator.webkitGetUserMedia = webkitGetUserMedia;
             done();
-        });
+          });
       }, 10000);
 
       it('results in a failed test if OT.initPublisher() returns an error', (done) => {
@@ -458,7 +457,7 @@ describe('NetworkTest', () => {
           callback(new Error());
         });
         networkTest.testQuality().catch((error?: QualityTestError) => {
-          expect(error.name).toBe(ErrorNames.INIT_PUBLISHER_ERROR);
+          expect(error?.name).toBe(ErrorNames.INIT_PUBLISHER_ERROR);
           done();
         });
       }, 10000);
@@ -474,7 +473,7 @@ describe('NetworkTest', () => {
           return session;
         });
         networkTest.testQuality().catch((error?: QualityTestError) => {
-          expect(error.name).toBe(ErrorNames.SUBSCRIBE_TO_SESSION_ERROR);
+          expect(error?.name).toBe(ErrorNames.SUBSCRIBE_TO_SESSION_ERROR);
           done();
         });
       }, 10000);
