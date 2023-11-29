@@ -168,8 +168,8 @@ function publishAndSubscribe(OT: OT.Client, options?: NetworkTestOptions) {
             audioOnly = true;
           }
           const publisherOptions: OT.PublisherProperties = {
-            resolution: options.fullHd ? FULL_HD_RESOLUTION : HD_RESOUTION,
-            scalableVideo: options.scalableVideo,
+            resolution: options?.fullHd ? FULL_HD_RESOLUTION : HD_RESOUTION,
+            scalableVideo: options?.scalableVideo,
             width: '100%',
             height: '100%',
             insertMode: 'append',

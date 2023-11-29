@@ -1,6 +1,6 @@
 {
   "name": "opentok-network-test-js",
-  "version": "3.1.1",
+  "version": "3.1.2",
   "description": "Precall network test for applications using the OpenTok platform.",
   "main": "dist/NetworkTest/index.js",
   "types": "dist/NetworkTest/index.d.ts",
@@ -13,8 +13,8 @@
     "example": "npm run build && cd sample && npm run build && python -m SimpleHTTPServer",
     "lint": "npm run tslint",
     "lint-fix": "npm run tslint-fix",
-    "tslint": "./node_modules/eslint/bin/eslint.js src",
-    "tslint-fix": "./node_modules/eslint/bin/eslint.js src --fix"
+    "tslint": "./node_modules/eslint/bin/eslint.js src test/**/*.ts",
+    "tslint-fix": "./node_modules/eslint/bin/eslint.js src test/**/*.ts --fix"
   },
   "repository": {
     "type": "git",
