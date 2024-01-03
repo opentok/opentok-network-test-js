@@ -37,8 +37,8 @@
   },
   "homepage": "https://github.com/opentok/network-connectivity-js#readme",
   "dependencies": {
-    "axios": "^0.21.1",
-    "opentok-solutions-logging": "^1.1.1",
+    "axios": "^1.6.3",
+    "opentok-solutions-logging": "^1.1.5-beta.0",
     "promise": "^8.0.1"
   },
   "devDependencies": {
