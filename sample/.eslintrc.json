@@ -15,5 +15,5 @@
     "window": true,
     "OT": true
   },
-  "extends": "eslint:recommended",
+  "extends": "eslint:recommended"
 }
