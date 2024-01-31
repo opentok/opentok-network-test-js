@@ -69,7 +69,7 @@ const extractOutboundRtpStats = (
   const videoStats = [];
   const audioStats = [];
   for (const stats of outboundRtpStats) {
-    if (stats.mediaType === 'video') {
+    if (stats.kind === 'video' || stats.mediaType === 'video') {
       const kbs = calculateVideoBitrate(stats, previousStats);
       const { ssrc, bytesSent: byteSent, timestamp: currentTimestamp } = stats;
       const baseStats = { kbs, ssrc, byteSent, currentTimestamp };
@@ -82,7 +82,7 @@ const extractOutboundRtpStats = (
         pliCount: stats.pliCount || 0,
         nackCount: stats.nackCount || 0,
       });
-    } else if (stats.mediaType === 'audio') {
+    } else if (stats.kind === 'audio' || stats.mediaType === 'audio') {
       const kbs = calculateAudioBitrate(stats, previousStats);
       const { ssrc, bytesSent: byteSent, timestamp: currentTimestamp } = stats;
       const baseStats = { kbs, ssrc, byteSent, currentTimestamp };
@@ -125,15 +125,6 @@ const extractPublisherStats = (
   const simulcastEnabled = videoStats.length > 1;
   const transportProtocol = localCandidate?.protocol || 'N/A';
   const timestamp = localCandidate?.timestamp || 0;
-
-  /**
-  console.info("availableOutgoingBitrate: ", availableOutgoingBitrate);
-  console.info("currentRoundTripTime: ", currentRoundTripTime);
-  console.info("simulcastEnabled: ", simulcastEnabled);
-  console.info("transportProtocol: ", transportProtocol);
-  console.info("availableOutgoingBitrate: ", availableOutgoingBitrate);
-  console.info("videoByteSent: ", videoByteSent);
-  **/
 
   return {
     videoStats,
