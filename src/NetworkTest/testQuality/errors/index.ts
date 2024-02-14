@@ -9,7 +9,7 @@
 import { NetworkTestError } from '../../errors';
 import { ErrorNames } from '../../errors/types';
 
- /**
+/**
   * Base class for errors used throughout Network Quality test.
   */
 export class QualityTestError extends NetworkTestError {
@@ -24,6 +24,7 @@ export class QualityTestError extends NetworkTestError {
 export class UnsupportedBrowserError extends QualityTestError {
   constructor(browser: string) {
     const message =
+      // eslint-disable-next-line max-len
       `Your current browser (${browser}) does not support the audio-video quality test. Please run the test in a supported browser.`;
     super(message, ErrorNames.UNSUPPORTED_BROWSER);
   }

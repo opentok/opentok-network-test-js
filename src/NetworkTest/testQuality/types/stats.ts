@@ -5,9 +5,9 @@ export interface HasAudioVideo<A> {
   video: A;
 }
 
-export interface Kbps { kbps: number; }
-export interface KbpsMap extends HasAudioVideo<Kbps[]> { }
-export interface Bandwidth extends HasAudioVideo<number> { }
+export interface Kbps { kbps: number }
+export type KbpsMap = HasAudioVideo<Kbps[]>;
+export type Bandwidth = HasAudioVideo<number>;
 
 export interface SubscriberQualityStats {
   averageBitrate: number;

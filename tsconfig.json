@@ -18,11 +18,17 @@
     /* Experimental Options */
   },
   "files": [
-    "src/NetworkTest/index.ts"
+    "src/NetworkTest/index.ts",
+    // "test/NetworkTest.spec.ts"
+  ],
+/*
+*/
+  "include": [
+    "src/**/*.ts"
   ],
   "exclude": [
     "node_modules",
     "dist",
-    "test/**/*.spec.ts",
+    "test/setup/setup.js"
   ]
 }

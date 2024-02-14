@@ -24,6 +24,7 @@ export const assocPath = (path: string, value: any, obj: Object): Object => {
   const valForKey = get(key, obj);
   const base: Object = (!!valForKey && typeof valForKey === 'object')
     ? valForKey
+    // eslint-disable-next-line no-extra-boolean-cast
     : (!!valForKey ? { ...obj, [key]: {} } : obj);
   const update = assoc(key, assocPath(keys.slice(1).join('.'), value, get(key, base)), obj);
   return { ...obj, ...update };
@@ -62,7 +63,7 @@ export const pick =
   <T extends { [key: string]: any }, K extends keyof T>(
     props: K[],
     obj: T,
-    all: boolean = false): Partial<T> => {
+    all = false): Partial<T> => {
     const update = (acc: object, prop: K): Partial<T> =>
       obj[prop] !== undefined || all ? { ...acc, [prop]: obj[prop] } : acc;
     return props.reduce(update, {});

@@ -1,28 +1,28 @@
 
-export interface AudioThreshold { minMos: number; }
-export interface VideoThreshold { targetBitrate: number; targetBitrateSimulcast: number; recommendedSetting: string; }
+export interface AudioThreshold { minMos: number }
+export interface VideoThreshold { targetBitrate: number; targetBitrateSimulcast: number; recommendedSetting: string }
 
 export type QualityTestConfig = {
-  getStatsInterval: number,
-  getStatsVideoAndAudioTestDuration: number,
-  getStatsAudioOnlyDuration: number,
+  getStatsInterval: number;
+  getStatsVideoAndAudioTestDuration: number;
+  getStatsAudioOnlyDuration: number;
   subscribeOptions: {
-    testNetwork: boolean,
-    audioVolume: number,
-  },
-  minimumVideoAndAudioTestSampleSize: number,
-  steadyStateSampleWindow: number, // this is also used to calculate bandwidth
-  steadyStateAllowedDelta: number,
-  thresholdRatio: number,
+    testNetwork: boolean;
+    audioVolume: number;
+  };
+  minimumVideoAndAudioTestSampleSize: number;
+  steadyStateSampleWindow: number; // this is also used to calculate bandwidth
+  steadyStateAllowedDelta: number;
+  thresholdRatio: number;
   qualityThresholds: {
-    audio: AudioThreshold[],
-    video: VideoThreshold[],
-  },
+    audio: AudioThreshold[];
+    video: VideoThreshold[];
+  };
   strings: {
-    bandwidthLow: string,
-    noCam: string,
-    noMic: string,
-  },
+    bandwidthLow: string;
+    noCam: string;
+    noMic: string;
+  };
 };
 
 const config: QualityTestConfig = {

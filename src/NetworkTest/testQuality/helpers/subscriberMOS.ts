@@ -22,7 +22,6 @@ const calculateBitRate = (type: AV, current: OT.SubscriberStats, last: OT.Subscr
   return current[type] && current[type].bytesReceived ?
     (8 * (current[type].bytesReceived - last[type].bytesReceived)) / (interval / 1000) : 0;
 };
-const MS_PER_SEC = 10000;
 const DEFAULT_DELAY = 150; // expressed in ms
 
 function calculateVideoScore(subscriber: OT.Subscriber, stats: OT.SubscriberStats[]): number {
@@ -57,12 +56,7 @@ function calculateVideoScore(subscriber: OT.Subscriber, stats: OT.SubscriberStat
 function calculateAudioScore(
   subscriber: OT.Subscriber, publisherStats: OT.PublisherStats | null,
   stats: OT.SubscriberStats[]): number {
-
-  const getRoundTripTime = () => publisherStats?.currentRoundTripTime || 0;
-
   const getDelay = (): number => {
-    const roundTripTime = getRoundTripTime();
-    const delay = (roundTripTime * MS_PER_SEC) / 2;
     // Return default delay until proper calculation
     return DEFAULT_DELAY;
   };

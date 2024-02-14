@@ -6,15 +6,22 @@ module.exports = {
     },
     "parser": "@typescript-eslint/parser",
     "parserOptions": {
-        "project": "tsconfig.json",
+        "project": "tsconfig.eslint.json",
         "sourceType": "module"
     },
     "plugins": [
         "@typescript-eslint",
         "@typescript-eslint/tslint"
     ],
+    "extends": [
+        "eslint:recommended",
+        "plugin:@typescript-eslint/eslint-recommended",
+        "plugin:@typescript-eslint/recommended"
+    ],
     "root": true,
     "rules": {
+        "@typescript-eslint/no-explicit-any": "off",
+        "@typescript-eslint/ban-types": "off",
         "@typescript-eslint/indent": [
             "error",
             2,

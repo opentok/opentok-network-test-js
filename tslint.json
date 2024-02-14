@@ -1,0 +1,14 @@
+-{
+    "extends": "tslint-config-airbnb",
+    "rules": {
+      "whitespace": [
+        true,
+        "check-branch",
+        "check-operator",
+        "check-separator",
+        "check-typecast"
+      ],
+      "max-line-length": [true, 120],
+      "align": [true, "parameters", "statements", "members", "elements"]
+    }
+  }
