@@ -127,7 +127,7 @@ export default function subscriberMOS(
         }
 
         // Check for faulty stats
-        if (subscriberStats.audio.bytesReceived < 0 || getOr(1, 'video.bytesReceived', subscriberStats) < 0) {
+        if (subscriberStats.audio.bytesReceived < 0 || Number(getOr(1, 'video.bytesReceived', subscriberStats)) < 0) {
           mosState.clearInterval();
           return callback(mosState);
         }
