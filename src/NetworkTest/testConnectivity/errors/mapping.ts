@@ -15,6 +15,7 @@ export enum FailureType {
   OpentokJs = 'OpenTok.js',
   Media = 'media',
   Logging = 'logging',
+  // eslint-disable-next-line @typescript-eslint/no-duplicate-enum-values
   ConnectivityError = 'OpenTok.js',
 }
 
