@@ -84,6 +84,9 @@
     },
     "find-versions": {
       "semver-regex": "^4.0.5"
+    },
+    "bin-check": {
+      "execa": "1.0.0"
     }
   }
 }
