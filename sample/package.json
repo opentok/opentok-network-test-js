@@ -13,6 +13,8 @@
   "license": "MIT",
   "homepage": "https://github.com/opentok/opentok-network-connectivity",
   "devDependencies": {
+    "ts-loader": "^9.5.2",
+    "typescript": "^5.7.3",
     "webpack": "^5.88.1"
   },
   "dependencies": {

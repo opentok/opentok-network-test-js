@@ -2,8 +2,9 @@ import NetworkTest from 'opentok-network-test-js';
 import createChart from './chart.js';
 import * as ConnectivityUI from './connectivity-ui.js';
 import config from './config.js';
+declare const OT: any;
 let sessionInfo = config;
-let otNetworkTest;
+let otNetworkTest : NetworkTest;
 let audioOnly;
 
 const precallDiv = document.getElementById('precall');
@@ -14,12 +15,12 @@ precallDiv.querySelector('#precall button').addEventListener('click', function (
 });
 
 function startTest() {
-    const audioOnly = precallDiv.querySelector('#audioOnlyCheckbox').checked;
-    const scalableVideo = precallDiv.querySelector('#scalableCheckbox').checked;
-    const fullHd = precallDiv.querySelector('#fullHdCheckbox').checked;
+    const audioOnly = (precallDiv.querySelector('#audioOnlyCheckbox') as HTMLInputElement).checked;
+    const scalableVideo = (precallDiv.querySelector('#scalableCheckbox') as HTMLInputElement).checked;
+    const fullHd = (precallDiv.querySelector('#fullHdCheckbox') as HTMLInputElement).checked;
       
     const timeoutSelect = precallDiv.querySelector('select');
-    const timeout = timeoutSelect.options[timeoutSelect.selectedIndex].text * 1000;
+    const timeout = Number(timeoutSelect.options[timeoutSelect.selectedIndex].text) * 1000;
 
     const options = {
         audioOnly: audioOnly,

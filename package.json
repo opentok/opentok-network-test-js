@@ -1,6 +1,6 @@
 {
   "name": "opentok-network-test-js",
-  "version": "3.1.4",
+  "version": "3.1.5",
   "description": "Precall network test for applications using the OpenTok platform.",
   "main": "dist/NetworkTest/index.js",
   "types": "dist/NetworkTest/index.d.ts",
@@ -84,6 +84,9 @@
     },
     "find-versions": {
       "semver-regex": "^4.0.5"
+    },
+    "bin-check": {
+      "execa": "1.0.0"
     }
   }
 }
