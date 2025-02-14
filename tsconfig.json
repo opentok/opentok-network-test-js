@@ -6,6 +6,8 @@
     "lib": ["es2018", "es2017.object", "dom"],                 /* Specify library files to be included in the compilation:  */
     "allowJs": false,                       /* Allow javascript files to be compiled. */
     "declaration": true,                   /* Generates corresponding '.d.ts' file. */
+    "declarationMap": true,
+    "declarationDir": "dist",
     "sourceMap": true,                        /* Generates corresponding '.map' file. */
     "outDir": "../",                       /* Redirect output structure to the directory. */
     "rootDir": "src",                       /* Specify the root directory of input files. Use to control the output directory structure with --outDir. */
