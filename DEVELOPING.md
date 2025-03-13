@@ -21,12 +21,11 @@ $ npm run build
 ```
 
 ### Test
-This project's tests are written with Karma and Jasmine. Before running the tests, you will need to create a `.env` file with the following values in the root directory of the repository.
+This project's tests are written with Karma and Jasmine. Before running the tests, you will need to create a `.env` file with the following value (your Vonage application ID for testing) in the root directory of the project:
 ```
-TEST_API_KEY={OPENTOK_API_KEY}
-TEST_API_SECRET={OPENTOK_API_SECRET}
+TEST_APPLICATION_ID={VONAGE_APPLICATION_ID}
 ```
-*You can obtain a project key and secret from the TokBox [Account Portal](https://tokbox.com/account/).*
+You will also need a Vonage `private.key` file, which you can obtain by logging into your [Vonage Video API account](https://dashboard.nexmo.com/). Once you have your `private.key`, move it to the root directory of the project.
 
 To run the tests:
 ```
@@ -47,13 +46,13 @@ In order to create a release, the following should be completed in order.
    version number.
 1. Create a git tag: `git tag -a vx.y.z -m "Release vx.y.z"`
 1. Ensure that you have permission to update the
-   [opentok npm module](https://www.npmjs.org/package/opentok)
+   [Vonage Server SDK npm module](https://www.npmjs.com/package/@vonage/server-sdk)
 1. Run `npm publish` to release to npm.
 1. Change the version number for future development by incrementing the patch number (z) adding
    "-alpha.1" in the source code (not the documentation). For possible files, see above. Then make
    another commit with the message "Begin development on next version".
 1. Push the changes to the source repository: `git push origin dev && git push --tags origin`
-1. Add a description to the [GitHub Releases](https://github.com/opentok/opentok-node/releases) page with any notable changes.
+1. Add a description to the [GitHub Releases](https://github.com/Vonage/vonage-node-sdk/releases) page with any notable changes.
 
 ## Workflow
 

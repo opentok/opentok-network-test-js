@@ -1,39 +1,50 @@
 require('dotenv').config()
-const OpenTok = require('opentok');
-const Promise = require('promise');
+const { Vonage } = require('@vonage/server-sdk');
 const fse = require('fs-extra');
-const apiKey = process.env.TEST_API_KEY
-const apiSecret = process.env.TEST_API_SECRET
+const fs = require('fs');
+const applicationId = process.env.TEST_APPLICATION_ID;
+const privateKeyPath = './private.key';
 
 
-function createSessionAndToken({ apiKey, apiSecret }) {
-  return new Promise((resolve, reject) => {
-    const opentok = new OpenTok(apiKey, apiSecret);
-    opentok.createSession({ mediaMode: 'routed' }, (error, session) => {
-      if (error) {
-        reject(error);
-      } else {
-        const token = opentok.generateToken(session.sessionId);
-        const { sessionId } = session;
-        resolve({ apiKey, sessionId, token });
-      }
-    });
+async function createSessionAndToken({applicationId, privateKey}) {
+  const vonage = new Vonage({
+    applicationId,
+    privateKey,
   });
+  try {
+    const session = await vonage.video.createSession({ mediaMode: 'routed' });
+    const token = vonage.video.generateClientToken(session.sessionId);
+    const { sessionId } = session;
+    return { applicationId, sessionId, token };
+  } catch(e) {
+    console.error(e);
+    throw e;
+  }
+
+
 }
 
-function writeCredentials(credentialsArray) {
+async function writeCredentials(credentialsArray) {
   const [primary, faultyLogging, faultyApi] = credentialsArray;
   const credentials = { primary, faultyLogging, faultyApi };
   return fse.outputJson('./test/credentials.json', credentials);
 }
 
-function generateCredentials(){
-  const create = () => createSessionAndToken({ apiKey, apiSecret })
+async function generateCredentials(){
+  try {
+    const privateKey = fs.readFileSync(privateKeyPath);
 
-  Promise.all([create(), create(), create()])
-    .then(writeCredentials)
-    .then((results) => console.info('Generated session credentials for test.'))
-    .catch(e => console.error('Failed to generate test credentials', e));
+    const sessions = await Promise.all([
+      createSessionAndToken({ applicationId, privateKey }),
+      createSessionAndToken({ applicationId, privateKey }),
+      createSessionAndToken({ applicationId, privateKey })
+    ]);
+
+    await writeCredentials(sessions);
+    console.info('Generated session credentials for test.');
+  } catch(e) {
+    console.error('Failed to generate test credentials', e);
+  }
 }
 
 generateCredentials();

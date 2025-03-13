@@ -1,10 +1,10 @@
-import NetworkTest from 'opentok-network-test-js';
+import NetworkTest from '@vonage/video-client-network-test';
 import createChart from './chart.js';
 import * as ConnectivityUI from './connectivity-ui.js';
 import config from './config.js';
 declare const OT: any;
 let sessionInfo = config;
-let otNetworkTest : NetworkTest;
+let videoNetworkTest : NetworkTest;
 let audioOnly;
 
 const precallDiv = document.getElementById('precall');
@@ -29,8 +29,8 @@ function startTest() {
         timeout: timeout
     };
 
-    otNetworkTest = new NetworkTest(OT, sessionInfo, options);
-    otNetworkTest.testConnectivity()
+    videoNetworkTest = new NetworkTest(OT, sessionInfo, options);
+    videoNetworkTest.testConnectivity()
         .then(results => ConnectivityUI.displayTestConnectivityResults(results))
         .then(testQuality);
 }
@@ -41,9 +41,9 @@ function testQuality() {
     ConnectivityUI.init(audioOnly);
     document.getElementById('stop_test').addEventListener('click', function stopTestListener() {
         ConnectivityUI.hideStopButton();
-        otNetworkTest.stop();
+        videoNetworkTest.stop();
     });
-    otNetworkTest.testQuality(function updateCallback(stats) {
+    videoNetworkTest.testQuality(function updateCallback(stats) {
         ConnectivityUI.checkToDisplayStopButton();
         ConnectivityUI.graphIntermediateStats('audio', stats);
         ConnectivityUI.graphIntermediateStats('video', stats);

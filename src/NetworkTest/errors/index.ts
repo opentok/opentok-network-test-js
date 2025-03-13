@@ -18,21 +18,21 @@ export class NetworkTestError extends Error {
 
 export class MissingOpenTokInstanceError extends NetworkTestError {
   constructor() {
-    super('An instance of OT, the OpenTok.js client SDK, is required.');
+    super('An instance of OT, the Vonage Video web client SDK, is required.');
     this.name = ErrorNames.MISSING_OPENTOK_INSTANCE;
   }
 }
 
 export class IncompleteSessionCredentialsError extends NetworkTestError {
   constructor() {
-    super('NetworkConnectivity requires an apiKey, sessionId, and token.',
+    super('NetworkConnectivity requires an applicationId, sessionId, and token.',
       ErrorNames.INCOMPLETE_SESSON_CREDENTIALS);
   }
 }
 
 export class MissingSessionCredentialsError extends NetworkTestError {
   constructor() {
-    super('NetworkConnectivity requires OpenTok session credentials.',
+    super('NetworkConnectivity requires Vonage Video API session credentials.',
       ErrorNames.MISSING_SESSON_CREDENTIALS);
   }
 }

@@ -67,7 +67,7 @@ export class ConnectToSessionNetworkError extends ConnectToSessionError {
 
 export class MediaDeviceError extends QualityTestError {
   constructor(message?: string, name?: string) {
-    const defaultMessage = 'OpenTok failed to find media devices for this browser.';
+    const defaultMessage = 'Vonage Video API failed to find media devices for this browser.';
     super(message || defaultMessage, name || ErrorNames.MEDIA_DEVICE_ERROR);
   }
 }

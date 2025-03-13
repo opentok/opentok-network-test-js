@@ -57,16 +57,16 @@ function convertFailedTestsToString(failedTests) {
   }
   var mappedFailures = [];
   if (failureTypes.indexOf('api') > -1) {
-    mappedFailures.push('OpenTok API server');
+    mappedFailures.push('Vonage Video API server');
   }
   if (failureTypes.indexOf('messaging') > -1) {
-    mappedFailures.push('OpenTok messaging WebSocket');
+    mappedFailures.push('Vonage Video API messaging WebSocket');
   }
   if (failureTypes.indexOf('media') > -1) {
-    mappedFailures.push('OpenTok Media Router');
+    mappedFailures.push('Vonage Video API Media Router');
   }
   if (failureTypes.indexOf('logging') > -1) {
-    mappedFailures.push('OpenTok logging server');
+    mappedFailures.push('Vonage Video API logging server');
   }
   return mappedFailures.join(', ');
 }

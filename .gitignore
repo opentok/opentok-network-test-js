@@ -63,6 +63,9 @@ dist/
 # env
 .env
 
+# Vonage application private.key
+private.key
+
 # sample
 sample/bundle.js
 sample/src/js/config.js

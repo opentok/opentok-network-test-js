@@ -46,13 +46,13 @@ export default class NetworkTest {
 
   /**
    * Returns an instance of NetworkConnectivity. See the "API reference" section of the
-   * README.md file in the root of the opentok-network-test-js project for details.
+   * README.md file in the root of the @vonage/video-client-network-test project for details.
    */
   constructor(OT: OT.Client, credentials: OT.SessionCredentials, options?: NetworkTestOptions) {
     this.validateOT(OT);
     this.validateCredentials(credentials);
     const proxyServerUrl = this.validateProxyUrl(options);
-    this.otLogging = this.startLoggingEngine(credentials.apiKey, credentials.sessionId, proxyServerUrl);
+    this.otLogging = this.startLoggingEngine(credentials.applicationId, credentials.sessionId, proxyServerUrl);
     this.OT = OT;
     this.credentials = credentials;
     this.options = options;
@@ -69,7 +69,7 @@ export default class NetworkTest {
     if (!credentials) {
       throw new MissingSessionCredentialsError();
     }
-    if (!credentials.apiKey || !credentials.sessionId || !credentials.token) {
+    if (!credentials.applicationId || !credentials.sessionId || !credentials.token) {
       throw new IncompleteSessionCredentialsError();
     }
   }
@@ -87,10 +87,10 @@ export default class NetworkTest {
     }
   }
 
-  private startLoggingEngine(apiKey: string, sessionId: string, proxyUrl: string): OTKAnalytics {
+  private startLoggingEngine(applicationId: string, sessionId: string, proxyUrl: string): OTKAnalytics {
     return new OTKAnalytics({
       sessionId,
-      partnerId: apiKey,
+      partnerId: applicationId,
       source: window.location.href,
       clientVersion: `js-network-test-${version}`,
       name: 'opentok-network-test',
@@ -101,11 +101,11 @@ export default class NetworkTest {
   }
 
   /**
-   * This method checks to see if the client can connect to TokBox servers required for
-   * using OpenTok.
+   * This method checks to see if the client can connect to Vonage Video API servers required for
+   * using Vonage Video API.
    *
    * See the "API reference" section of the README.md file in the root of the
-   * opentok-network-test-js project for details.
+   * @vonage/video-client-network-test project for details.
    */
   testConnectivity(): Promise<ConnectivityTestResults> {
     this.otLogging.logEvent({ action: 'testConnectivity', variation: 'Attempt' });
@@ -118,7 +118,7 @@ export default class NetworkTest {
    * results indicating the recommended supported publisher settings.
    *
    * See the "API reference" section of the README.md file in the root of the
-   * opentok-network-test-js project for details.
+   * @vonage/video-client-network-test project for details.
    */
   testQuality(updateCallback?: UpdateCallback<UpdateCallbackStats>): Promise<QualityTestResults> {
     this.otLogging.logEvent({ action: 'testQuality', variation: 'Attempt' });
@@ -136,7 +136,7 @@ export default class NetworkTest {
    * Stops the currently running test.
    *
    * See the "API reference" section of the README.md file in the root of the
-   * opentok-network-test-js project for details.
+   * @vonage/video-client-network-test project for details.
    */
   stop() {
     stopQualityTest();

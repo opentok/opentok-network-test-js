@@ -78,11 +78,11 @@ function cleanPublisher(publisher: OT.Publisher) {
 }
 
 /**
- * Attempt to connect to the OpenTok sessionope
+ * Attempt to connect to the Vonage Video API session
  */
 function connectToSession(
   OT: OT.Client,
-  { apiKey, sessionId, token }: OT.SessionCredentials,
+  { applicationId, sessionId, token }: OT.SessionCredentials,
   options?: NetworkTestOptions,
 ): Promise<OT.Session> {
   return new Promise((resolve, reject) => {
@@ -96,7 +96,7 @@ function connectToSession(
         sessionOptions.proxyUrl = options.proxyServerUrl;
       }
     }
-    const session = OT.initSession(apiKey, sessionId, sessionOptions);
+    const session = OT.initSession(applicationId, sessionId, sessionOptions);
     session.connect(token, (error?: OT.OTError) => {
       if (errorHasName(error, OTErrorType.OT_AUTHENTICATION_ERROR)) {
         reject(new e.ConnectToSessionTokenError());
@@ -265,7 +265,7 @@ function checkSubscribeToSession({ session, publisher }: PublishToSessionResults
 }
 
 /**
- * Attempt to connect to the tokbox client logging server
+ * Attempt to connect to the Vonage client logging server
  */
 function checkLoggingServer(OT: OT.Client, options?: NetworkTestOptions, input?: SubscribeToSessionResults):
 Promise<SubscribeToSessionResults> {
@@ -283,7 +283,7 @@ Promise<SubscribeToSessionResults> {
 }
 
 /**
- * This method checks to see if the client can connect to TokBox servers required for using OpenTok
+ * This method checks to see if the client can connect to Vonage Video API servers required for using Vonage Video API
  */
 export function testConnectivity(
   OT: OT.Client,

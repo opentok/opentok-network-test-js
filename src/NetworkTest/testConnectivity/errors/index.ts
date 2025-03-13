@@ -23,7 +23,7 @@ export class ConnectivityError extends NetworkTestError {
  */
 export class APIConnectivityError extends ConnectivityError {
   constructor() {
-    const message = 'Failed to connect to OpenTOK API Server';
+    const message = 'Failed to connect to Vonage Video API Server';
     super(message, ErrorNames.API_CONNECTIVITY_ERROR);
   }
 }
@@ -65,7 +65,7 @@ export class ConnectToSessionNetworkError extends ConnectToSessionError {
 
 export class MediaDeviceError extends ConnectivityError {
   constructor(message?: string, name?: string) {
-    const defaultMessage = 'OpenTok failed to find media devices for this browser.';
+    const defaultMessage = 'Vonage Video API failed to find media devices for this browser.';
     super(message || defaultMessage, name || ErrorNames.MEDIA_DEVICE_ERROR);
   }
 }
@@ -148,6 +148,6 @@ export class SubscribeToSessionError extends ConnectivityError {
  */
 export class LoggingServerConnectionError extends ConnectivityError {
   constructor(){
-    super('Failed to connect to the OpenTok logging server.', ErrorNames.LOGGING_SERVER_CONNECTION_ERROR);
+    super('Failed to connect to the Vonage Video API logging server.', ErrorNames.LOGGING_SERVER_CONNECTION_ERROR);
   }
 }

@@ -11,7 +11,7 @@ import * as OTEvent from './events';
 export namespace OT {
 
   /**
-   * OpenTok.js Client SDK
+   * Vonage Video Web Client SDK
    */
   export interface Client {
     properties?: {
@@ -68,7 +68,7 @@ export namespace OT {
   }
 
   export interface SessionCredentials {
-    apiKey: string;
+    applicationId: string;
     sessionId: string;
     token: string;
   }

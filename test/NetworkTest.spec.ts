@@ -1,6 +1,6 @@
 /* tslint: disable */
 
-import * as OTClient from '@opentok/client';
+import * as OTClient from '@vonage/client-sdk-video';
 import {
   primary as sessionCredentials,
   faultyLogging as badLoggingCredentials,
@@ -19,8 +19,8 @@ import { QualityTestError } from '../src/NetworkTest/testQuality/errors/index';
 
 type CustomMatcher = jasmine.CustomMatcher;
 
-const malformedCredentials = { apiKey: '1234', invalidProp: '1234', token: '1234' };
-const badCredentials = { apiKey: '1234', sessionId: '1234', token: '1234' };
+const malformedCredentials = { applicationId: '1234', invalidProp: '1234', token: '1234' };
+const badCredentials = { applicationId: '1234', sessionId: '1234', token: '1234' };
 const networkTest = new NetworkTest(OTClient, sessionCredentials);
 const networkTestWithOptions = new NetworkTest(OTClient, sessionCredentials, {
   audioOnly: true,
@@ -80,8 +80,8 @@ describe('NetworkTest', () => {
     const testConnectFailure = (errorName, expectedType) => {
       return new Promise((resolve) => {
         const realInitSession = OT.initSession;
-        spyOn(OT, 'initSession').and.callFake((apiKey, sessionId) => {
-          const session = realInitSession(apiKey, sessionId);
+        spyOn(OT, 'initSession').and.callFake((applicationId, sessionId) => {
+          const session = realInitSession(applicationId, sessionId);
           spyOn(session, 'connect').and.callFake((token, callback) => {
             const error = new Error();
             error.name = errorName;
@@ -206,8 +206,8 @@ describe('NetworkTest', () => {
       }, 10000);
       it('results in a failed test if Session.subscribe() returns an error', (done) => {
         const realInitSession = OT.initSession;
-        spyOn(OT, 'initSession').and.callFake((apiKey, sessionId) => {
-          const session = realInitSession(apiKey, sessionId);
+        spyOn(OT, 'initSession').and.callFake((applicationId, sessionId) => {
+          const session = realInitSession(applicationId, sessionId);
           spyOn(session, 'subscribe').and.callFake((stream, target, config, callback) => {
             const error = new Error();
             callback(error);
@@ -236,8 +236,8 @@ describe('NetworkTest', () => {
 
       const testConnectFailure = (otErrorName, netTestErrorName) => {
         const realInitSession = OT.initSession;
-        spyOn(OT, 'initSession').and.callFake((apiKey, sessionId) => {
-          const session = realInitSession(apiKey, sessionId);
+        spyOn(OT, 'initSession').and.callFake((applicationId, sessionId) => {
+          const session = realInitSession(applicationId, sessionId);
           spyOn(session, 'connect').and.callFake((token, callback) => {
             const error = new Error();
             error.name = otErrorName;
@@ -472,8 +472,8 @@ describe('NetworkTest', () => {
 
       it('results in a failed test if Session.subscribe() returns an error', (done) => {
         const realInitSession = OT.initSession;
-        spyOn(OT, 'initSession').and.callFake((apiKey, sessionId) => {
-          const session = realInitSession(apiKey, sessionId);
+        spyOn(OT, 'initSession').and.callFake((applicationId, sessionId) => {
+          const session = realInitSession(applicationId, sessionId);
           spyOn(session, 'subscribe').and.callFake((stream, target, config, callback) => {
             const error = new Error();
             callback(error);
