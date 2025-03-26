@@ -1,4 +1,4 @@
-import * as Promise from 'promise';
+import { Promise } from '../../util/promise';
 import * as e from '../../testQuality/errors';
 import { OT } from '../../types/opentok';
 
