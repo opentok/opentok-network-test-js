@@ -189,6 +189,8 @@ function checkCreateLocalPublisher(
         const publisher = OT.initPublisher(publisherDiv, publisherOptions, (error?: OT.OTError) => {
           if (!error) {
             resolve({ publisher });
+          } else if (errorHasName(error, OTErrorType.OT_USER_MEDIA_ACCESS_DENIED)) {
+            reject(new e.MediaPermissionsDeniedError())
           } else {
             reject(new e.FailedToCreateLocalPublisher());
           }
