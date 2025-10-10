@@ -132,6 +132,12 @@ div.prettyBox img {
   margin-top: 8px;
   display: none;
 }
+
+#retry_test {
+  margin: 20px auto;
+  display: none;
+  text-align: center;
+}
 #quality_status_container > div {
   display: flex;
   justify-content: center;

@@ -14,6 +14,12 @@ precallDiv.querySelector('#precall button').addEventListener('click', function (
     startTest();
 });
 
+// Add event listener for retry button
+const retryButton = document.getElementById('retry_test');
+retryButton.addEventListener('click', function () {
+    retryTest();
+});
+
 function startTest() {
     const audioOnly = (precallDiv.querySelector('#audioOnlyCheckbox') as HTMLInputElement).checked;
     const scalableVideo = (precallDiv.querySelector('#scalableCheckbox') as HTMLInputElement).checked;
@@ -39,7 +45,13 @@ function testQuality() {
     createChart('audio');
     createChart('video');
     ConnectivityUI.init(audioOnly);
-    document.getElementById('stop_test').addEventListener('click', function stopTestListener() {
+    
+    // Remove existing event listener if any and add new one
+    const stopTestBtn = document.getElementById('stop_test') as HTMLButtonElement;
+    const newStopTestBtn = stopTestBtn.cloneNode(true) as HTMLButtonElement;
+    stopTestBtn.parentNode?.replaceChild(newStopTestBtn, stopTestBtn);
+    
+    newStopTestBtn.addEventListener('click', function stopTestListener() {
         ConnectivityUI.hideStopButton();
         otNetworkTest.stop();
     });
@@ -49,4 +61,38 @@ function testQuality() {
         ConnectivityUI.graphIntermediateStats('video', stats);
     }).then(results => ConnectivityUI.displayTestQualityResults(null, results))
         .catch(error => ConnectivityUI.displayTestQualityResults(error));
+}
+
+function retryTest() {
+    // Reset UI state
+    ConnectivityUI.resetUIForRetry();
+    
+    // Reset connectivity status container
+    const connectivityContainer = document.getElementById('connectivity_status_container') as HTMLElement;
+    const connectivityStatusEl = connectivityContainer.querySelector('p') as HTMLElement;
+    const connectivityIconEl = connectivityContainer.querySelector('img') as HTMLImageElement;
+    connectivityStatusEl.textContent = 'Test in progress.';
+    connectivityStatusEl.style.display = 'block';
+    connectivityIconEl.src = 'assets/spinner.gif';
+    connectivityContainer.style.display = 'block';
+    
+    // Reset quality status container
+    const qualityContainer = document.getElementById('quality_status_container') as HTMLElement;
+    const qualityStatusEl = qualityContainer.querySelector('p') as HTMLElement;
+    const qualityIconEl = qualityContainer.querySelector('img') as HTMLImageElement;
+    qualityStatusEl.textContent = 'Test in progress.';
+    qualityIconEl.src = 'assets/spinner.gif';
+    
+    // Hide result elements
+    const audioResults = qualityContainer.querySelector('#audio .results') as HTMLElement;
+    const videoResults = qualityContainer.querySelector('#video .results') as HTMLElement;
+    if (audioResults) audioResults.style.display = 'none';
+    if (videoResults) videoResults.style.display = 'none';
+    
+    // Clear video unsupported reason
+    const videoUnsupportedReason = qualityContainer.querySelector('#video-unsupported-reason') as HTMLElement;
+    if (videoUnsupportedReason) videoUnsupportedReason.style.display = 'none';
+    
+    // Start the test again
+    startTest();
 }

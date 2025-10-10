@@ -33,6 +33,41 @@ export function hideStopButton() {
   stopTestBtn.style.display = 'none';
 }
 
+export function showRetryButton() {
+  document.getElementById('retry_test').style.display = 'block';
+}
+
+export function hideRetryButton() {
+  document.getElementById('retry_test').style.display = 'none';
+}
+
+export function resetUIForRetry() {
+  resultCount.audio = 0;
+  resultCount.video = 0;
+  prevBitsReceived.audio = 0;
+  prevBitsReceived.video = 0;
+  
+  if (stopBtnTimeout) {
+    clearTimeout(stopBtnTimeout);
+    stopBtnTimeout = null;
+  }
+  
+  hideStopButton();
+  hideRetryButton();
+  
+  Object.keys(charts).forEach(mediaType => {
+    if (charts[mediaType] && charts[mediaType].destroy) {
+      charts[mediaType].destroy();
+    }
+  });
+  charts = {};
+  
+  const audioGraphEl = document.getElementById('audioGraph');
+  const videoGraphEl = document.getElementById('videoGraph');
+  if (audioGraphEl) audioGraphEl.innerHTML = '';
+  if (videoGraphEl) videoGraphEl.innerHTML = '';
+}
+
 export function displayTestConnectivityResults(results) {
   const statusContainer = document.getElementById('connectivity_status_container');
   const statusMessageEl = statusContainer.querySelector('p');
@@ -89,6 +124,7 @@ function rateMosScore(mos) {
 
 export function displayTestQualityResults(error, results) {
   hideStopButton();
+  showRetryButton();
   const statusContainerEl = document.getElementById('quality_status_container');
   const statusEl = statusContainerEl.querySelector('p');
   const statusIconEl = statusContainerEl.querySelector('img');
