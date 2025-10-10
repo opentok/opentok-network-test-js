@@ -20,6 +20,27 @@ retryButton.addEventListener('click', function () {
     retryTest();
 });
 
+function displayPermissionDeniedError() {
+    const statusContainer = document.getElementById('connectivity_status_container');
+    const statusEl = statusContainer?.querySelector('p') as HTMLElement;
+    const statusIconEl = statusContainer?.querySelector('img') as HTMLImageElement;
+    
+    if (statusEl && statusIconEl) {
+        statusEl.innerHTML = `
+            <strong style="color: #d32f2f;">Camera/Microphone Access Required</strong><br><br>
+            <div style="text-align: left; max-width: 500px; margin: 0 auto;">
+                <p><strong>To enable the network test:</strong></p>
+                <ol style="margin-left: 20px;">
+                    <li>Click the camera/microphone icon in your browser's address bar</li>
+                    <li>Select "Allow" for both camera and microphone access</li>
+                    <li>Refresh the page</li>
+                </ol>
+            </div>
+        `;
+        statusIconEl.src = 'assets/icon_error.svg';
+    }
+}
+
 function startTest() {
     const audioOnly = (precallDiv.querySelector('#audioOnlyCheckbox') as HTMLInputElement).checked;
     const scalableVideo = (precallDiv.querySelector('#scalableCheckbox') as HTMLInputElement).checked;
@@ -38,7 +59,19 @@ function startTest() {
     otNetworkTest = new NetworkTest(OT, sessionInfo, options);
     otNetworkTest.testConnectivity()
         .then(results => ConnectivityUI.displayTestConnectivityResults(results))
-        .then(testQuality);
+        .then(testQuality)
+        .catch(error => {
+            // Handle permission errors - show message, no retry button
+            if (error.name === 'PermissionDeniedError') {
+                displayPermissionDeniedError();
+            } else {
+                // Handle other errors - show failure message and retry button
+                ConnectivityUI.displayTestConnectivityResults({ success: false, failedTests: [] });
+                ConnectivityUI.showRetryButton();
+            }
+            
+            console.error('Connectivity test failed:', error);
+        });
 }
 
 function testQuality() {
@@ -67,6 +100,14 @@ function retryTest() {
     // Reset UI state
     ConnectivityUI.resetUIForRetry();
     
+    // Clean up any existing OpenTok elements
+    const otElements = document.querySelectorAll('[id^="OT_"], [class*="OT_"], [data-opentok-publisher]');
+    otElements.forEach(element => {
+        if (element.parentNode) {
+            element.parentNode.removeChild(element);
+        }
+    });
+    
     // Reset connectivity status container
     const connectivityContainer = document.getElementById('connectivity_status_container') as HTMLElement;
     const connectivityStatusEl = connectivityContainer.querySelector('p') as HTMLElement;
@@ -92,7 +133,7 @@ function retryTest() {
     // Clear video unsupported reason
     const videoUnsupportedReason = qualityContainer.querySelector('#video-unsupported-reason') as HTMLElement;
     if (videoUnsupportedReason) videoUnsupportedReason.style.display = 'none';
-    
+
     // Start the test again
     startTest();
 }
