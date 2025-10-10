@@ -97,42 +97,26 @@ function testQuality() {
 }
 
 function retryTest() {
-    // Reset UI state
+    // Reset UI state and clean up
     ConnectivityUI.resetUIForRetry();
     
     // Clean up any existing OpenTok elements
     const otElements = document.querySelectorAll('[id^="OT_"], [class*="OT_"], [data-opentok-publisher]');
-    otElements.forEach(element => {
-        if (element.parentNode) {
-            element.parentNode.removeChild(element);
-        }
-    });
+    otElements.forEach(element => element.parentNode?.removeChild(element));
     
-    // Reset connectivity status container
+    // Reset status displays to "in progress" state
     const connectivityContainer = document.getElementById('connectivity_status_container') as HTMLElement;
     const connectivityStatusEl = connectivityContainer.querySelector('p') as HTMLElement;
     const connectivityIconEl = connectivityContainer.querySelector('img') as HTMLImageElement;
     connectivityStatusEl.textContent = 'Test in progress.';
-    connectivityStatusEl.style.display = 'block';
     connectivityIconEl.src = 'assets/spinner.gif';
     connectivityContainer.style.display = 'block';
     
-    // Reset quality status container
     const qualityContainer = document.getElementById('quality_status_container') as HTMLElement;
     const qualityStatusEl = qualityContainer.querySelector('p') as HTMLElement;
     const qualityIconEl = qualityContainer.querySelector('img') as HTMLImageElement;
     qualityStatusEl.textContent = 'Test in progress.';
     qualityIconEl.src = 'assets/spinner.gif';
-    
-    // Hide result elements
-    const audioResults = qualityContainer.querySelector('#audio .results') as HTMLElement;
-    const videoResults = qualityContainer.querySelector('#video .results') as HTMLElement;
-    if (audioResults) audioResults.style.display = 'none';
-    if (videoResults) videoResults.style.display = 'none';
-    
-    // Clear video unsupported reason
-    const videoUnsupportedReason = qualityContainer.querySelector('#video-unsupported-reason') as HTMLElement;
-    if (videoUnsupportedReason) videoUnsupportedReason.style.display = 'none';
 
     // Start the test again
     startTest();
