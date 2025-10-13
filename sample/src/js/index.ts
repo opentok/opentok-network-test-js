@@ -1,4 +1,4 @@
-import NetworkTest from 'opentok-network-test-js';
+import NetworkTest, { ErrorNames } from 'opentok-network-test-js';
 import createChart from './chart.js';
 import * as ConnectivityUI from './connectivity-ui.js';
 import config from './config.js';
@@ -27,10 +27,10 @@ function displayPermissionDeniedError() {
     
     if (statusEl && statusIconEl) {
         statusEl.innerHTML = `
-            <strong style="color: #d32f2f;">Camera/Microphone Access Required</strong><br><br>
-            <div style="text-align: left; max-width: 500px; margin: 0 auto;">
+            <strong class="permission-denied-error">Camera/Microphone Access Required</strong><br><br>
+            <div class="permission-instructions">
                 <p><strong>To enable the network test:</strong></p>
-                <ol style="margin-left: 20px;">
+                <ol>
                     <li>Click the camera/microphone icon in your browser's address bar</li>
                     <li>Select "Allow" for both camera and microphone access</li>
                     <li>Refresh the page</li>
@@ -39,6 +39,7 @@ function displayPermissionDeniedError() {
         `;
         statusIconEl.src = 'assets/icon_error.svg';
     }
+    ConnectivityUI.showRetryButton();
 }
 
 function startTest() {
@@ -61,8 +62,8 @@ function startTest() {
         .then(results => ConnectivityUI.displayTestConnectivityResults(results))
         .then(testQuality)
         .catch(error => {
-            // Handle permission errors - show message, no retry button
-            if (error.name === 'PermissionDeniedError') {
+            // Handle permission errors - show message and retry button
+            if (error.name === ErrorNames.PERMISSION_DENIED_ERROR) {
                 displayPermissionDeniedError();
             } else {
                 // Handle other errors - show failure message and retry button
