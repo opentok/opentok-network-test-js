@@ -1,9 +1,9 @@
-import { OT } from '../../types/opentok';
 import { UpdateCallbackStats, CallbackTrackStats } from '../../types/callbacks';
+import { PublisherStats } from '../../types/publisher';
 
 const getUpdateCallbackStats = (
   subscriberStats: OT.SubscriberStats,
-  publisherStats: OT.PublisherStats,
+  publisherStats: PublisherStats,
   phase: string,
 ): UpdateCallbackStats => {
   const { audio: audioTrackStats, video: videoTrackStats } = subscriberStats;

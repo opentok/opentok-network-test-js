@@ -1,6 +1,6 @@
 import config from './config';
 import { getOr, last } from '../../util';
-import { PublisherStats } from '../../types/opentok/publisher';
+import { PublisherStats } from '../../types/publisher';
 
 export default function getLatestSampleWindow(stats: PublisherStats[]): PublisherStats[] {
   const mostRecentTimestamp: number = getOr(0, 'timestamp', last(stats));
