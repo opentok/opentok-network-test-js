@@ -8,7 +8,7 @@
 
 // eslint-disable-next-line
 const version = require('../../package.json').version;
-import { OT } from './types/opentok';
+import { SessionCredentials, InitSessionOptions } from './types/session';
 import { UpdateCallback, UpdateCallbackStats } from './types/callbacks';
 import {
   testConnectivity,
@@ -32,15 +32,15 @@ export interface NetworkTestOptions {
   timeout?: number;
   audioSource?: string;
   videoSource?: string;
-  initSessionOptions?: OT.InitSessionOptions;
+  initSessionOptions?: InitSessionOptions;
   proxyServerUrl?: string;
   scalableVideo?: boolean;
   fullHd?: boolean;
 }
 
 export default class NetworkTest {
-  credentials: OT.SessionCredentials;
-  OT: OT.Client;
+  credentials: SessionCredentials;
+  OTInstance: typeof OT;
   otLogging: OTKAnalytics;
   options?: NetworkTestOptions;
 
@@ -48,24 +48,24 @@ export default class NetworkTest {
    * Returns an instance of NetworkConnectivity. See the "API reference" section of the
    * README.md file in the root of the opentok-network-test-js project for details.
    */
-  constructor(OT: OT.Client, credentials: OT.SessionCredentials, options?: NetworkTestOptions) {
+  constructor(OTInstance: typeof OT, credentials: SessionCredentials, options?: NetworkTestOptions) {
     this.validateOT(OT);
     this.validateCredentials(credentials);
     const proxyServerUrl = this.validateProxyUrl(options);
     this.otLogging = this.startLoggingEngine(credentials.apiKey, credentials.sessionId, proxyServerUrl);
-    this.OT = OT;
+    this.OTInstance = OT;
     this.credentials = credentials;
     this.options = options;
     this.setProxyUrl(proxyServerUrl);
   }
 
-  private validateOT(OT: OT.Client) {
-    if (!OT || typeof OT !== 'object' || !OT.initSession) {
+  private validateOT(OTInstance: typeof OT) {
+    if (!OTInstance || typeof OTInstance !== 'object' || !OTInstance.initSession) {
       throw new MissingOpenTokInstanceError();
     }
   }
 
-  private validateCredentials(credentials: OT.SessionCredentials) {
+  private validateCredentials(credentials: SessionCredentials) {
     if (!credentials) {
       throw new MissingSessionCredentialsError();
     }
@@ -82,8 +82,8 @@ export default class NetworkTest {
   }
 
   private setProxyUrl(proxyServerUrl: string) {
-    if (this.OT.setProxyUrl && typeof this.OT.setProxyUrl === 'function' && proxyServerUrl) {
-      this.OT.setProxyUrl(proxyServerUrl);
+    if (this.OTInstance.setProxyUrl && typeof this.OTInstance.setProxyUrl === 'function' && proxyServerUrl) {
+      this.OTInstance.setProxyUrl(proxyServerUrl);
     }
   }
 
@@ -109,7 +109,7 @@ export default class NetworkTest {
    */
   testConnectivity(): Promise<ConnectivityTestResults> {
     this.otLogging.logEvent({ action: 'testConnectivity', variation: 'Attempt' });
-    return testConnectivity(this.OT, this.credentials, this.otLogging, this.options);
+    return testConnectivity(this.OTInstance, this.credentials, this.otLogging, this.options);
   }
 
   /**
@@ -129,7 +129,7 @@ export default class NetworkTest {
       }
     }
     return testQuality(
-      this.OT, this.credentials, this.otLogging, this.options, updateCallback);
+      this.OTInstance, this.credentials, this.otLogging, this.options, updateCallback);
   }
 
   /**

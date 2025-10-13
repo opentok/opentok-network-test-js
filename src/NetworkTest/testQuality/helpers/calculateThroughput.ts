@@ -4,7 +4,7 @@ import getVideoQualityEvaluation from './getVideoQualityEvaluation';
 import { AV, AverageStats, AverageStatsBase, HasAudioVideo, SubscriberQualityStats } from '../types/stats';
 import config from './config';
 import MOSState from './MOSState';
-import { PublisherStats } from '../../types/opentok/publisher';
+import { PublisherStats } from '../../types/publisher';
 import { getOr } from '../../util';
 
 function getAverageBitrateAndPlr(type: AV,

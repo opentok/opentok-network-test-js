@@ -64,7 +64,7 @@ export const pick =
     props: K[],
     obj: T,
     all = false): Partial<T> => {
-    const update = (acc: object, prop: K): Partial<T> =>
+    const update = (acc: Partial<T>, prop: K): Partial<T> =>
       obj[prop] !== undefined || all ? { ...acc, [prop]: obj[prop] } : acc;
     return props.reduce(update, {});
   };

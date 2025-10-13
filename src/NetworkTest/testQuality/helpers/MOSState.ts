@@ -1,10 +1,9 @@
-import { OT } from '../../types/opentok';
-
+import { PublisherStats } from '../../types/publisher';
 import { AverageStats, Bandwidth, HasAudioVideo } from '../types/stats';
 
 export default class MOSState {
   subscriberStatsLog: OT.SubscriberStats[];
-  publisherStatsLog: OT.PublisherStats[];
+  publisherStatsLog: PublisherStats[];
   audioScoresLog: number[];
   videoScoresLog: number[];
   stats: HasAudioVideo<AverageStats> = { audio: {}, video: {} };
@@ -26,7 +25,7 @@ export default class MOSState {
   readonly hasAudioTrack = (): boolean => this.subscriberStatsLog[0] && !!this.subscriberStatsLog[0].audio;
   readonly hasVideoTrack = (): boolean => this.subscriberStatsLog[0] && !!this.subscriberStatsLog[0].video;
 
-  public getLastPublisherStats = (): OT.PublisherStats | undefined =>
+  public getLastPublisherStats = (): PublisherStats | undefined =>
     this.publisherStatsLog[this.publisherStatsLog.length - 1] ?? undefined;
 
   private audioScore(): number {
