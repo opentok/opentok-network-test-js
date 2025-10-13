@@ -34,11 +34,14 @@ export function hideStopButton() {
 }
 
 export function showRetryButton() {
-  document.getElementById('retry_test').style.display = 'block';
+  const retryContainer = document.getElementById('retry_container');
+  if (retryContainer) {
+    retryContainer.style.display = 'block';
+  }
 }
 
 export function hideRetryButton() {
-  document.getElementById('retry_test').style.display = 'none';
+  document.getElementById('retry_container').style.display = 'none';
 }
 
 export function resetUIForRetry() {

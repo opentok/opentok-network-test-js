@@ -133,10 +133,14 @@ div.prettyBox img {
   display: none;
 }
 
-#retry_test {
-  margin: 20px auto;
+#retry_container {
   display: none;
   text-align: center;
+}
+
+#retry_test {
+  margin: 20px auto;
+  display: block;
 }
 #quality_status_container > div {
   display: flex;

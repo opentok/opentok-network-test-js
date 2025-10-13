@@ -39,6 +39,7 @@ function displayPermissionDeniedError() {
         `;
         statusIconEl.src = 'assets/icon_error.svg';
     }
+    ConnectivityUI.showRetryButton();
 }
 
 function startTest() {
@@ -61,7 +62,7 @@ function startTest() {
         .then(results => ConnectivityUI.displayTestConnectivityResults(results))
         .then(testQuality)
         .catch(error => {
-            // Handle permission errors - show message, no retry button
+            // Handle permission errors - show message and retry button
             if (error.name === 'PermissionDeniedError') {
                 displayPermissionDeniedError();
             } else {
