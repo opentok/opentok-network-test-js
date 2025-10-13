@@ -42,7 +42,7 @@
     "promise": "^8.0.1"
   },
   "devDependencies": {
-    "@opentok/client": "^2.18.0",
+    "@opentok/client": "^2.31.0",
     "@types/expect.js": "^0.3.29",
     "@types/jasmine": "^2.8.8",
     "@types/jasmine-matchers": "^0.2.30",
@@ -51,9 +51,9 @@
     "@types/opentok": "^2.3.4",
     "@types/promise": "^7.1.30",
     "@types/webrtc": "^0.0.34",
-    "@typescript-eslint/parser": "^7.6.0",
     "@typescript-eslint/eslint-plugin": "^7.6.0",
     "@typescript-eslint/eslint-plugin-tslint": "^7.0.2",
+    "@typescript-eslint/parser": "^7.6.0",
     "dotenv": "^4.0.0",
     "eslint": "^8.44.0",
     "fs-extra": "^4.0.3",
