@@ -49,11 +49,11 @@ export default class NetworkTest {
    * README.md file in the root of the opentok-network-test-js project for details.
    */
   constructor(OTInstance: typeof OT, credentials: SessionCredentials, options?: NetworkTestOptions) {
-    this.validateOT(OT);
+    this.validateOT(OTInstance);
     this.validateCredentials(credentials);
     const proxyServerUrl = this.validateProxyUrl(options);
     this.otLogging = this.startLoggingEngine(credentials.apiKey, credentials.sessionId, proxyServerUrl);
-    this.OTInstance = OT;
+    this.OTInstance = OTInstance;
     this.credentials = credentials;
     this.options = options;
     this.setProxyUrl(proxyServerUrl);
