@@ -1,4 +1,4 @@
-import NetworkTest from 'opentok-network-test-js';
+import NetworkTest, { ErrorNames } from 'opentok-network-test-js';
 import createChart from './chart.js';
 import * as ConnectivityUI from './connectivity-ui.js';
 import config from './config.js';
@@ -63,7 +63,7 @@ function startTest() {
         .then(testQuality)
         .catch(error => {
             // Handle permission errors - show message and retry button
-            if (error.name === 'PermissionDeniedError') {
+            if (error.name === ErrorNames.PERMISSION_DENIED_ERROR) {
                 displayPermissionDeniedError();
             } else {
                 // Handle other errors - show failure message and retry button
