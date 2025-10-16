@@ -49,7 +49,6 @@
     "@types/mocha": "^5.2.2",
     "@types/node": "^10.3.2",
     "@types/promise": "^7.1.30",
-    "@types/webrtc": "^0.0.34",
     "@typescript-eslint/eslint-plugin": "^7.6.0",
     "@typescript-eslint/eslint-plugin-tslint": "^7.0.2",
     "@typescript-eslint/parser": "^7.6.0",

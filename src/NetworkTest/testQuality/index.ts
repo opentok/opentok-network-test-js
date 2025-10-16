@@ -215,7 +215,7 @@ function publishAndSubscribe(OTInstance: typeof OT, options?: NetworkTestOptions
                 { testNetwork: true, insertMode: 'append', subscribeToAudio: true, subscribeToVideo: true },
                 (subscribeError?: OT.OTError) => {
                   return subscribeError ?
-                  disconnectAndReject(new e.SubscribeToSessionError(subscribeError.message)) :
+                    disconnectAndReject(new e.SubscribeToSessionError(subscribeError.message)) :
                     resolve({ publisher, subscriber });
                 });
           });
@@ -318,7 +318,6 @@ function checkSubscriberQuality(
   onUpdate?: UpdateCallback<UpdateCallbackStats>,
   audioOnlyFallback?: boolean,
 ): Promise<QualityTestResults> {
-  
 
   let mosEstimatorTimeoutId: number;
 
@@ -328,7 +327,7 @@ function checkSubscriberQuality(
         reject(rejectError);
       });
     };
-    subscribeToTestStream(OT, session, credentials, options)
+    subscribeToTestStream(OTInstance, session, credentials, options)
       .then(({ publisher, subscriber }: PublisherSubscriber) => {
         if (!subscriber) {
           reject(new e.MissingSubscriberError());
@@ -360,7 +359,7 @@ function checkSubscriberQuality(
                 audioOnly = true;
                 // We don't want to lose the videoResults.
                 const videoResults = audioVideoResults.video;
-                checkSubscriberQuality(OT, session, credentials, options, onUpdate, true)
+                checkSubscriberQuality(OTInstance, session, credentials, options, onUpdate, true)
                   .then((results: QualityTestResults) => {
                     results.video = videoResults;
                     resolve(results);
