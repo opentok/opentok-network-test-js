@@ -142,6 +142,22 @@ div.prettyBox img {
   margin: 20px auto;
   display: block;
 }
+
+.permission-denied-error {
+  color: #d32f2f;
+  font-weight: bold;
+}
+
+.permission-instructions {
+  text-align: left;
+  max-width: 500px;
+  margin: 0 auto;
+}
+
+.permission-instructions ol {
+  margin-left: 20px;
+}
+
 #quality_status_container > div {
   display: flex;
   justify-content: center;

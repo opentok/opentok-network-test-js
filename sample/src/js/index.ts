@@ -27,10 +27,10 @@ function displayPermissionDeniedError() {
     
     if (statusEl && statusIconEl) {
         statusEl.innerHTML = `
-            <strong style="color: #d32f2f;">Camera/Microphone Access Required</strong><br><br>
-            <div style="text-align: left; max-width: 500px; margin: 0 auto;">
+            <strong class="permission-denied-error">Camera/Microphone Access Required</strong><br><br>
+            <div class="permission-instructions">
                 <p><strong>To enable the network test:</strong></p>
-                <ol style="margin-left: 20px;">
+                <ol>
                     <li>Click the camera/microphone icon in your browser's address bar</li>
                     <li>Select "Allow" for both camera and microphone access</li>
                     <li>Refresh the page</li>
