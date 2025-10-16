@@ -153,6 +153,11 @@ function validateDevices(OT: OT.Client, options?: NetworkTestOptions): Promise<A
 function publishAndSubscribe(OT: OT.Client, options?: NetworkTestOptions) {
   return (session: OT.Session): Promise<PublisherSubscriber> =>
     new Promise((resolve, reject) => {
+      const disconnectAndReject = (rejectError: Error) => {
+        disconnectFromSession(session).then(() => {
+          reject(rejectError);
+        });
+      };
       type StreamCreatedEvent = OT.Event<'streamCreated', OT.Publisher> & { stream: OT.Stream };
       const containerDiv = document.createElement('div');
       containerDiv.style.position = 'fixed';
@@ -186,17 +191,17 @@ function publishAndSubscribe(OT: OT.Client, options?: NetworkTestOptions) {
           }
           const publisher = OT.initPublisher(containerDiv, publisherOptions, (error?: OT.OTError) => {
             if (error) {
-              reject(new e.InitPublisherError(error.message));
+              disconnectAndReject(new e.InitPublisherError(error.message));
             } else {
               session.publish(publisher, (publishError?: OT.OTError) => {
                 if (publishError) {
                   if (errorHasName(publishError, OTErrorType.NOT_CONNECTED)) {
-                    return reject(new e.PublishToSessionNotConnectedError());
+                    return disconnectAndReject(new e.PublishToSessionNotConnectedError());
                   }
                   if (errorHasName(publishError, OTErrorType.UNABLE_TO_PUBLISH)) {
-                    return reject(new e.PublishToSessionPermissionOrTimeoutError());
+                    return disconnectAndReject(new e.PublishToSessionPermissionOrTimeoutError());
                   }
-                  return reject(new e.PublishToSessionError());
+                  return disconnectAndReject(new e.PublishToSessionError());
                   // return reject(new e.PublishToSessionError(publishError.message));
                 }
               });
@@ -209,7 +214,7 @@ function publishAndSubscribe(OT: OT.Client, options?: NetworkTestOptions) {
                 { testNetwork: true, insertMode: 'append', subscribeToAudio: true, subscribeToVideo: true },
                 (subscribeError?: OT.OTError) => {
                   return subscribeError ?
-                    reject(new e.SubscribeToSessionError(subscribeError.message)) :
+                  disconnectAndReject(new e.SubscribeToSessionError(subscribeError.message)) :
                     resolve({ publisher, subscriber });
                 });
           });
@@ -257,6 +262,21 @@ function isAudioQualityAcceptable(results: QualityTestResults): boolean {
 }
 
 /**
+ * Disconnect from a session. Once disconnected, remove all session
+ * event listeners and invoke the provided callback function.
+ */
+function disconnectFromSession(session: OT.Session) {
+  return new Promise((resolve) => {
+    session.on('sessionDisconnected', () => {
+      session.off();
+      resolve();
+    });
+    session.disconnect();
+  });
+}
+
+
+/**
  * Clean subscriber objects before disconnecting from the session
  * @param session
  * @param subscriber
@@ -297,10 +317,16 @@ function checkSubscriberQuality(
   onUpdate?: UpdateCallback<UpdateCallbackStats>,
   audioOnlyFallback?: boolean,
 ): Promise<QualityTestResults> {
+  
 
   let mosEstimatorTimeoutId: number;
 
   return new Promise((resolve, reject) => {
+    const disconnectAndReject = (rejectError: Error) => {
+      disconnectFromSession(session).then(() => {
+        reject(rejectError);
+      });
+    };
     subscribeToTestStream(OT, session, credentials, options)
       .then(({ publisher, subscriber }: PublisherSubscriber) => {
         if (!subscriber) {
@@ -372,7 +398,7 @@ function checkSubscriberQuality(
             }, 5000);
 
           } catch (exception) {
-            reject(new e.SubscriberGetStatsError());
+            disconnectAndReject(new e.SubscriberGetStatsError());
           }
         }
       })
@@ -400,6 +426,7 @@ export function testQuality(
   options?: NetworkTestOptions,
   onUpdate?: UpdateCallback<UpdateCallbackStats>,
 ): Promise<QualityTestResults> {
+
   stopTestTimeoutCompleted = false;
   stopTestCalled = false;
   return new Promise((resolve, reject) => {
