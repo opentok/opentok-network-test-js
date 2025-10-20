@@ -9,7 +9,7 @@ export interface QualityEvaluationResults{
   reason?: string;
 }
 
-export default function getVideoQualityEvaluationt(stats: AverageStatsBase): QualityEvaluationResults {
+export default function getVideoQualityEvaluation(stats: AverageStatsBase): QualityEvaluationResults {
   const thresholds = config.qualityThresholds.video;
   const thresholdRatio = config.thresholdRatio;
   const bitrate = stats.availableOutgoingBitrate;
