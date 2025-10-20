@@ -18,9 +18,10 @@ import {
 } from '../index';
 import { OT } from '../types/opentok';
 import * as e from './errors';
-import { OTErrorType, errorHasName } from '../errors/types';
+import { OTErrorType, errorHasName, ErrorNames } from '../errors/types';
 import { mapErrors, FailureCase } from './errors/mapping';
 import { getOr } from '../util';
+import { PermissionDeniedError } from '../errors';
 
 type AV = 'audio' | 'video';
 type CreateLocalPublisherResults = { publisher: OT.Publisher };
@@ -190,7 +191,17 @@ function checkCreateLocalPublisher(
           if (!error) {
             resolve({ publisher });
           } else {
-            reject(new e.FailedToCreateLocalPublisher());
+            // Clean up the DOM element
+            publisherDiv.parentNode?.removeChild(publisherDiv);
+
+            if (error && (error.name === 'OT_USER_MEDIA_ACCESS_DENIED' ||
+                (error.message && (error.message.toLowerCase().includes('permission') ||
+                error.message.toLowerCase().includes('access denied') ||
+                error.message.toLowerCase().includes('not allowed'))))) {
+              reject(new PermissionDeniedError());
+            } else {
+              reject(new e.FailedToCreateLocalPublisher());
+            }
           }
         });
         publisher.on('streamCreated', () => {
@@ -291,8 +302,7 @@ export function testConnectivity(
   otLogging: OTKAnalytics,
   options?: NetworkTestOptions,
 ): Promise<ConnectivityTestResults> {
-  return new Promise((resolve) => {
-
+  return new Promise((resolve, reject) => {
     const onSuccess = (flowResults: SubscribeToSessionResults) => {
       const results: ConnectivityTestResults = {
         success: true,
@@ -306,6 +316,10 @@ export function testConnectivity(
     };
 
     const onFailure = (error: Error) => {
+      if (error.name === ErrorNames.PERMISSION_DENIED_ERROR) {
+        reject(error);
+        return;
+      }
 
       const handleResults = (...errors: e.ConnectivityError[]) => {
         /**

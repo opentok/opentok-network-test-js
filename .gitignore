@@ -73,3 +73,5 @@ sample/node_modules
 
 # We're using npm (at least for now)
 yarn.lock
+
+.DS_STORE
