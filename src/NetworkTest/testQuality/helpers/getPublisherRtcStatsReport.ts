@@ -1,10 +1,5 @@
-import { OT } from '../../types/opentok';
-import {
-  RTCOutboundRtpStreamStats,
-  RTCIceCandidatePairStats,
-  RTCStatsInternal,
-  RTCandidateStatsInternal,
-} from '../../types/opentok/rtcStats';
+import { PublisherStats } from '../../types/publisher';
+import { RTCIceCandidateStats } from '../../types/rtcStats';
 
 export interface PreviousStreamStats {
   [ssrc: number]: {
@@ -15,8 +10,8 @@ export interface PreviousStreamStats {
 
 export async function getPublisherStats(
   publisher: OT.Publisher,
-  previousStats: OT.PublisherStats | undefined,
-): Promise<OT.PublisherStats | null> {
+  previousStats: PublisherStats | undefined,
+): Promise<PublisherStats | null> {
 
   if (typeof publisher.getRtcStatsReport !== 'function') {
     return null;
@@ -32,7 +27,7 @@ export async function getPublisherStats(
 
 const calculateAudioBitrate = (
   stats: RTCOutboundRtpStreamStats,
-  previousStats: OT.PublisherStats | undefined,
+  previousStats: PublisherStats | undefined,
 ): number => {
   const previousSsrcFrameData = previousStats?.audioStats[0];
   if (!previousSsrcFrameData) {
@@ -48,7 +43,7 @@ const calculateAudioBitrate = (
 
 const calculateVideoBitrate = (
   stats: RTCOutboundRtpStreamStats,
-  previousStats: OT.PublisherStats | undefined,
+  previousStats: PublisherStats | undefined,
 ): number => {
   const previousSsrcFrameData = previousStats?.videoStats.find(videoStats => videoStats.ssrc === stats.ssrc);
   if (!previousSsrcFrameData) {
@@ -63,8 +58,8 @@ const calculateVideoBitrate = (
 };
 
 const extractOutboundRtpStats = (
-  outboundRtpStats: RTCOutboundRtpStreamStats[],
-  previousStats?: OT.PublisherStats,
+  outboundRtpStats: (RTCOutboundRtpStreamStats & { mediaType?: 'video' | 'audio' })[],
+  previousStats?: PublisherStats,
 ) => {
   const videoStats = [];
   const audioStats = [];
@@ -94,24 +89,27 @@ const extractOutboundRtpStats = (
 };
 
 const extractPublisherStats = (
-  publisherRtcStatsReport?: OT.PublisherRtcStatsReport,
-  previousStats?: OT.PublisherStats,
-): OT.PublisherStats | null => {
+  publisherRtcStatsReport?: OT.PublisherRtcStatsReportArr,
+  previousStats?: PublisherStats,
+): PublisherStats | null => {
   if (!publisherRtcStatsReport) {
     return null;
   }
 
   const { rtcStatsReport } = publisherRtcStatsReport[0];
 
-  const rtcStatsArray: RTCStatsInternal[] = Array.from(rtcStatsReport.values());
+  const rtcStatsArray: RTCStats[] = Array.from(rtcStatsReport.values());
 
   const outboundRtpStats = rtcStatsArray.filter(
     stats => stats.type === 'outbound-rtp') as RTCOutboundRtpStreamStats[];
   const iceCandidatePairStats = rtcStatsArray.find(
-    stats => stats.type === 'candidate-pair' && stats.nominated) as RTCIceCandidatePairStats;
+    (stats) =>
+      stats.type === 'candidate-pair' &&
+      (stats as RTCIceCandidatePairStats).nominated
+  ) as RTCIceCandidatePairStats | null;
 
   const findCandidateById = (type: string, id: string) => {
-    return rtcStatsArray.find(stats => stats.type === type && stats.id === id) as RTCandidateStatsInternal | null;
+    return rtcStatsArray.find(stats => stats.type === type && stats.id === id) as RTCIceCandidateStats | null;
   };
 
   const localCandidate = findCandidateById('local-candidate', iceCandidatePairStats.localCandidateId);

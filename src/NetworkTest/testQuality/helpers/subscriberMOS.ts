@@ -1,20 +1,20 @@
 import isBitrateSteadyState from './isBitrateSteadyState';
 import calculateThroughput from './calculateThroughput';
 import MOSState from './MOSState';
-import { OT } from '../../types/opentok';
 import { AV } from '../types/stats';
 import { getOr, last, nth } from '../../util';
 import { getPublisherStats }  from '../helpers/getPublisherRtcStatsReport';
+import { PublisherStats } from '../../types/publisher';
 
 export type StatsListener = (
   error?: OT.OTError,
   subStats?: OT.SubscriberStats,
-  pubStats?: OT.PublisherStats,
+  pubStats?: PublisherStats,
 ) => void;
 
-const getPacketsLost = (ts: OT.TrackStats): number => getOr(0, 'packetsLost', ts);
-const getPacketsReceived = (ts: OT.TrackStats): number => getOr(0, 'packetsReceived', ts);
-const getTotalPackets = (ts: OT.TrackStats): number => getPacketsLost(ts) + getPacketsReceived(ts);
+const getPacketsLost = (ts: OT.IncomingTrackStats): number => getOr(0, 'packetsLost', ts);
+const getPacketsReceived = (ts: OT.IncomingTrackStats): number => getOr(0, 'packetsReceived', ts);
+const getTotalPackets = (ts: OT.IncomingTrackStats): number => getPacketsLost(ts) + getPacketsReceived(ts);
 const calculateTotalPackets = (type: AV, current: OT.SubscriberStats, last: OT.SubscriberStats) =>
   getTotalPackets(current[type]) - getTotalPackets(last[type]);
 const calculateBitRate = (type: AV, current: OT.SubscriberStats, last: OT.SubscriberStats): number => {
@@ -54,7 +54,7 @@ function calculateVideoScore(subscriber: OT.Subscriber, stats: OT.SubscriberStat
 }
 
 function calculateAudioScore(
-  subscriber: OT.Subscriber, publisherStats: OT.PublisherStats | null,
+  subscriber: OT.Subscriber, publisherStats: PublisherStats | null,
   stats: OT.SubscriberStats[]): number {
   const getDelay = (): number => {
     // Return default delay until proper calculation

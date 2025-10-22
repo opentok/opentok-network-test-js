@@ -6,8 +6,8 @@
  * Define errors returned by OpenTok.js
  */
 
+import { OTError } from '@opentok/client';
 import { get } from '../util';
-import { OTError } from '../types/opentok/error';
 
 export enum ErrorNames {
   NETWORK_TEST_ERROR = 'NetworkTestError',
