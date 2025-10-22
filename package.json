@@ -1,6 +1,6 @@
 {
   "name": "@vonage/video-client-network-test",
-  "version": "3.1.6",
+  "version": "4.0.0",
   "description": "Precall network test for applications using the Vonage Video API platform.",
   "main": "dist/NetworkTest/index.js",
   "types": "dist/NetworkTest/index.d.ts",
@@ -42,15 +42,13 @@
     "promise": "^8.0.1"
   },
   "devDependencies": {
+    "@opentok/client": "^2.31.0",
     "@types/expect.js": "^0.3.29",
     "@types/jasmine": "^2.8.8",
     "@types/jasmine-matchers": "^0.2.30",
     "@types/mocha": "^5.2.2",
     "@types/node": "^10.3.2",
-    "@types/opentok": "^2.3.4",
     "@types/promise": "^7.1.30",
-    "@types/webrtc": "^0.0.34",
-    "@typescript-eslint/parser": "^7.6.0",
     "@typescript-eslint/eslint-plugin": "^7.6.0",
     "@typescript-eslint/eslint-plugin-tslint": "^7.0.2",
     "@vonage/client-sdk-video": "^2.29.2",

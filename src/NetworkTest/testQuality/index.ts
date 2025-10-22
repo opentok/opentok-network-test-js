@@ -16,7 +16,6 @@ import * as Promise from 'promise';
 import {
   NetworkTestOptions,
 } from '../index';
-import { OT } from '../types/opentok';
 import { AverageStats, AV, Bandwidth, HasAudioVideo } from './types/stats';
 import { UpdateCallback, UpdateCallbackStats } from '../types/callbacks';
 import { pick } from '../util';
@@ -28,6 +27,8 @@ import config from './helpers/config';
 import isSupportedBrowser from './helpers/isSupportedBrowser';
 import getUpdateCallbackStats from './helpers/getUpdateCallbackStats';
 import { PermissionDeniedError, UnsupportedResolutionError } from '../errors';
+import { InitSessionOptions, SessionCredentials } from '../types/session';
+import { PublisherStats } from '../types/publisher';
 
 const FULL_HD_WIDTH = 1920;
 const FULL_HD_HEIGHT = 1080;
@@ -37,7 +38,7 @@ const HD_RESOUTION = '1280x720';
 interface QualityTestResultsBuilder {
   state: MOSState;
   subscriber: OT.Subscriber;
-  credentials: OT.SessionCredentials;
+  credentials: SessionCredentials;
   mosScore?: number;
   bandwidth?: Bandwidth;
 }
@@ -116,9 +117,9 @@ function checkCameraSupport(width: number, height: number): Promise<void> {
 /**
  * Ensure that audio and video devices are available
  */
-function validateDevices(OT: OT.Client, options?: NetworkTestOptions): Promise<AvailableDevices> {
+function validateDevices(OTInstance: typeof OT, options?: NetworkTestOptions): Promise<AvailableDevices> {
   return new Promise((resolve, reject) => {
-    OT.getDevices((error?: OT.OTError, devices: OT.Device[] = []) => {
+    OTInstance.getDevices((error?: OT.OTError, devices: OT.Device[] = []) => {
       if (error) {
         reject(new e.FailedToObtainMediaDevices());
         return;
@@ -150,9 +151,14 @@ function validateDevices(OT: OT.Client, options?: NetworkTestOptions): Promise<A
 /**
  * Create a test publisher and subscribe to the publihser's stream
  */
-function publishAndSubscribe(OT: OT.Client, options?: NetworkTestOptions) {
+function publishAndSubscribe(OTInstance: typeof OT, options?: NetworkTestOptions) {
   return (session: OT.Session): Promise<PublisherSubscriber> =>
     new Promise((resolve, reject) => {
+      const disconnectAndReject = (rejectError: Error) => {
+        disconnectFromSession(session).then(() => {
+          reject(rejectError);
+        });
+      };
       type StreamCreatedEvent = OT.Event<'streamCreated', OT.Publisher> & { stream: OT.Stream };
       const containerDiv = document.createElement('div');
       containerDiv.style.position = 'fixed';
@@ -162,7 +168,7 @@ function publishAndSubscribe(OT: OT.Client, options?: NetworkTestOptions) {
       containerDiv.style.opacity = '0';
       document.body.appendChild(containerDiv);
 
-      validateDevices(OT, options)
+      validateDevices(OTInstance, options)
         .then((availableDevices: AvailableDevices) => {
           if (!Object.keys(availableDevices.video).length) {
             audioOnly = true;
@@ -184,19 +190,19 @@ function publishAndSubscribe(OT: OT.Client, options?: NetworkTestOptions) {
           if (audioOnly) {
             publisherOptions.videoSource = null;
           }
-          const publisher = OT.initPublisher(containerDiv, publisherOptions, (error?: OT.OTError) => {
+          const publisher = OTInstance.initPublisher(containerDiv, publisherOptions, (error?: OT.OTError) => {
             if (error) {
-              reject(new e.InitPublisherError(error.message));
+              disconnectAndReject(new e.InitPublisherError(error.message));
             } else {
               session.publish(publisher, (publishError?: OT.OTError) => {
                 if (publishError) {
                   if (errorHasName(publishError, OTErrorType.NOT_CONNECTED)) {
-                    return reject(new e.PublishToSessionNotConnectedError());
+                    return disconnectAndReject(new e.PublishToSessionNotConnectedError());
                   }
                   if (errorHasName(publishError, OTErrorType.UNABLE_TO_PUBLISH)) {
-                    return reject(new e.PublishToSessionPermissionOrTimeoutError());
+                    return disconnectAndReject(new e.PublishToSessionPermissionOrTimeoutError());
                   }
-                  return reject(new e.PublishToSessionError());
+                  return disconnectAndReject(new e.PublishToSessionError());
                   // return reject(new e.PublishToSessionError(publishError.message));
                 }
               });
@@ -209,7 +215,7 @@ function publishAndSubscribe(OT: OT.Client, options?: NetworkTestOptions) {
                 { testNetwork: true, insertMode: 'append', subscribeToAudio: true, subscribeToVideo: true },
                 (subscribeError?: OT.OTError) => {
                   return subscribeError ?
-                    reject(new e.SubscribeToSessionError(subscribeError.message)) :
+                    disconnectAndReject(new e.SubscribeToSessionError(subscribeError.message)) :
                     resolve({ publisher, subscriber });
                 });
           });
@@ -221,13 +227,13 @@ function publishAndSubscribe(OT: OT.Client, options?: NetworkTestOptions) {
  *  Connect to the Vonage Video API session, create a publisher, and subsribe to the publisher's stream
  */
 function subscribeToTestStream(
-  OT: OT.Client,
+  OTInstance: typeof OT,
   session: OT.Session,
-  credentials: OT.SessionCredentials,
+  credentials: SessionCredentials,
   options?: NetworkTestOptions): Promise<PublisherSubscriber> {
   return new Promise((resolve, reject) => {
     connectToSession(session, credentials.token)
-      .then(publishAndSubscribe(OT, options))
+      .then(publishAndSubscribe(OTInstance, options))
       .then(resolve)
       .catch(reject);
   });
@@ -255,6 +261,21 @@ function buildResults(builder: QualityTestResultsBuilder): QualityTestResults {
 function isAudioQualityAcceptable(results: QualityTestResults): boolean {
   return !!results.audio.mos && (results.audio.mos >= config.qualityThresholds.audio[0].minMos);
 }
+
+/**
+ * Disconnect from a session. Once disconnected, remove all session
+ * event listeners and invoke the provided callback function.
+ */
+function disconnectFromSession(session: OT.Session) {
+  return new Promise((resolve) => {
+    session.on('sessionDisconnected', () => {
+      session.off();
+      resolve();
+    });
+    session.disconnect();
+  });
+}
+
 
 /**
  * Clean subscriber objects before disconnecting from the session
@@ -290,9 +311,9 @@ function cleanPublisher(session: OT.Session, publisher: OT.Publisher) {
 }
 
 function checkSubscriberQuality(
-  OT: OT.Client,
+  OTInstance: typeof OT,
   session: OT.Session,
-  credentials: OT.SessionCredentials,
+  credentials: SessionCredentials,
   options?: NetworkTestOptions,
   onUpdate?: UpdateCallback<UpdateCallbackStats>,
   audioOnlyFallback?: boolean,
@@ -301,7 +322,12 @@ function checkSubscriberQuality(
   let mosEstimatorTimeoutId: number;
 
   return new Promise((resolve, reject) => {
-    subscribeToTestStream(OT, session, credentials, options)
+    const disconnectAndReject = (rejectError: Error) => {
+      disconnectFromSession(session).then(() => {
+        reject(rejectError);
+      });
+    };
+    subscribeToTestStream(OTInstance, session, credentials, options)
       .then(({ publisher, subscriber }: PublisherSubscriber) => {
         if (!subscriber) {
           reject(new e.MissingSubscriberError());
@@ -316,7 +342,7 @@ function checkSubscriberQuality(
             const getStatsListener = (
               error?: OT.OTError,
               subscriberStats?: OT.SubscriberStats,
-              publisherStats?: OT.PublisherStats,
+              publisherStats?: PublisherStats,
             ) => {
               if (subscriberStats && publisherStats && onUpdate) {
                 const updateStats = getUpdateCallbackStats(subscriberStats, publisherStats, audioOnly ?
@@ -333,7 +359,7 @@ function checkSubscriberQuality(
                 audioOnly = true;
                 // We don't want to lose the videoResults.
                 const videoResults = audioVideoResults.video;
-                checkSubscriberQuality(OT, session, credentials, options, onUpdate, true)
+                checkSubscriberQuality(OTInstance, session, credentials, options, onUpdate, true)
                   .then((results: QualityTestResults) => {
                     results.video = videoResults;
                     resolve(results);
@@ -372,7 +398,7 @@ function checkSubscriberQuality(
             }, 5000);
 
           } catch (exception) {
-            reject(new e.SubscriberGetStatsError());
+            disconnectAndReject(new e.SubscriberGetStatsError());
           }
         }
       })
@@ -394,12 +420,13 @@ function validateBrowser(): Promise<void> {
  * This method checks to see if the client can publish to a Vonage Video API session.
  */
 export function testQuality(
-  OT: OT.Client,
-  credentials: OT.SessionCredentials,
+  OTInstance: typeof OT,
+  credentials: SessionCredentials,
   otLogging: OTKAnalytics,
   options?: NetworkTestOptions,
   onUpdate?: UpdateCallback<UpdateCallbackStats>,
 ): Promise<QualityTestResults> {
+
   stopTestTimeoutCompleted = false;
   stopTestCalled = false;
   return new Promise((resolve, reject) => {
@@ -423,18 +450,18 @@ export function testQuality(
 
     validateBrowser()
       .then(() => {
-        let sessionOptions: OT.InitSessionOptions = {};
+        let sessionOptions: InitSessionOptions = {};
         if (options && options.initSessionOptions) {
           sessionOptions = options.initSessionOptions;
         }
         if (options && options.proxyServerUrl) {
           // eslint-disable-next-line no-prototype-builtins
-          if (!OT.hasOwnProperty('setProxyUrl')) { // Fallback for OT.version < 2.17.4
+          if (!OTInstance.hasOwnProperty('setProxyUrl')) { // Fallback for OT.version < 2.17.4
             sessionOptions.proxyUrl = options.proxyServerUrl;
           }
         }
-        const session = OT.initSession(credentials.applicationId, credentials.sessionId, sessionOptions);
-        checkSubscriberQuality(OT, session, credentials, options, onUpdate)
+        const session = OTInstance.initSession(credentials.apiKey, credentials.sessionId, sessionOptions);
+        checkSubscriberQuality(OTInstance, session, credentials, options, onUpdate)
           .then(onSuccess)
           .catch(onError);
       })
