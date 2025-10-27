@@ -1,6 +1,6 @@
 {
   "name": "opentok-network-test-js",
-  "version": "4.0.0",
+  "version": "4.0.1",
   "description": "Precall network test for applications using the OpenTok platform.",
   "main": "dist/NetworkTest/index.js",
   "types": "dist/NetworkTest/index.d.ts",
@@ -28,8 +28,8 @@
     "webrtc"
   ],
   "author": {
-    "name": "TokBox",
-    "email": "contact@tokbox.com"
+    "name": "Vonage Video API",
+    "email": "support@api.vonage.com"
   },
   "license": "MIT",
   "bugs": {
@@ -42,7 +42,7 @@
     "promise": "^8.0.1"
   },
   "devDependencies": {
-    "@opentok/client": "^2.18.0",
+    "@opentok/client": "^2.31.1",
     "@types/expect.js": "^0.3.29",
     "@types/jasmine": "^2.8.8",
     "@types/jasmine-matchers": "^0.2.30",

@@ -38,6 +38,9 @@ export interface NetworkTestOptions {
   fullHd?: boolean;
 }
 
+export { QualityTestResults } from './testQuality';
+export { ConnectivityTestResults } from './testConnectivity';
+
 export default class NetworkTest {
   credentials: SessionCredentials;
   OTInstance: typeof OT;
