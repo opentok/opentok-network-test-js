@@ -42,7 +42,7 @@
     "promise": "^8.0.1"
   },
   "devDependencies": {
-    "@opentok/client": "^2.18.0",
+    "@opentok/client": "^2.31.1",
     "@types/expect.js": "^0.3.29",
     "@types/jasmine": "^2.8.8",
     "@types/jasmine-matchers": "^0.2.30",
