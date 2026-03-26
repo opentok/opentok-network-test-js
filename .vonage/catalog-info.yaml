@@ -8,6 +8,6 @@ metadata:
     github.com/project-slug: opentok/opentok-network-test-js
 spec:
   type: library
-  owner: group:orgdata/vcl
+  owner: group:orgdata/vdt
   system: video-network-test
   lifecycle: production
